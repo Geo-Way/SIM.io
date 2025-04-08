@@ -1,0 +1,92 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Listado de Registros</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    table { width: 100%; border-collapse: collapse; margin-bottom: 40px; }
+    th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+    th { background-color: #f2f2f2; }
+    h2 { margin-top: 40px; }
+  </style>
+</head>
+<body>
+  <h1>Listado de Registros</h1>
+
+  <h2>Inventario</h2>
+  <table id="tabla-inventario">
+    <thead>
+      <tr>
+        <th>Nombre</th><th>Proveedor</th><th>Cantidad</th><th>Precio</th><th>Fecha</th><th>Ubicación</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <h2>Mantenimientos</h2>
+  <table id="tabla-mantenimiento">
+    <thead>
+      <tr>
+        <th>Fecha</th><th>Máquina</th><th>Línea</th><th>Técnico</th><th>Costo</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <h2>Inspecciones</h2>
+  <table id="tabla-inspeccion">
+    <thead>
+      <tr>
+        <th>Fecha</th><th>Máquina</th><th>Técnico</th><th>Observaciones</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+<script>
+async function cargarDatos() {
+  try {
+    const [invRes, mantRes, inspRes] = await Promise.all([
+      fetch("/api/inventario"), 
+      fetch("/api/mantenimientos"),
+      fetch("/api/inspecciones")
+    ]);
+    const inventario = await invRes.json();
+    const mantenimientos = await mantRes.json();
+    const inspecciones = await inspRes.json();
+
+    const invBody = document.querySelector("#tabla-inventario tbody");
+    inventario.forEach(item => {
+      invBody.innerHTML += `<tr>
+        <td>${item.nombre}</td><td>${item.proveedor}</td><td>${item.cantidad}</td>
+        <td>${item.precio}</td><td>${item.fecha}</td><td>${item.ubicacion}</td>
+      </tr>`;
+    });
+
+    const mantBody = document.querySelector("#tabla-mantenimiento tbody");
+    mantenimientos.forEach(item => {
+      mantBody.innerHTML += `<tr>
+        <td>${item.fechaMantenimiento}</td><td>${item.nombreMaquina}</td><td>${item.lineaProduccion}</td>
+        <td>${item.tecnicoAsignado}</td><td>${item.costoMantenimiento}</td>
+      </tr>`;
+    });
+
+    const inspBody = document.querySelector("#tabla-inspeccion tbody");
+    inspecciones.forEach(item => {
+      inspBody.innerHTML += `<tr>
+        <td>${item.fecha}</td><td>${item.maquina}</td><td>${item.tecnico}</td>
+        <td>${item.observaciones}</td>
+      </tr>`;
+    });
+
+  } catch (err) {
+    alert("Error al cargar datos: " + err.message);
+  }
+}
+
+cargarDatos();
+</script>
+</body>
+</html>

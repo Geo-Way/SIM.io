@@ -1,0 +1,215 @@
+
+<!DOCTYPE html>
+
+<html lang="es">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Dashboard Técnico</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script></head>
+<body class="bg-gray-100 text-gray-800">
+<header class="bg-red-600 text-white p-4 text-center text-xl font-bold">Dashboard Técnico - Global Mattress</header>
+<main class="max-w-7xl mx-auto px-4 py-6">
+<section class="mb-8"><h2 class="text-2xl font-semibold mb-4">Resumen de Estado de Inspecciones Técnicas</h2><canvas class="bg-white p-4 rounded shadow w-full max-w-xl mx-auto" id="grafico-inspecciones"></canvas></section><section class="mb-8">
+<h2 class="text-2xl font-semibold mb-4">Resumen de Inventario</h2>
+<div class="bg-white p-4 shadow rounded" id="resumen-inventario"></div>
+</section>
+<section class="mb-8">
+<h2 class="text-2xl font-semibold mb-4">Últimas Inspecciones</h2>
+<table class="w-full bg-white shadow rounded">
+<thead class="bg-gray-200">
+<tr>
+<th class="px-2 py-1">Fecha</th>
+<th class="px-2 py-1">Máquina</th>
+<th class="px-2 py-1">Técnico</th>
+<th class="px-2 py-1">Observaciones</th>
+</tr>
+</thead>
+<tbody class="text-sm" id="tabla-inspecciones"></tbody>
+</table>
+</section>
+<section>
+<h2 class="text-2xl font-semibold mb-4">Últimos Mantenimientos</h2>
+<table class="w-full bg-white shadow rounded">
+<thead class="bg-gray-200">
+<tr>
+<th class="px-2 py-1">Fecha</th>
+<th class="px-2 py-1">Máquina</th>
+<th class="px-2 py-1">Técnico</th>
+<th class="px-2 py-1">Costo</th>
+</tr>
+</thead>
+<tbody class="text-sm" id="tabla-mantenimientos"></tbody>
+</table>
+</section>
+<section class="mb-8"><h2 class="text-2xl font-semibold mb-4">Frecuencia de Inspecciones por Máquina (Línea de Tiempo)</h2><canvas class="bg-white p-4 rounded shadow w-full max-w-4xl mx-auto" id="grafico-linea-tiempo"></canvas></section><section class="mb-8"><h2 class="text-2xl font-semibold mb-4">Distribución del Inventario por Proveedor</h2><canvas class="bg-white p-4 rounded shadow w-full max-w-xl mx-auto" id="grafico-inventario"></canvas></section></main>
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+      fetch("/api/inventario")
+        .then(res => res.json())
+        .then(data => {
+          const total = data.length;
+          const valor = data.reduce((sum, i) => sum + (i.precio * i.cantidad), 0).toFixed(2);
+          document.getElementById("resumen-inventario").innerHTML = `
+            <p><strong>Total de artículos:</strong> ${total}</p>
+            <p><strong>Valor estimado total:</strong> $${valor}</p>
+          `;
+        });
+
+      fetch("/api/inspecciones")
+        .then(res => res.json())
+        .then(data => {
+          const tbody = document.getElementById("tabla-inspecciones");
+          tbody.innerHTML = data.slice(0, 5).map(i => `
+            <tr class="border-t">
+              <td class="px-2 py-1">${i.fecha}</td>
+              <td class="px-2 py-1">${i.nombreMaquina}</td>
+              <td class="px-2 py-1">${i.tecnicoResponsable}</td>
+              <td class="px-2 py-1">${i.observaciones}</td>
+            </tr>`).join("");
+        });
+
+      fetch("/api/mantenimientos")
+        .then(res => res.json())
+        .then(data => {
+          const tbody = document.getElementById("tabla-mantenimientos");
+          tbody.innerHTML = data.slice(0, 5).map(i => `
+            <tr class="border-t">
+              <td class="px-2 py-1">${i.fechaMantenimiento}</td>
+              <td class="px-2 py-1">${i.nombreMaquina}</td>
+              <td class="px-2 py-1">${i.tecnicoAsignado}</td>
+              <td class="px-2 py-1">$${i.costoMantenimiento}</td>
+            </tr>`).join("");
+        });
+    });
+  </script>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  fetch("/api/inspecciones")
+    .then(res => res.json())
+    .then(data => {
+      const conteo = {
+        "Pendiente a realizar": 0,
+        "Necesita Mantenimiento Inmediato": 0,
+        "Mantenimiento Programado": 0,
+        "Operativo": 0
+      };
+
+      data.forEach(i => {
+        const estado = i.estadoAccion?.trim();
+        if (estado && conteo.hasOwnProperty(estado)) {
+          conteo[estado]++;
+        }
+      });
+
+      const ctx = document.getElementById("grafico-inspecciones").getContext("2d");
+      new Chart(ctx, {
+        type: "pie",
+        data: {
+          labels: Object.keys(conteo),
+          datasets: [{
+            label: "Estado de Inspecciones",
+            data: Object.values(conteo),
+            backgroundColor: ["#f87171", "#facc15", "#60a5fa", "#34d399"]
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: {
+              position: 'bottom'
+            },
+            title: {
+              display: true,
+              text: "Distribución de Inspecciones por Estado de Acción"
+            }
+          }
+        }
+      });
+    });
+});
+</script><script>
+document.addEventListener("DOMContentLoaded", () => {
+  // Gráfico de línea por máquinas a lo largo del tiempo
+  fetch("/api/inspecciones")
+    .then(res => res.json())
+    .then(data => {
+      const registros = {};
+      data.forEach(item => {
+        const fecha = item.fecha?.split("T")[0];
+        const maquina = item.nombreMaquina || "Sin nombre";
+        if (fecha && maquina) {
+          if (!registros[maquina]) registros[maquina] = {};
+          registros[maquina][fecha] = (registros[maquina][fecha] || 0) + 1;
+        }
+      });
+
+      const fechas = [...new Set(data.map(i => i.fecha?.split("T")[0]).filter(Boolean))].sort();
+      const datasets = Object.keys(registros).map((maquina, i) => {
+        return {
+          label: maquina,
+          data: fechas.map(f => registros[maquina][f] || 0),
+          borderWidth: 2,
+          fill: false
+        };
+      });
+
+      const ctxLinea = document.getElementById("grafico-linea-tiempo").getContext("2d");
+      new Chart(ctxLinea, {
+        type: 'line',
+        data: {
+          labels: fechas,
+          datasets: datasets
+        },
+        options: {
+          responsive: true,
+          interaction: {
+            mode: 'index',
+            intersect: false
+          },
+          plugins: {
+            legend: { position: 'top' },
+            title: { display: true, text: 'Inspecciones por Fecha' }
+          },
+          scales: {
+            y: { beginAtZero: true, title: { display: true, text: "Cantidad de Inspecciones" } },
+            x: { title: { display: true, text: "Fecha" } }
+          }
+        }
+      });
+    });
+
+  // Gráfico de torta del inventario por proveedor
+  fetch("/api/inventario")
+    .then(res => res.json())
+    .then(data => {
+      const conteo = {};
+      data.forEach(i => {
+        const proveedor = i.proveedor || "Desconocido";
+        conteo[proveedor] = (conteo[proveedor] || 0) + 1;
+      });
+
+      const ctxInv = document.getElementById("grafico-inventario").getContext("2d");
+      new Chart(ctxInv, {
+        type: "pie",
+        data: {
+          labels: Object.keys(conteo),
+          datasets: [{
+            label: "Cantidad de Artículos",
+            data: Object.values(conteo),
+            backgroundColor: ["#93c5fd", "#fdba74", "#86efac", "#fcd34d", "#fca5a5", "#d8b4fe"]
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: { position: 'bottom' },
+            title: { display: true, text: "Inventario por Proveedor" }
+          }
+        }
+      });
+    });
+});
+</script></body>
+</html>
