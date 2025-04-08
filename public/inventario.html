@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+
+<html lang="es">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Sistema de Inventario</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet"/>
+<script src="https://unpkg.com/@tailwindcss/browser@latest"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<link href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" rel="stylesheet"/>
+<style>
+        /* Estilos personalizados (los que ya tenías) */
+        .top-menu {
+            background-color: #2c3e50; /* Color de fondo más oscuro */
+            padding: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .top-menu .logo {
+            height: 50px; /* Altura del logo */
+        }
+
+        .top-menu nav {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .top-menu nav a {
+            color: #fff;
+            text-decoration: none;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 1rem;
+            transition: color 0.3s ease;
+        }
+
+        .top-menu nav a:hover {
+            color: #f1c40f; /* Color amarillo al pasar el mouse */
+        }
+
+        .main-content {
+            padding: 2rem;
+            margin-top: 70px; /* Ajuste para el menú fijo */
+        }
+
+        .form-container {
+            background-color: #fff;
+            border-radius: 0.5rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .form-container h2 {
+            margin-bottom: 1.5rem;
+            color: #34495e;
+        }
+
+        .form-container form {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .form-container form div {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-container form label {
+            font-weight: 600;
+            color: #7f8c8d;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-container form input,
+        .form-container form select {
+            padding: 0.75rem;
+            border: 1px solid #bdc3c7;
+            border-radius: 0.375rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-container form input:focus,
+        .form-container form select:focus {
+            outline: none;
+            border-color: #3498db; /* Color azul al enfocar */
+            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.25);
+        }
+
+        .form-container form button {
+            padding: 0.75rem 1.5rem;
+            background-color: #2ecc71; /* Color verde */
+            color: #fff;
+            font-weight: 600;
+            border: none;
+            border-radius: 0.375rem;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .form-container form button:hover {
+            background-color: #27ae60; /* Verde más oscuro al pasar el mouse */
+        }
+
+        .table-container {
+            background-color: #fff;
+            border-radius: 0.5rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            padding: 1.5rem;
+            overflow-x: auto;
+        }
+
+        .table-container h2 {
+            margin-bottom: 1.5rem;
+            color: #34495e;
+        }
+
+        .table-container table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 1.5rem;
+        }
+
+        .table-container table thead th {
+            background-color: #ecf0f1; /* Color gris claro para encabezados */
+            color: #34495e;
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 2px solid #bdc3c7;
+        }
+
+        .table-container table tbody td {
+            padding: 0.75rem;
+            border-bottom: 1px solid #ededed;
+            color: #555;
+        }
+
+        .table-container table tbody tr:hover {
+            background-color: #f9f9f9; /* Color gris muy claro al pasar el mouse */
+        }
+
+        .table-container table tfoot th {
+            padding-top: 1.5rem;
+            font-weight: 600;
+            color: #34495e;
+        }
+
+        .mensaje-exito {
+            background-color: #d4edda;
+            color: #155724;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border: 1px solid #c3e6cb;
+            border-radius: 0.375rem;
+            display: none;
+        }
+
+        .mensaje-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border: 1px solid #f5c6cb;
+            border-radius: 0.375rem;
+            display: none;
+        }
+
+        .autocomplete {
+            position: relative;
+            display: inline-block;
+            width: 100%;
+        }
+
+        .autocomplete-items {
+            position: absolute;
+            border: 1px solid #d4d4d4;
+            border-bottom: none;
+            border-top: none;
+            z-index: 1;
+            top: 100%;
+            left: 0;
+            right: 0;
+            overflow: auto;
+            max-height: 200px;
+            background-color: #fff;
+        }
+
+        .autocomplete-items div {
+            padding: 10px;
+            cursor: pointer;
+            background-color: #fff;
+            border-bottom: 1px solid #d4d4d4;
+        }
+
+        .autocomplete-items div:hover {
+            background-color: #eee;
+        }
+
+        .autocomplete-active {
+            background-color: #3498db !important;
+            color: #fff;
+        }
+
+        .filter-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            align-items: flex-end;
+        }
+
+        .filter-container div {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .filter-container label {
+            font-weight: 600;
+            color: #7f8c8d;
+        }
+
+        .filter-container input,
+        .filter-container select {
+            padding: 0.75rem;
+            border: 1px solid #bdc3c7;
+            border-radius: 0.375rem;
+            transition: border-color .filter-container input:focus,
+        .filter-container select:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.25);
+        }
+
+        @media (max-width: 768px) {
+            .top-menu {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+
+            .top-menu nav {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            .main-content {
+                margin-top: 120px; /* Ajuste para el menú en pantallas pequeñas */
+                padding: 1rem;
+            }
+
+            .form-container form {
+                grid-template-columns: 1fr;
+            }
+
+            .filter-container {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+
+            .filter-container div {
+                width: 100%;
+            }
+
+            .filter-container input,
+            .filter-container select {
+                width: 100%;
+            }
+        }
+
+        .footer {
+            background-color: #2c3e50;
+            color: #fff;
+            padding: 1rem;
+            text-align: center;
+            margin-top: 2rem;
+        }
+
+        .footer a {
+            color: #f1c40f;
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 font-inter">
+<div class="top-menu">
+<img alt="Logo de la empresa" class="logo" src="https://images.squarespace-cdn.com/content/v1/58a36221d482e9bca4af6eac/34694fc3-6f92-4054-8a58-3776436c00dc/IMG_9869+2.PNG?format=2500w"/>
+<nav>
+<a href="index.html">HOME</a>
+<a href="inspeccion.html">Inspección Técnica</a>
+<a href="mantenimiento.html">Mantenimientos</a>
+</nav>
+</div>
+<div class="main-content container mx-auto p-4 md:p-8">
+<h1 class="text-3xl font-semibold text-gray-800 text-center mb-6">Sistema de Inventario</h1>
+<div class="bg-white rounded-lg shadow-md p-6 mb-6">
+<h2 class="text-xl font-semibold text-gray-700 mb-4">Agregar Nuevo Artículo</h2>
+<form class="space-y-4" id="form-inventario">
+<div>
+<label class="block text-gray-600 text-sm font-bold mb-2" for="nombre">Nombre:</label>
+<div class="autocomplete">
+<input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="nombre" name="nombre" required="" type="text"/>
+<div class="text-red-500 text-sm italic" id="nombre-error" style="display:none;"></div>
+</div>
+<div class="text-red-500 text-xs italic" id="nombre-error" style="display: none;"></div>
+</div>
+<div>
+<label class="block text-gray-600 text-sm font-bold mb-2" for="proveedor">Proveedor:</label>
+<div class="autocomplete">
+<input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="proveedor" name="proveedor" required="" type="text"/>
+</div>
+</div>
+<div>
+<label class="block text-gray-600 text-sm font-bold mb-2" for="cantidad">Cantidad:</label>
+<input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="cantidad" min="1" name="cantidad" required="" type="number" value="1"/>
+<div class="text-red-500 text-sm italic" id="cantidad-error" style="display:none;"></div>
+<div class="text-red-500 text-xs italic" id="cantidad-error" style="display: none;"></div>
+</div>
+<div>
+<label class="block text-gray-600 text-sm font-bold mb-2" for="precio">Precio (USD):</label>
+<input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="precio" min="0" name="precio" required="" step="0.01" type="number" value="0"/>
+<div class="text-red-500 text-sm italic" id="precio-error" style="display:none;"></div>
+<div class="text-red-500 text-xs italic" id="precio-error" style="display: none;"></div>
+</div>
+<div>
+<label class="block text-gray-600 text-sm font-bold mb-2" for="fecha">Fecha:</label>
+<input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="fecha" name="fecha" required="" type="date"/>
+</div>
+<div>
+<label class="block text-gray-600 text-sm font-bold mb-2" for="vida-util">Vida Útil:</label>
+<input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="vida-util" name="vida-util" required="" type="text"/>
+</div>
+<div>
+<label class="block text-gray-600 text-sm font-bold mb-2" for="ubicacion">Ubicación en Almacén:</label>
+<div class="autocomplete">
+<input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="ubicacion" name="ubicacion" required="" type="text"/>
+</div>
+</div>
+<div>
+<label class="block text-gray-600 text-sm font-bold mb-2" for="estado">Estado:</label>
+<select class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="estado" name="estado" required="">
+<option disabled="" selected="" value="">Seleccione el estado</option>
+<option value="nuevo">Nuevo</option>
+<option value="ligeramente-nuevo">Ligeramente Nuevo</option>
+<option value="usado">Usado</option>
+</select>
+<div class="text-red-500 text-sm italic" id="estado-error" style="display:none;"></div>
+</div>
+<div>
+<label class="block text-gray-600 text-sm font-bold mb-2" for="familia">Familia:</label>
+<input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="familia" name="familia" required="" type="text"/>
+</div>
+<div>
+<label class="block text-gray-600 text-sm font-bold mb-2" for="codigo-barras">Código de Barras:</label>
+<input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="codigo-barras" name="codigo-barras" required="" type="text"/>
+</div>
+<div>
+<label class="block text-gray-600 text-sm font-bold mb-2" for="miniatura">Miniatura:</label>
+<input accept="image/*" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="miniatura" name="miniatura" type="file"/>
+</div>
+<button class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="submit">Agregar Artículo</button>
+</form>
+<div id="mensaje-exito">Artículo agregado correctamente</div>
+</div>
+<div class="bg-white rounded-lg shadow-md p-6">
+<h2 class="text-xl font-semibold text-gray-700 mb-4">Inventario Actual</h2>
+<div class="mb-4 text-gray-600" id="summary-text"></div>
+<div class="filter-container">
+<div>
+<label for="filtro-nombre">Filtrar por Nombre:</label>
+<select id="filtro-nombre"></select>
+</div>
+<div>
+<label for="filtro-proveedor">Filtrar por Proveedor:</label>
+<select id="filtro-proveedor"></select>
+</div>
+<div>
+<label for="filtro-estado">Filtrar por Estado:</label>
+<select id="filtro-estado">
+<option value="">Todos</option>
+<option value="nuevo">Nuevo</option>
+<option value="ligeramente-nuevo">Ligeramente Nuevo</option>
+<option value="usado">Usado</option>
+</select>
+<div class="text-red-500 text-sm italic" id="estado-error" style="display:none;"></div>
+</div>
+</div>
+<table class="table-auto" id="tabla-inventario">
+<thead>
+<tr>
+<th class="px-4 py-2">Nombre</th>
+<th class="px-4 py-2">Proveedor</th>
+<th class="px-4 py-2">Cantidad</th>
+<th class="px-4 py-2">Precio</th>
+<th class="px-4 py-2">Fecha</th>
+<th class="px-4 py-2">Vida Útil</th>
+<th class="px-4 py-2">Ubicación en Almacén</th>
+<th class="px-4 py-2">Estado</th>
+<th class="px-4 py-2">Familia</th>
+<th class="px-4 py-2">Código de Barras</th>
+<th class="px-4 py-2">Miniatura</th>
+</tr>
+</thead>
+<tbody id="tabla-body">
+<tr>
+<td class="px-4 py-2 text-center text-gray-500" colspan="11">No hay artículos en el inventario.</td>
+</tr>
+</tbody>
+<tfoot>
+<tr>
+<th class="px-4 py-2 text-right font-semibold" colspan="9">Total General:</th>
+<th class="px-4 py-2 text-left" id="total-general">0.00</th>
+</tr>
+<tr>
+<th class="px-4 py-2 text-right font-semibold" colspan="9">Total de Artículos:</th>
+<th class="px-4 py-2 text-left" id="total-articulos">0</th>
+</tr>
+</tfoot>
+<tbody id="tabla-inventario-cuerpo"></tbody></table>
+</div>
+</div>
+<footer class="footer">
+<p>© 2024 GEOWAY, Technology-Based initiative - IBT. All rights reserved. Berlin - Germany <a href="https://geo-way.github.io/GeoWay.io/index.html">GEOWAY</a></p>
+</footer>
+<script>
+    if (!localStorage.getItem('loggedIn')) {
+        window.location.href = 'login.html';
+    }
+</script>
+<script>
+let inventario = [];
+
+document.addEventListener("DOMContentLoaded", () => {
+  cargarInventarioDesdeBackend();
+  document.getElementById("filtro-nombre").addEventListener("change", aplicarFiltros);
+  document.getElementById("filtro-proveedor").addEventListener("change", aplicarFiltros);
+  document.getElementById("filtro-estado").addEventListener("change", aplicarFiltros);
+});
+
+function cargarInventarioDesdeBackend() {
+  fetch("/api/inventario")
+    .then(response => response.json())
+    .then(data => {
+      inventario = data;
+      poblarFiltros(data);
+      actualizarTabla(data);
+    });
+}
+
+function poblarFiltros(data) {
+  const nombres = [...new Set(data.map(i => i.nombre).filter(Boolean))];
+  const proveedores = [...new Set(data.map(i => i.proveedor).filter(Boolean))];
+  const estados = [...new Set(data.map(i => i.estado).filter(Boolean))];
+
+  const selectNombre = document.getElementById("filtro-nombre");
+  const selectProveedor = document.getElementById("filtro-proveedor");
+  const selectEstado = document.getElementById("filtro-estado");
+
+  selectNombre.innerHTML = "<option value=''>Todos</option>";
+  nombres.forEach(n => {
+    const opt = document.createElement("option");
+    opt.value = n;
+    opt.textContent = n;
+    selectNombre.appendChild(opt);
+  });
+
+  selectProveedor.innerHTML = "<option value=''>Todos</option>";
+  proveedores.forEach(p => {
+    const opt = document.createElement("option");
+    opt.value = p;
+    opt.textContent = p;
+    selectProveedor.appendChild(opt);
+  });
+
+  selectEstado.innerHTML = "<option value=''>Todos</option>";
+  estados.forEach(e => {
+    const opt = document.createElement("option");
+    opt.value = e;
+    opt.textContent = e;
+    selectEstado.appendChild(opt);
+  });
+}
+
+function aplicarFiltros() {
+  const nombre = document.getElementById("filtro-nombre").value;
+  const proveedor = document.getElementById("filtro-proveedor").value;
+  const estado = document.getElementById("filtro-estado").value;
+
+  const filtrado = inventario.filter(item => {
+    return (nombre === "" || item.nombre === nombre) &&
+           (proveedor === "" || item.proveedor === proveedor) &&
+           (estado === "" || item.estado === estado);
+  });
+
+  actualizarTabla(filtrado);
+}
+
+function actualizarTabla(data) {
+  const tbody = document.getElementById("tabla-inventario-cuerpo");
+  if (!tbody) return;
+  tbody.innerHTML = "";
+  let total = 0;
+  data.forEach(item => {
+    total += (item.precio * item.cantidad);
+    const fila = document.createElement("tr");
+    fila.innerHTML = `
+      <td>${item.nombre}</td>
+      <td>${item.proveedor}</td>
+      <td>${item.cantidad}</td>
+      <td>${item.precio}</td>
+      <td>${item.fecha}</td>
+      <td>${item.vidaUtil}</td>
+      <td>${item.ubicacion}</td>
+      <td>${item.estado}</td>
+      <td>${item.familia}</td>
+      <td>${item.codigoBarras}</td>
+      <td>${item.miniatura ? '<img src="' + item.miniatura + '" width="50">' : ''}</td>
+    `;
+    tbody.appendChild(fila);
+  });
+
+  document.getElementById("total-articulos").textContent = data.length;
+  document.getElementById("total-general").textContent = total.toFixed(2);
+}
+
+document.getElementById("form-inventario").addEventListener("submit", function (e) {
+  e.preventDefault();
+
+  const formData = new FormData(this);
+  const nuevoArticulo = Object.fromEntries(formData.entries());
+
+  fetch("/api/inventario", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(nuevoArticulo),
+  })
+    .then(res => res.json())
+    .then(data => {
+      alert("Artículo guardado correctamente.");
+      this.reset();
+      cargarInventarioDesdeBackend();
+    })
+    .catch(err => {
+      console.error("Error al guardar artículo:", err);
+      alert("Error al guardar artículo.");
+    });
+});
+</script></body>
+</html>
