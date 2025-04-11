@@ -238,7 +238,7 @@ function exportarCSV() {
 
 async function cargarMantenimientos() {
   try {
-    const res = await fetch("/api/mantenimiento");
+    const res = await fetch("https://sim-io.onrender.com/api/mantenimiento");
     datosMantenimiento = await res.json();
     renderTabla(datosMantenimiento);
   } catch (err) {
@@ -261,7 +261,7 @@ document.getElementById("formMantenimiento").addEventListener("submit", async fu
   }
 
   try {
-    const res = await fetch("/api/mantenimiento", {
+    const res = await fetch("https://sim-io.onrender.com/api/mantenimiento", {
       method: "POST",
       body: formData
     });
