@@ -303,6 +303,15 @@ document.getElementById("formMantenimiento").addEventListener("submit", async fu
 window.onload = cargarMantenimientos;
 
 </script>
+<!-- funcion para la hamburgesa de Menú para móviles -->
+<script>
+  const menuToggle = document.getElementById("menuToggle");
+  const mobileMenu = document.getElementById("mobileMenu");
 
+  menuToggle.addEventListener("click", () => {
+    mobileMenu.classList.toggle("hidden");
+  });
+</script>
+  
 </body>
 </html>
