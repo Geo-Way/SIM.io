@@ -140,7 +140,7 @@ async function eliminarArticulo(id) {
 }
 
 async function cargarInventario() {
-  const res = await fetch("/api/inventario");
+  const res = await fetch("https://sim-io.onrender.com/api/inventario");
   const data = await res.json();
   console.log(data);  // <- Verifica qué llega
   const cuerpo = document.getElementById("cuerpoTabla");
