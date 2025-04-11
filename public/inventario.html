@@ -128,7 +128,7 @@ async function guardarArticulo(datos, form) {
 async function eliminarArticulo(id) {
   if (!confirm("¿Eliminar este artículo?")) return;
   try {
-    const res = await fetch("fetch('https://sim-io.onrender.com/api/inventario')" + id, {
+    const res = await fetch("https://sim-io.onrender.com/api/inventario/" + id, {
       method: "DELETE"
     });
     if (!res.ok) throw new Error(await res.text());
