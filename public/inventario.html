@@ -142,6 +142,7 @@ async function eliminarArticulo(id) {
 async function cargarInventario() {
   const res = await fetch("/api/inventario");
   const data = await res.json();
+  console.log(data);  // <- Verifica qué llega
   const cuerpo = document.getElementById("cuerpoTabla");
   cuerpo.innerHTML = "";
 
