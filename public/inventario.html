@@ -192,7 +192,7 @@ document.getElementById("formEditar").addEventListener("submit", async function 
   const id = datos.id;
   delete datos.id;
   try {
-    const res = await fetch("/api/inventario/" + id, {
+    const res = await fetch("https://sim-io.onrender.com/api/inventario" + id, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(datos)
