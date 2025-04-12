@@ -378,12 +378,69 @@ window.onload = cargarMantenimientos;
 </script>
 <!-- ... (omitido por brevedad, ya está bien estructurado) -->
 
-<!-- Aquí insertamos el bloque del modal de edición -->
-<!-- Puedes copiar el contenido actualizado del modal desde el canvas existente -->
-<!-- Se ha añadido un modal visual editable con campos dinámicos -->
+<script>
+let idEditando = null;
 
-<!-- Aquí van las funciones JS como renderTabla, editarMantenimiento, eliminarMantenimiento -->
-<!-- Todo está incluido en el documento actualizado -->
+function editarMantenimiento(id) {
+  const mantenimiento = datosMantenimiento.find(m => m.id === id);
+  if (!mantenimiento) return;
+
+  idEditando = id;
+
+  const form = document.getElementById("formEditarMantenimiento");
+  for (let campo in mantenimiento) {
+    if (form[campo]) {
+      form[campo].value = mantenimiento[campo];
+    }
+  }
+
+  document.getElementById("modalEditar").classList.remove("hidden");
+}
+
+function cerrarModalEditar() {
+  document.getElementById("modalEditar").classList.add("hidden");
+  idEditando = null;
+}
+
+document.getElementById("formEditarMantenimiento").addEventListener("submit", async function (e) {
+  e.preventDefault();
+  if (!idEditando) return;
+
+  const formData = new FormData(e.target);
+  const datos = Object.fromEntries(formData.entries());
+
+  try {
+    const res = await fetch(`https://sim-io.onrender.com/api/mantenimiento/${idEditando}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(datos)
+    });
+
+    if (!res.ok) throw new Error("Error al actualizar");
+    alert("✅ Mantenimiento actualizado.");
+    cerrarModalEditar();
+    cargarMantenimientos();
+  } catch (err) {
+    alert("❌ Error al actualizar.");
+    console.error(err);
+  }
+});
+
+async function eliminarMantenimiento(id) {
+  if (!confirm("¿Estás seguro de eliminar este mantenimiento?")) return;
+
+  try {
+    const res = await fetch(`https://sim-io.onrender.com/api/mantenimiento/${id}`, { method: "DELETE" });
+    if (!res.ok) throw new Error("Error al eliminar");
+    alert("✅ Eliminado correctamente.");
+    cargarMantenimientos();
+  } catch (err) {
+    alert("❌ Error al eliminar.");
+    console.error(err);
+  }
+}
+</script>
+
 
 <!-- Footer final -->
 <footer class="bg-gray-600 text-gray-200 text-center py-6 mt-10 text-sm">
@@ -397,5 +454,33 @@ window.onload = cargarMantenimientos;
   </div>
 </footer>
 
+<!-- Modal de edición -->
+<div id="modalEditar" class="hidden fixed inset-0 bg-black bg-opacity-60 flex justify-center items-center z-50">
+  <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-2xl relative">
+    <h2 class="text-xl font-semibold mb-4">Editar Mantenimiento</h2>
+    <form id="formEditarMantenimiento" class="grid grid-cols-2 gap-4">
+      <input name="maquina" placeholder="Máquina" class="p-2 border rounded" required />
+      <input name="linea" placeholder="Línea" class="p-2 border rounded" />
+      <input name="fecha" type="date" class="p-2 border rounded" />
+      <input name="tecnico" placeholder="Técnico" class="p-2 border rounded" />
+      <input name="tiempo" type="number" step="0.1" placeholder="Horas" class="p-2 border rounded" />
+      <input name="observaciones" placeholder="Observaciones" class="p-2 border rounded" />
+
+      <select name="estadomotor" class="p-2 border rounded"><option>Operativo</option><option>Ruido Anormal</option><option>Vibración</option><option>Sobrecalentamiento</option><option>Sin funcionamiento</option></select>
+      <select name="transmision" class="p-2 border rounded"><option>Operativa</option><option>Desgaste</option><option>Desalineada</option><option>Falla</option></select>
+      <select name="hidraulico" class="p-2 border rounded"><option>Sin fugas</option><option>Con fugas</option><option>Baja presión</option><option>Obstruido</option></select>
+      <select name="neumatico" class="p-2 border rounded"><option>Correcto</option><option>Fuga de aire</option><option>Pérdida de presión</option><option>Desgaste excesivo</option></select>
+      <select name="electrico" class="p-2 border rounded"><option>Funciona bien</option><option>Corto circuito</option><option>Sensor fallando</option><option>Sin señal</option></select>
+      <select name="estadoaccion" class="p-2 border rounded"><option>Reparado</option><option>Pendiente</option><option>En seguimiento</option><option>Fuera de servicio</option></select>
+
+      <div class="col-span-2 flex justify-between mt-4">
+        <button type="submit" class="bg-red-600 text-white px-4 py-2 rounded">Guardar</button>
+        <button type="button" onclick="cerrarModalEditar()" class="bg-gray-400 text-white px-4 py-2 rounded">Cancelar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+    
 </body>
 </html>
