@@ -189,6 +189,7 @@
 
 <script>
 let datosMantenimiento = [];
+let idEditando = null;
 
 function aplicarFiltros() {
   const desde = document.getElementById("filtroFechaDesde").value;
@@ -265,6 +266,52 @@ function verFoto(ruta) {
   modal.onclick = () => modal.classList.add("hidden");
 }
 
+  function editarMantenimiento(id) {
+  const mantenimiento = datosMantenimiento.find(item => item.id === id);
+  if (!mantenimiento) return;
+
+  const form = document.getElementById("formMantenimiento");
+  idEditando = id; // variable global que debes declarar arriba del todo
+
+  form.maquina.value = mantenimiento.maquina;
+  form.linea.value = mantenimiento.linea;
+  form.fecha.value = mantenimiento.fecha;
+  form.tecnico.value = mantenimiento.tecnico;
+  form.tiempo.value = mantenimiento.tiempo;
+  form.observaciones.value = mantenimiento.observaciones;
+  form.estadomotor.value = mantenimiento.estadomotor;
+  form.transmision.value = mantenimiento.transmision;
+  form.hidraulico.value = mantenimiento.hidraulico;
+  form.neumatico.value = mantenimiento.neumatico;
+  form.electrico.value = mantenimiento.electrico;
+  form.estadoaccion.value = mantenimiento.estadoaccion;
+
+  // Checkboxes
+  form.querySelectorAll('input[name="sintomas"]').forEach(cb => {
+    cb.checked = mantenimiento.sintomas?.includes(cb.value);
+  });
+
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+ async function eliminarMantenimiento(id) {
+  if (!confirm("¿Estás seguro de eliminar este mantenimiento?")) return;
+  try {
+    const res = await fetch(`https://sim-io.onrender.com/api/mantenimiento/${id}`, {
+      method: "DELETE"
+    });
+    if (!res.ok) throw new Error("Error al eliminar");
+    alert("✅ Eliminado correctamente.");
+    cargarMantenimientos();
+  } catch (err) {
+    console.error("❌ Error al eliminar:", err);
+    alert("Hubo un error al eliminar el mantenimiento.");
+  }
+}
+ 
+
+
+  
 function exportarCSV() {
   let csv = "Fecha,Máquina,Línea,Técnico,Horas,Motor,Transmisión,Hidráulico,Neumático,Eléctrico,Síntomas,Observaciones,Acción,Foto\n";
   datosMantenimiento.forEach(row => {
