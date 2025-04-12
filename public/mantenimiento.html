@@ -8,6 +8,7 @@
 </head>
 <body class="bg-gray-100 text-gray-900">
 
+<!-- Header Profesional y Responsive -->
 <header class="bg-white shadow-md sticky top-0 z-50">
   <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
     <a href="index.html" class="flex items-center space-x-2">
@@ -41,21 +42,73 @@
     <input class="p-2 border rounded" name="tecnico" placeholder="Técnico"/>
     <input class="p-2 border rounded" name="tiempo" type="number" placeholder="Horas mantenimiento" step="0.1"/>
     <input class="p-2 border rounded" name="observaciones" placeholder="Observaciones"/>
-    <input class="p-2 border rounded w-full" type="file" name="fotoman" id="fotoman" accept="image/*" capture="environment"/>
-    <select name="estadomotor" class="p-2 border rounded"><option value="">Motor</option><option>Operativo</option></select>
-    <select name="transmision" class="p-2 border rounded"><option value="">Transmisión</option><option>Operativa</option></select>
-    <select name="hidraulico" class="p-2 border rounded"><option value="">Hidráulico</option><option>Sin fugas</option></select>
-    <select name="neumatico" class="p-2 border rounded"><option value="">Neumático</option><option>Correcto</option></select>
-    <select name="electrico" class="p-2 border rounded"><option value="">Eléctrico</option><option>Funciona bien</option></select>
-    <select name="estadoaccion" class="p-2 border rounded"><option value="">Estado Acción</option><option>Reparado</option></select>
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1" for="fotoman">Subir o Tomar Foto</label>
+      <input class="p-2 border rounded w-full" type="file" name="fotoman" id="fotoman" accept="image/*" capture="environment"/>
+      <small class="text-gray-500 text-xs">Solo imágenes menores a 500KB</small>
+    </div>
+    <select name="estadomotor" class="p-2 border rounded">
+      <option value="">Motor</option>
+      <option>Operativo</option>
+      <option>Ruido Anormal</option>
+      <option>Vibración</option>
+      <option>Sobrecalentamiento</option>
+      <option>Sin funcionamiento</option>
+    </select>
+    <select name="transmision" class="p-2 border rounded">
+      <option value="">Transmisión</option>
+      <option>Operativa</option>
+      <option>Desgaste</option>
+      <option>Desalineada</option>
+      <option>Falla</option>
+    </select>
+    <select name="hidraulico" class="p-2 border rounded">
+      <option value="">Hidráulico</option>
+      <option>Sin fugas</option>
+      <option>Con fugas</option>
+      <option>Baja presión</option>
+      <option>Obstruido</option>
+    </select>
+    <select name="neumatico" class="p-2 border rounded">
+      <option value="">Neumático</option>
+      <option>Correcto</option>
+      <option>Fuga de aire</option>
+      <option>Pérdida de presión</option>
+      <option>Desgaste excesivo</option>
+    </select>
+    <select name="electrico" class="p-2 border rounded">
+      <option value="">Eléctrico</option>
+      <option>Funciona bien</option>
+      <option>Corto circuito</option>
+      <option>Sensor fallando</option>
+      <option>Sin señal</option>
+    </select>
+    <select name="estadoaccion" class="p-2 border rounded">
+      <option value="">Estado Acción</option>
+      <option>Reparado</option>
+      <option>Pendiente</option>
+      <option>En seguimiento</option>
+      <option>Fuera de servicio</option>
+    </select>
     <fieldset class="col-span-full space-x-2">
-      <legend class="font-semibold">Síntomas</legend>
+      <legend class="font-semibold">Síntomas Encontrados</legend>
       <label><input type="checkbox" name="sintomas" value="Ruido Anormal"/> Ruido Anormal</label>
+      <label><input type="checkbox" name="sintomas" value="Fugas de Líquido"/> Fugas de Líquido</label>
+      <label><input type="checkbox" name="sintomas" value="Olor a Quemado"/> Olor a Quemado</label>
+      <label><input type="checkbox" name="sintomas" value="Corrosión"/> Corrosión</label>
+      <label><input type="checkbox" name="sintomas" value="Vibración Excesiva"/> Vibración Excesiva</label>
+      <label><input type="checkbox" name="sintomas" value="Sobrecalentamiento"/> Sobrecalentamiento</label>
+      <label><input type="checkbox" name="sintomas" value="Humo"/> Humo</label>
+      <label><input type="checkbox" name="sintomas" value="Desgaste Irregular"/> Desgaste Irregular</label>
     </fieldset>
     <button class="col-span-full bg-red-600 text-white p-2 rounded hover:bg-red-700" type="submit">Guardar</button>
   </form>
+  <div id="modalFoto" class="hidden fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
+    <img id="imagenGrande" class="max-h-[90vh] max-w-[90vw] border-4 border-white shadow-xl"/>
+  </div>
 </main>
 
+<!-- Footer -->
 <footer class="bg-gray-600 text-gray-200 text-center py-6 mt-10 text-sm">
   <div class="max-w-4xl mx-auto px-4 flex flex-col items-center space-y-2">
     <p>© 2025 <strong>GEOWAY</strong>, Technology-Based Initiative – IBT. All rights reserved.</p>
@@ -64,13 +117,6 @@
     </a>
   </div>
 </footer>
-
-<script>
-// Solo muestra menú móvil
-document.getElementById("menuToggle").addEventListener("click", () => {
-  document.getElementById("mobileMenu").classList.toggle("hidden");
-});
-</script>
 
 </body>
 </html>
