@@ -298,5 +298,15 @@ document.getElementById("formInventario").addEventListener("submit", async funct
   const datos = Object.fromEntries(new FormData(form).entries());
   await guardarArticulo(datos, form);
 });
-</script></body>
+</script>
+<!-- funcion para la hamburgesa de Menú para móviles -->
+<script>
+  const menuToggle = document.getElementById("menuToggle");
+  const mobileMenu = document.getElementById("mobileMenu");
+
+  menuToggle.addEventListener("click", () => {
+    mobileMenu.classList.toggle("hidden");
+  });
+</script>
+</body>
 </html>
