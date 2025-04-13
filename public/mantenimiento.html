@@ -59,11 +59,10 @@
 
 
     <!-- Foto -->
-    <div>
-      <label class="block text-sm font-medium text-gray-700 mb-1" for="fotoman">Subir o Tomar Foto</label>
-      <input class="p-2 border rounded w-full" type="file" name="fotoman" id="fotoman" accept="image/*" capture="environment" required/>
-      <small class="text-gray-500 text-xs">Solo imágenes menores a 500KB</small>
-    </div>
+<div>
+  <label class="block text-sm font-medium text-gray-700 mb-1" for="fotoman">Subir o Tomar Foto</label>
+  <input class="p-2 border rounded w-full" type="file" name="fotoman" id="fotoman" accept="image/*" capture="environment"/>
+</div>
 
     <!-- Selects -->
     <select name="estadomotor" class="p-2 border rounded">
@@ -469,7 +468,7 @@ formMantenimiento.addEventListener("submit", async function (e) {
   const form = e.target;
   const formData = new FormData();
 
-  // ⬆️ Extraer campos manualmente porque usamos imagen comprimida
+  // Extraer campos manualmente porque usamos imagen comprimida
   const fields = ["maquina", "linea", "fecha", "tecnico", "tiempo", "observaciones",
     "estadomotor", "transmision", "hidraulico", "neumatico", "electrico", "estadoaccion"];
   fields.forEach(name => {
@@ -486,13 +485,9 @@ formMantenimiento.addEventListener("submit", async function (e) {
     .map(cb => cb.value);
   sintomasSeleccionados.forEach(val => formData.append("sintomas", val));
 
-  // 📷 Comprimir imagen
+  // Comprimir imagen si hay
   const archivo = form.fotoman.files[0];
   if (archivo) {
-    if (!idEditando && archivo.size > 500 * 1024) {
-      alert("⚠️ La imagen excede los 500 KB permitidos.");
-      return;
-    }
     const comprimida = await comprimirImagen(archivo, 0.6);
     formData.append("fotoman", comprimida, archivo.name);
   }
