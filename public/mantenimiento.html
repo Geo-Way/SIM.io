@@ -384,6 +384,51 @@ async function eliminarMantenimiento(id) {
 }
 </script>
 
+<script>
+document.getElementById("formMantenimiento").addEventListener("submit", async function (e) {
+  e.preventDefault();
+
+  const form = e.target;
+  const formData = new FormData(form);
+
+  // Añadir síntomas (checkboxes)
+  const sintomasSeleccionados = Array.from(form.querySelectorAll('input[name="sintomas"]:checked'))
+    .map(cb => cb.value);
+  formData.delete("sintomas"); // elimina anteriores si los hubiera
+  sintomasSeleccionados.forEach(val => formData.append("sintomas", val));
+
+  // Validar imagen solo si es un nuevo registro (no edición)
+  const archivo = formData.get("fotoman");
+  if (!idEditando && archivo && archivo.size > 500 * 1024) {
+    alert("⚠️ La imagen excede los 500 KB permitidos.");
+    return;
+  }
+
+  try {
+    const method = idEditando ? "PUT" : "POST";
+    const url = idEditando
+      ? `https://sim-io.onrender.com/api/mantenimiento/${idEditando}`
+      : `https://sim-io.onrender.com/api/mantenimiento`;
+
+    const res = await fetch(url, {
+      method,
+      body: formData
+    });
+
+    if (!res.ok) throw new Error(await res.text());
+
+    alert(`✅ Mantenimiento ${idEditando ? "actualizado" : "guardado"} correctamente.`);
+    form.reset();
+    idEditando = null;
+    cargarMantenimientos();
+  } catch (err) {
+    console.error("❌ Error al guardar:", err.message);
+    alert("❌ Hubo un error al guardar el mantenimiento.");
+  }
+});
+</script>
+
+    
 
 <!-- Footer final -->
 <footer class="bg-gray-600 text-gray-200 text-center py-6 mt-10 text-sm">
