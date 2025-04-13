@@ -55,6 +55,8 @@
     <input class="p-2 border rounded" name="tecnico" placeholder="Técnico"/>
     <input class="p-2 border rounded" name="tiempo" type="number" placeholder="Horas mantenimiento" step="0.1"/>
     <input class="p-2 border rounded" name="observaciones" placeholder="Observaciones"/>
+    <input type="hidden" name="id" id="idMantenimiento" />
+
 
     <!-- Foto -->
     <div>
@@ -282,6 +284,9 @@ function verFoto(ruta) {
   form.electrico.value = mantenimiento.electrico;
   form.estadoaccion.value = mantenimiento.estadoaccion;
 
+   // ✅ Aquí guardamos el ID en el input oculto
+  form.querySelector("#idMantenimiento").value = mantenimiento.id;  
+
   // Checkboxes
   form.querySelectorAll('input[name="sintomas"]').forEach(cb => {
     cb.checked = mantenimiento.sintomas?.includes(cb.value);
@@ -388,14 +393,40 @@ function editarMantenimiento(id) {
   idEditando = id;
 
   const form = document.getElementById("formEditarMantenimiento");
-  for (let campo in mantenimiento) {
-    if (form[campo]) {
-      form[campo].value = mantenimiento[campo];
-    }
+
+  // Campos normales
+  form.maquina.value = mantenimiento.maquina || "";
+  form.linea.value = mantenimiento.linea || "";
+  form.fecha.value = mantenimiento.fecha || "";
+  form.tecnico.value = mantenimiento.tecnico || "";
+  form.tiempo.value = mantenimiento.tiempo || "";
+  form.observaciones.value = mantenimiento.observaciones || "";
+
+  // Selects
+  form.estadomotor.value = mantenimiento.estadomotor || "";
+  form.transmision.value = mantenimiento.transmision || "";
+  form.hidraulico.value = mantenimiento.hidraulico || "";
+  form.neumatico.value = mantenimiento.neumatico || "";
+  form.electrico.value = mantenimiento.electrico || "";
+  form.estadoaccion.value = mantenimiento.estadoaccion || "";
+
+  // Checkboxes (sintomas es un array tipo ['ruido', 'fuga', etc.])
+  if (Array.isArray(mantenimiento.sintomas)) {
+    form.querySelectorAll('input[name="sintomas"]').forEach(cb => {
+      cb.checked = mantenimiento.sintomas.includes(cb.value);
+    });
   }
 
+  // Si tienes un campo oculto con el ID
+  const campoId = form.querySelector("#idEditarMantenimiento");
+  if (campoId) {
+    campoId.value = mantenimiento.id;
+  }
+
+  // Mostrar modal
   document.getElementById("modalEditar").classList.remove("hidden");
 }
+
 
 function cerrarModalEditar() {
   document.getElementById("modalEditar").classList.add("hidden");
