@@ -161,6 +161,49 @@ app.listen(port, () => {
   console.log(`Servidor corriendo en http://localhost:${port}`);
 });
 
+// PUT - Editar mantenimiento con foto
+app.put('/api/mantenimiento/:id', upload.single('fotoman'), async (req, res) => {
+  const { id } = req.params;
+  let {
+    maquina, linea, fecha, tecnico, tiempo,
+    sintomas, estadomotor, transmision, hidraulico,
+    neumatico, electrico, observaciones, estadoaccion
+  } = req.body;
+
+  try {
+    const fotoman = req.file ? `/uploads/${req.file.filename}` : null;
+
+    if (Array.isArray(sintomas) && sintomas.length > 0) {
+      sintomas = `{${sintomas.map(s => `"${s}"`).join(',')}}`;
+    } else {
+      sintomas = '{}';
+    }
+
+    const query = `
+      UPDATE mantenimiento SET
+        maquina=$1, linea=$2, fecha=$3, tecnico=$4, tiempo=$5,
+        sintomas=$6, estadomotor=$7, transmision=$8, hidraulico=$9,
+        neumatico=$10, electrico=$11, observaciones=$12,
+        estadoaccion=$13${fotoman ? `, fotoman=$14` : ''}
+      WHERE id=$${fotoman ? 15 : 14}
+    `;
+
+    const values = fotoman
+      ? [maquina, linea, fecha, tecnico, tiempo, sintomas, estadomotor, transmision, hidraulico,
+         neumatico, electrico, observaciones, estadoaccion, fotoman, id]
+      : [maquina, linea, fecha, tecnico, tiempo, sintomas, estadomotor, transmision, hidraulico,
+         neumatico, electrico, observaciones, estadoaccion, id];
+
+    await pool.query(query, values);
+
+    res.status(200).json({ message: 'Mantenimiento actualizado correctamente' });
+  } catch (error) {
+    console.error('Error al actualizar mantenimiento:', error);
+    res.status(500).json({ error: 'Error al actualizar mantenimiento' });
+  }
+});
+
+
 // DELETE - Eliminar mantenimiento
 app.delete('/api/mantenimiento/:id', async (req, res) => {
   const { id } = req.params;
