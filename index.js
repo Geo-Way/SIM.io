@@ -160,3 +160,16 @@ app.post('/api/mantenimiento', upload.single('fotoman'), async (req, res) => {
 app.listen(port, () => {
   console.log(`Servidor corriendo en http://localhost:${port}`);
 });
+
+// DELETE - Eliminar mantenimiento
+app.delete('/api/mantenimiento/:id', async (req, res) => {
+  const { id } = req.params;
+  try {
+    await pool.query('DELETE FROM mantenimiento WHERE id = $1', [id]);
+    res.status(200).json({ message: 'Mantenimiento eliminado correctamente' });
+  } catch (error) {
+    console.error('Error al eliminar mantenimiento:', error);
+    res.status(500).json({ error: 'Error al eliminar mantenimiento' });
+  }
+});
+
