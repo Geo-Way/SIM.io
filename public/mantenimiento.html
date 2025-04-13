@@ -264,37 +264,40 @@ function verFoto(ruta) {
   modal.onclick = () => modal.classList.add("hidden");
 }
 
-  function editarMantenimiento(id) {
+function editarMantenimiento(id) {
   const mantenimiento = datosMantenimiento.find(item => item.id === id);
   if (!mantenimiento) return;
 
   const form = document.getElementById("formMantenimiento");
-  idEditando = id; // variable global que debes declarar arriba del todo
 
-  form.maquina.value = mantenimiento.maquina;
-  form.linea.value = mantenimiento.linea;
-  form.fecha.value = mantenimiento.fecha;
-  form.fecha.value = mantenimiento.fecha?.split("T")[0] || "";  
-  form.tecnico.value = mantenimiento.tecnico;
-  form.tiempo.value = mantenimiento.tiempo;
-  form.observaciones.value = mantenimiento.observaciones;
-  form.estadomotor.value = mantenimiento.estadomotor;
-  form.transmision.value = mantenimiento.transmision;
-  form.hidraulico.value = mantenimiento.hidraulico;
-  form.neumatico.value = mantenimiento.neumatico;
-  form.electrico.value = mantenimiento.electrico;
-  form.estadoaccion.value = mantenimiento.estadoaccion;
+  // Asignamos el ID global y al campo oculto
+  idEditando = id;
+  form.querySelector("#idMantenimiento").value = id;
 
-   // ✅ Aquí guardamos el ID en el input oculto
-  form.querySelector("#idMantenimiento").value = mantenimiento.id;  
+  // Rellenamos los campos del formulario
+  form.maquina.value = mantenimiento.maquina || "";
+  form.linea.value = mantenimiento.linea || "";
+  form.fecha.value = mantenimiento.fecha?.split("T")[0] || "";
+  form.tecnico.value = mantenimiento.tecnico || "";
+  form.tiempo.value = mantenimiento.tiempo || "";
+  form.observaciones.value = mantenimiento.observaciones || "";
 
-  // Checkboxes
+  form.estadomotor.value = mantenimiento.estadomotor || "";
+  form.transmision.value = mantenimiento.transmision || "";
+  form.hidraulico.value = mantenimiento.hidraulico || "";
+  form.neumatico.value = mantenimiento.neumatico || "";
+  form.electrico.value = mantenimiento.electrico || "";
+  form.estadoaccion.value = mantenimiento.estadoaccion || "";
+
+  // Rellenamos los checkboxes de síntomas
+  const sintomas = Array.isArray(mantenimiento.sintomas) ? mantenimiento.sintomas : [];
   form.querySelectorAll('input[name="sintomas"]').forEach(cb => {
-    cb.checked = mantenimiento.sintomas?.includes(cb.value);
+    cb.checked = sintomas.includes(cb.value);
   });
 
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
+  
 
 async function eliminarMantenimiento(id) {
   if (!confirm("¿Estás seguro de eliminar este mantenimiento?")) return;
