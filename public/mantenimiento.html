@@ -444,6 +444,82 @@ document.getElementById("formMantenimiento").addEventListener("submit", async fu
 
 <!-- Modal de edición *** eliminado -->
 
+<script>
+// Comprimir imagen antes de enviar
+async function comprimirImagen(file, calidad = 0.6) {
+  const bitmap = await createImageBitmap(file);
+  const canvas = document.createElement("canvas");
+  const MAX_WIDTH = 1024;
+  const scale = MAX_WIDTH / bitmap.width;
+  canvas.width = MAX_WIDTH;
+  canvas.height = bitmap.height * scale;
+  const ctx = canvas.getContext("2d");
+  ctx.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+  return new Promise((resolve) => {
+    canvas.toBlob((blob) => resolve(blob), "image/jpeg", calidad);
+  });
+}
+
+// Evento del formulario actualizado con compresión
+const formMantenimiento = document.getElementById("formMantenimiento");
+
+formMantenimiento.addEventListener("submit", async function (e) {
+  e.preventDefault();
+
+  const form = e.target;
+  const formData = new FormData();
+
+  // ⬆️ Extraer campos manualmente porque usamos imagen comprimida
+  const fields = ["maquina", "linea", "fecha", "tecnico", "tiempo", "observaciones",
+    "estadomotor", "transmision", "hidraulico", "neumatico", "electrico", "estadoaccion"];
+  fields.forEach(name => {
+    formData.append(name, form[name].value);
+  });
+
+  // ID si está editando
+  if (idEditando) {
+    formData.append("id", idEditando);
+  }
+
+  // Checkbox de síntomas
+  const sintomasSeleccionados = Array.from(form.querySelectorAll('input[name="sintomas"]:checked'))
+    .map(cb => cb.value);
+  sintomasSeleccionados.forEach(val => formData.append("sintomas", val));
+
+  // 📷 Comprimir imagen
+  const archivo = form.fotoman.files[0];
+  if (archivo) {
+    if (!idEditando && archivo.size > 500 * 1024) {
+      alert("⚠️ La imagen excede los 500 KB permitidos.");
+      return;
+    }
+    const comprimida = await comprimirImagen(archivo, 0.6);
+    formData.append("fotoman", comprimida, archivo.name);
+  }
+
+  try {
+    const method = idEditando ? "PUT" : "POST";
+    const url = idEditando
+      ? `https://sim-io.onrender.com/api/mantenimiento/${idEditando}`
+      : `https://sim-io.onrender.com/api/mantenimiento`;
+
+    const res = await fetch(url, {
+      method,
+      body: formData
+    });
+
+    if (!res.ok) throw new Error(await res.text());
+
+    alert(`✅ Mantenimiento ${idEditando ? "actualizado" : "guardado"} correctamente.`);
+    form.reset();
+    idEditando = null;
+    cargarMantenimientos();
+  } catch (err) {
+    console.error("❌ Error al guardar:", err.message);
+    alert("❌ Hubo un error al guardar el mantenimiento.");
+  }
+});
+</script>
 
     
 </body>
