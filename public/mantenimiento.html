@@ -274,6 +274,7 @@ function verFoto(ruta) {
   form.maquina.value = mantenimiento.maquina;
   form.linea.value = mantenimiento.linea;
   form.fecha.value = mantenimiento.fecha;
+  form.fecha.value = mantenimiento.fecha?.split("T")[0] || "";  
   form.tecnico.value = mantenimiento.tecnico;
   form.tiempo.value = mantenimiento.tiempo;
   form.observaciones.value = mantenimiento.observaciones;
@@ -362,9 +363,11 @@ document.getElementById("formMantenimiento").addEventListener("submit", async fu
 
   try {
     const method = idEditando ? "PUT" : "POST";
-    const url = idEditando
-      ? `https://sim-io.onrender.com/api/mantenimiento/${idEditando}`
+    const cleanId = parseInt(idEditando);
+    const url = cleanId
+      ? `https://sim-io.onrender.com/api/mantenimiento/${cleanId}`
       : `https://sim-io.onrender.com/api/mantenimiento`;
+
 
     const res = await fetch(url, {
       method,
@@ -398,7 +401,7 @@ window.onload = cargarMantenimientos;
 <!-- ... (omitido por brevedad, ya está bien estructurado) -->
 
 <script>
-let idEditando = null;
+
 
 function editarMantenimiento(id) {
   const mantenimiento = datosMantenimiento.find(m => m.id === id);
