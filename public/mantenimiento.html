@@ -343,52 +343,12 @@ async function cargarMantenimientos() {
 }
 
 
-document.getElementById("formMantenimiento").addEventListener("submit", async function (e) {
-  e.preventDefault();
-
-  const form = e.target;
-  const formData = new FormData(form);
-
-  // Añadir síntomas (checkboxes) si los tienes
-  const sintomasSeleccionados = Array.from(form.querySelectorAll('input[name="sintomas"]:checked'))
-    .map(cb => cb.value);
-  sintomasSeleccionados.forEach(val => formData.append("sintomas", val));
-
-  // Validar imagen
-  const archivo = formData.get("fotoman");
-  if (archivo && archivo.size > 500 * 1024) {
-    alert("⚠️ La imagen excede los 500 KB permitidos.");
-    return;
-  }
-
-  try {
-    const method = idEditando ? "PUT" : "POST";
-    const cleanId = parseInt(idEditando);
-    const url = cleanId
-      ? `https://sim-io.onrender.com/api/mantenimiento/${cleanId}`
-      : `https://sim-io.onrender.com/api/mantenimiento`;
-
-
-    const res = await fetch(url, {
-      method,
-      body: formData
-    });
-
-    if (!res.ok) throw new Error(await res.text());
-
-    alert(`✅ Mantenimiento ${idEditando ? "actualizado" : "guardado"} correctamente.`);
-    form.reset();
-    idEditando = null;
-    cargarMantenimientos();
-  } catch (err) {
-    console.error("❌ Error al guardar:", err);
-    alert("Hubo un error al guardar el mantenimiento.");
-  }
-});
+ 
 
 window.onload = cargarMantenimientos;
 
 </script>
+    
 <!-- funcion para la hamburgesa de Menú para móviles -->
 <script>
   const menuToggle = document.getElementById("menuToggle");
@@ -397,6 +357,7 @@ window.onload = cargarMantenimientos;
   menuToggle.addEventListener("click", () => {
     mobileMenu.classList.toggle("hidden");
   });
+  
 </script>
 <!-- ... (omitido por brevedad, ya está bien estructurado) -->
 
