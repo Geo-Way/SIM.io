@@ -243,10 +243,10 @@ tr.innerHTML = `
   <td class="p-2">${row.estadoaccion}</td>
   <td class="p-2"><button onclick="verFoto('${row.fotoman}')" class="text-blue-600 underline">Ver foto</button></td>
   <td class="p-2 text-center">
-    <button onclick="editarMantenimiento(${row.id})" class="hover:scale-110 transition">✏️</button>
+    <button onclick="editarMantenimiento(${row.id})" class="text-yellow-600 hover:scale-110 transition">✏️</button>
   </td>
   <td class="p-2 text-center">
-    <button onclick="eliminarMantenimiento(${row.id})" class="hover:scale-110 transition">🗑️</button>
+    <button onclick="eliminarMantenimiento(${row.id})" type="button" class="text-red-600 hover:scale-110 transition">🗑️</button>
   </td>
 `;
 
@@ -290,20 +290,24 @@ function verFoto(ruta) {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
- async function eliminarMantenimiento(id) {
+async function eliminarMantenimiento(id) {
   if (!confirm("¿Estás seguro de eliminar este mantenimiento?")) return;
   try {
+    console.log("🧨 Eliminando ID:", id);
     const res = await fetch(`https://sim-io.onrender.com/api/mantenimiento/${id}`, {
       method: "DELETE"
     });
-    if (!res.ok) throw new Error("Error al eliminar");
+    const text = await res.text();
+    console.log("📡 Respuesta:", text);
+    if (!res.ok) throw new Error(text);
     alert("✅ Eliminado correctamente.");
     cargarMantenimientos();
   } catch (err) {
-    console.error("❌ Error al eliminar:", err);
-    alert("Hubo un error al eliminar el mantenimiento.");
+    console.error("❌ Error al eliminar:", err.message);
+    alert("Hubo un error al eliminar el mantenimiento:\n" + err.message);
   }
 }
+
  
 
 
