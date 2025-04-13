@@ -344,31 +344,45 @@ async function cargarMantenimientos() {
 
 document.getElementById("formMantenimiento").addEventListener("submit", async function (e) {
   e.preventDefault();
+
   const form = e.target;
-  const sintomasSeleccionados = Array.from(form.querySelectorAll('input[name="sintomas"]:checked')).map(cb => cb.value);
   const formData = new FormData(form);
+
+  // Añadir síntomas (checkboxes) si los tienes
+  const sintomasSeleccionados = Array.from(form.querySelectorAll('input[name="sintomas"]:checked'))
+    .map(cb => cb.value);
   sintomasSeleccionados.forEach(val => formData.append("sintomas", val));
 
-  const file = formData.get("fotoman");
-  if (file && file.size > 500 * 1024) {
-    alert("La imagen excede el tamaño máximo permitido (500 KB)");
+  // Validar imagen
+  const archivo = formData.get("fotoman");
+  if (archivo && archivo.size > 500 * 1024) {
+    alert("⚠️ La imagen excede los 500 KB permitidos.");
     return;
   }
 
   try {
-    const res = await fetch("https://sim-io.onrender.com/api/mantenimiento", {
-      method: "POST",
+    const method = idEditando ? "PUT" : "POST";
+    const url = idEditando
+      ? `https://sim-io.onrender.com/api/mantenimiento/${idEditando}`
+      : `https://sim-io.onrender.com/api/mantenimiento`;
+
+    const res = await fetch(url, {
+      method,
       body: formData
     });
-    if (!res.ok) throw new Error("Error al guardar");
-    alert("✅ Mantenimiento guardado correctamente.");
+
+    if (!res.ok) throw new Error(await res.text());
+
+    alert(`✅ Mantenimiento ${idEditando ? "actualizado" : "guardado"} correctamente.`);
     form.reset();
+    idEditando = null;
     cargarMantenimientos();
   } catch (err) {
     console.error("❌ Error al guardar:", err);
     alert("Hubo un error al guardar el mantenimiento.");
   }
 });
+
 window.onload = cargarMantenimientos;
 
 </script>
