@@ -403,73 +403,7 @@ window.onload = cargarMantenimientos;
 <script>
 
 
-function editarMantenimiento(id) {
-  const mantenimiento = datosMantenimiento.find(m => m.id === id);
-  if (!mantenimiento) return;
 
-  idEditando = id;
-
-  const form = document.getElementById("formEditarMantenimiento");
-
-  // Campos normales
-  form.maquina.value = mantenimiento.maquina || "";
-  form.linea.value = mantenimiento.linea || "";
-  form.fecha.value = mantenimiento.fecha || "";
-  form.tecnico.value = mantenimiento.tecnico || "";
-  form.tiempo.value = mantenimiento.tiempo || "";
-  form.observaciones.value = mantenimiento.observaciones || "";
-
-  // Selects
-  form.estadomotor.value = mantenimiento.estadomotor || "";
-  form.transmision.value = mantenimiento.transmision || "";
-  form.hidraulico.value = mantenimiento.hidraulico || "";
-  form.neumatico.value = mantenimiento.neumatico || "";
-  form.electrico.value = mantenimiento.electrico || "";
-  form.estadoaccion.value = mantenimiento.estadoaccion || "";
-
-  // Checkboxes (sintomas es un array tipo ['ruido', 'fuga', etc.])
-  if (Array.isArray(mantenimiento.sintomas)) {
-    form.querySelectorAll('input[name="sintomas"]').forEach(cb => {
-      cb.checked = mantenimiento.sintomas.includes(cb.value);
-    });
-  }
-
-  // Si tienes un campo oculto con el ID
-  const campoId = form.querySelector("#idEditarMantenimiento");
-  if (campoId) {
-    campoId.value = mantenimiento.id;
-  }
-
-  // Mostrar modal
-  document.getElementById("modalEditar").classList.remove("hidden");
-}
-
-
- 
-
-document.getElementById("formEditarMantenimiento").addEventListener("submit", async function (e) {
-  e.preventDefault();
-  if (!idEditando) return;
-
-  const formData = new FormData(e.target);
-  const datos = Object.fromEntries(formData.entries());
-
-  try {
-    const res = await fetch(`https://sim-io.onrender.com/api/mantenimiento/${idEditando}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(datos)
-    });
-
-    if (!res.ok) throw new Error("Error al actualizar");
-    alert("✅ Mantenimiento actualizado.");
-    cerrarModalEditar();
-    cargarMantenimientos();
-  } catch (err) {
-    alert("❌ Error al actualizar.");
-    console.error(err);
-  }
-});
 
 async function eliminarMantenimiento(id) {
   if (!confirm("¿Estás seguro de eliminar este mantenimiento?")) return;
