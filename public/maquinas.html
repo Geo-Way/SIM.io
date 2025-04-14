@@ -131,9 +131,17 @@
     };
     legend.addTo(map);
 
-    L.control.attribution({
-      prefix: '<a href="https://geo-way.github.io/GeoWay.io/index.html" target="_blank">Powered by GEOWAY</a> <img src="https://geo-way.github.io/GeoWay.io/images/Logo5.png" alt="GEOWAY" style="height: 14px; vertical-align: middle;">'
-    }).addTo(map);
+L.control.attribution({
+  prefix: `
+    <span style="display: inline-flex; align-items: center; gap: 6px;">
+      <a href="https://geo-way.github.io/GeoWay.io/index.html" target="_blank" style="color: black; font-weight: bold;">
+        Powered by GEOWAY
+      </a>
+      <img src="https://geo-way.github.io/GeoWay.io/images/Logo5.png" alt="GEOWAY" style="height: 16px; filter: invert(0); vertical-align: middle;">
+    </span>
+  `
+}).addTo(map);
+
   </script>
 </body>
 </html>
