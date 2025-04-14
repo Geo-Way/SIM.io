@@ -113,9 +113,10 @@
     maquinas.forEach(async ({ nombre, coords, manual }) => {
       const estado = await obtenerEstado(nombre);
       const color = estadoColores[estado] || "gray";
+      const encodedMaquina = encodeURIComponent(nombre);
 
       const icono = L.BeautifyIcon.icon({
-        icon: 'gear',
+        icon: 'spinner',
         iconShape: 'circle-dot',
         borderColor: color,
         backgroundColor: color,
@@ -125,7 +126,6 @@
       });
 
       const marker = L.marker(coords, { icon: icono }).addTo(map);
-      const encodedMaquina = encodeURIComponent(nombre);
 
       marker.bindPopup(`
         <div class="text-sm">
