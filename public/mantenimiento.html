@@ -397,16 +397,7 @@ window.onload = cargarMantenimientos;
 
 </script>
     
-<!-- funcion para la hamburgesa de Menú para móviles -->
-<script>
-  const menuToggle = document.getElementById("menuToggle");
-  const mobileMenu = document.getElementById("mobileMenu");
 
-  menuToggle.addEventListener("click", () => {
-    mobileMenu.classList.toggle("hidden");
-  });
-  
-</script>
 <!-- ... (omitido por brevedad, ya está bien estructurado) -->
 
 <script>
@@ -624,5 +615,18 @@ function renderTabla(data) {
       <img src="https://geo-way.github.io/GeoWay.io/images/Logo5.png" alt="GEOWAY Logo" class="h-8 md:h-6 w-auto">
     </div>
   </footer>
+  <script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const menuToggle = document.getElementById("menuToggle");
+    const mobileMenu = document.getElementById("mobileMenu");
+
+    if (menuToggle && mobileMenu) {
+      menuToggle.addEventListener("click", () => {
+        mobileMenu.classList.toggle("hidden");
+      });
+    }
+  });
+</script>
+
 </body>
 </html>
