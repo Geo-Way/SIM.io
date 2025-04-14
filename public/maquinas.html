@@ -1,16 +1,16 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Diagrama de Máquinas</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <link rel="stylesheet" href="https://unpkg.com/leaflet-beautify-marker-icon@1.0.7/dist/leaflet-beautify-marker-icon.css"/>
-  <script src="https://unpkg.com/leaflet-beautify-marker-icon@1.0.7/dist/leaflet-beautify-marker-icon.min.js"></script>
 </head>
 <body class="bg-gray-100">
+
+  <!-- HEADER -->
   <header class="bg-white shadow-md sticky top-0 z-50">
     <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
       <a href="index.html" class="flex items-center space-x-2">
@@ -26,6 +26,7 @@
     </div>
   </header>
 
+  <!-- MAIN -->
   <main class="max-w-7xl mx-auto mt-10 px-4">
     <h1 class="text-xl font-bold mb-4">📍 Diagrama de Máquinas</h1>
     <div id="map" class="w-full h-[80vh] rounded shadow"></div>
@@ -37,25 +38,18 @@
     </div>
   </main>
 
+  <!-- FOOTER -->
   <footer class="bg-gray-600 text-gray-200 text-center py-6 mt-10 text-sm">
     <div class="max-w-4xl mx-auto px-4 flex flex-col items-center space-y-2">
-      <p>
-        © 2025 <strong>GEOWAY</strong>, Technology-Based Initiative – IBT. All rights reserved.
-      </p>
+      <p>© 2025 <strong>GEOWAY</strong>, Technology-Based Initiative – IBT. All rights reserved.</p>
       <a href="https://geo-way.github.io/GeoWay.io/index.html" target="_blank" class="hover:opacity-80 transition-opacity">
         <img src="https://geo-way.github.io/GeoWay.io/images/Logo5.png" alt="GEOWAY Logo" class="h-8 invert">
       </a>
     </div>
   </footer>
 
+  <!-- MAP SCRIPT -->
   <script>
-    const estadoColores = {
-      "Reparado": "green",
-      "Pendiente": "yellow",
-      "En seguimiento": "orange",
-      "Fuera de servicio": "red"
-    };
-
     const maquinas = [
       { nombre: "PISTOLA CUADROS", coords: [892, 206], manual: "https://kalixxe.github.io/Manuales/PISTOLA_CUADROS.pdf" },
       { nombre: "PISTOLA SEMIFLEX", coords: [822, 206], manual: "https://kalixxe.github.io/Manuales/PISTOLA_SEMIFLEX.pdf" },
@@ -87,7 +81,7 @@
       { nombre: "ENCOLADORA 2", coords: [510, 810], manual: "https://kalixxe.github.io/Manuales/ENCOLADORA_2.pdf" }
     ];
 
-    const map = L.map('map', {
+    const map = L.map("map", {
       crs: L.CRS.Simple,
       minZoom: -1,
       maxZoom: 2,
@@ -95,38 +89,12 @@
     });
 
     const bounds = [[0, 0], [1300, 1600]];
-    const image = L.imageOverlay('img/layout_horizontal.png', bounds).addTo(map);
+    const image = L.imageOverlay("img/layout_horizontal.png", bounds).addTo(map);
     map.fitBounds(bounds);
 
-    async function obtenerEstado(maquina) {
-      try {
-        const res = await fetch("https://sim-io.onrender.com/api/mantenimiento");
-        const data = await res.json();
-        const ult = data.find(d => d.maquina?.toLowerCase() === maquina.toLowerCase());
-        return ult?.estadoaccion || "Reparado";
-      } catch (err) {
-        console.warn("Error al obtener estado para", maquina);
-        return "Reparado";
-      }
-    }
-
-    maquinas.forEach(async ({ nombre, coords, manual }) => {
-      const estado = await obtenerEstado(nombre);
-      const color = estadoColores[estado] || "gray";
-
-      const icono = L.BeautifyIcon.icon({
-        icon: 'spinner',
-        iconShape: 'circle-dot',
-        borderColor: color,
-        backgroundColor: color,
-        textColor: '#fff',
-        borderWidth: 4,
-        spin: true
-      });
-
-      const marker = L.marker(coords, { icon: icono }).addTo(map);
+    maquinas.forEach(({ nombre, coords, manual }) => {
+      const marker = L.marker(coords).addTo(map);
       const encodedMaquina = encodeURIComponent(nombre);
-
       marker.bindPopup(`
         <div class="text-sm">
           <p class="font-bold">🔧 ${nombre}</p>
