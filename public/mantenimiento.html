@@ -11,6 +11,11 @@
 const rolUsuario = localStorage.getItem("rol") || "viewer";
 </script>
 
+
+<script>
+  const rolUsuario = localStorage.getItem("rol") || "viewer";
+</script>
+
 </head>
 <body class="bg-gray-100 text-gray-900">
 
@@ -581,6 +586,15 @@ function renderTabla(data) {
     tbody.appendChild(tr);
   });
 }
+</script>
+
+
+<script>
+  window.addEventListener("DOMContentLoaded", () => {
+    const rol = localStorage.getItem("rol") || "viewer";
+    const spanRol = document.getElementById("nombreRol");
+    if (spanRol) spanRol.textContent = rol;
+  });
 </script>
 
 </body>
