@@ -583,7 +583,7 @@ function renderTabla(data) {
       <td class="p-2">${row.sintomas}</td>
       <td class="p-2">${row.observaciones}</td>
       <td class="p-2">${row.estadoaccion}</td>
-      <td class="p-2"><button onclick="verFoto('${row.fotoman}')" class="text-blue-600 underline">Ver foto</button></td>
+ 
       <td class="p-2 text-center">
         ${rolUsuario === "viewer" ? "" : `<button onclick="editarMantenimiento(${row.id})" class="text-yellow-600 hover:scale-110 transition">✏️</button>`}
       </td>
