@@ -31,103 +31,86 @@
 
   <footer class="bg-gray-600 text-gray-200 text-center py-6 mt-10 text-sm">
     <div class="max-w-4xl mx-auto px-4 flex flex-col items-center space-y-2">
-      <p>
-        © 2025 <strong>GEOWAY</strong>, Technology-Based Initiative – IBT. All rights reserved.
-      </p>
+      <p>© 2025 <strong>GEOWAY</strong>, Technology-Based Initiative – IBT. All rights reserved.</p>
       <a href="https://geo-way.github.io/GeoWay.io/index.html" target="_blank" class="hover:opacity-80 transition-opacity">
         <img src="https://geo-way.github.io/GeoWay.io/images/Logo5.png" alt="GEOWAY Logo" class="h-8 invert">
       </a>
     </div>
   </footer>
 
-  <style>
-    .leaflet-control-attribution span.geoway {
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-    }
-    .leaflet-control-attribution img {
-      height: 16px;
-      vertical-align: middle;
-      filter: invert(1);
-    }
-  </style>
+<script>
+const estadoColores = {
+  "Reparado": "green",
+  "Pendiente": "yellow",
+  "En seguimiento": "orange",
+  "Fuera de servicio": "red"
+};
 
-  <script>
-    const maquinas = [
-      { nombre: "PISTOLA CUADROS", coords: [892, 206], manual: "https://kalixxe.github.io/Manuales/PISTOLA_CUADROS.pdf" },
-      { nombre: "PISTOLA SEMIFLEX", coords: [822, 206], manual: "https://kalixxe.github.io/Manuales/PISTOLA_SEMIFLEX.pdf" },
-      { nombre: "PISTOLA CERRAR", coords: [750, 206], manual: "https://kalixxe.github.io/Manuales/PISTOLA_CERRAR.pdf" },
-      { nombre: "EMBALADORA 2 TK381", coords: [120, 390], manual: "https://kalixxe.github.io/Manuales/EMBALADORA_2_TK381.pdf" },
-      { nombre: "BOX TK386", coords: [690, 170], manual: "https://kalixxe.github.io/Manuales/BOX_TK386.pdf" },
-      { nombre: "PORTER", coords: [770, 575], manual: "https://kalixxe.github.io/Manuales/PORTER.pdf" },
-      { nombre: "CORTE BOBINAS", coords: [900, 655], manual: "https://kalixxe.github.io/Manuales/CORTE_BOBINAS.pdf" },
-      { nombre: "CORTE PANTASOTA", coords: [770, 650], manual: "https://kalixxe.github.io/Manuales/CORTE_PANTASOTA.pdf" },
-      { nombre: "QUILTING HC 3500 BANDAS1", coords: [800, 420], manual: "https://kalixxe.github.io/Manuales/QUILTING_HC_3500_BANDAS1.pdf" },
-      { nombre: "QUILTING HC 3500 BANDAS2", coords: [800, 335], manual: "https://kalixxe.github.io/Manuales/QUILTING_HC_3500_BANDAS2.pdf" },
-      { nombre: "QUILTIADORA 2", coords: [210, 888], manual: "https://kalixxe.github.io/Manuales/QUILTIADORA_2.pdf" },
-      { nombre: "QUILTIADORA 3", coords: [300, 888], manual: "https://kalixxe.github.io/Manuales/QUILTIADORA_3.pdf" },
-      { nombre: "EMBALADORA 1", coords: [200, 390], manual: "https://kalixxe.github.io/Manuales/EMBALADORA_1.pdf" },
-      { nombre: "ZONA POKCKET LR-PS-LINE 19F09", coords: [380, 1120], manual: "https://kalixxe.github.io/Manuales/ZONA_POKCKET_LR-PS-LINE_19F09.pdf" },
-      { nombre: "ZONA BONNEL", coords: [380, 1250], manual: "https://kalixxe.github.io/Manuales/ZONA_BONNEL.pdf" },
-      { nombre: "ZONA TAPA-TAPA TK900", coords: [400, 888], manual: "https://kalixxe.github.io/Manuales/ZONA_TAPA-TAPA_TK900.pdf" },
-      { nombre: "COSTURA", coords: [170, 760], manual: "https://kalixxe.github.io/Manuales/COSTURA.pdf" },
-      { nombre: "QUILTIADORA 1", coords: [115, 888], manual: "https://kalixxe.github.io/Manuales/QUILTIADORA_1.pdf" },
-      { nombre: "DAMAGE", coords: [170, 680], manual: "https://kalixxe.github.io/Manuales/DAMAGE.pdf" },
-      { nombre: "CERRADORA 5", coords: [255, 548], manual: "https://kalixxe.github.io/Manuales/CERRADORA_5.pdf" },
-      { nombre: "CERRADORA 4", coords: [290, 548], manual: "https://kalixxe.github.io/Manuales/CERRADORA_4.pdf" },
-      { nombre: "CERRADORA 3", coords: [330, 548], manual: "https://kalixxe.github.io/Manuales/CERRADORA_3.pdf" },
-      { nombre: "CERRADORA 2", coords: [370, 548], manual: "https://kalixxe.github.io/Manuales/CERRADORA_2.pdf" },
-      { nombre: "TK050", coords: [255, 480], manual: "https://kalixxe.github.io/Manuales/TK050.pdf" },
-      { nombre: "CERRADORA 1", coords: [515, 390], manual: "https://kalixxe.github.io/Manuales/CERRADORA_1.pdf" },
-      { nombre: "PRENSA PILLOW TK 19F09", coords: [280, 345], manual: "https://kalixxe.github.io/Manuales/PRENSA_PILLOW_TK_19F09.pdf" },
-      { nombre: "ENCOLADORA 1", coords: [510, 645], manual: "https://kalixxe.github.io/Manuales/ENCOLADORA_1.pdf" },
-      { nombre: "ENCOLADORA 2", coords: [510, 810], manual: "https://kalixxe.github.io/Manuales/ENCOLADORA_2.pdf" },
-    ];
+const maquinas = [
+  { nombre: "PISTOLA CUADROS", coords: [892, 206], manual: "https://kalixxe.github.io/Manuales/PISTOLA_CUADROS.pdf" },
+  { nombre: "PISTOLA SEMIFLEX", coords: [822, 206], manual: "https://kalixxe.github.io/Manuales/PISTOLA_SEMIFLEX.pdf" },
+  { nombre: "PISTOLA CERRAR", coords: [750, 206], manual: "https://kalixxe.github.io/Manuales/PISTOLA_CERRAR.pdf" },
+  { nombre: "EMBALADORA 2 TK381", coords: [120, 390], manual: "https://kalixxe.github.io/Manuales/EMBALADORA_2_TK381.pdf" },
+  { nombre: "BOX TK386", coords: [690, 170], manual: "https://kalixxe.github.io/Manuales/BOX_TK386.pdf" },
+  { nombre: "PORTER", coords: [770, 575], manual: "https://kalixxe.github.io/Manuales/PORTER.pdf" },
+  { nombre: "CORTE BOBINAS", coords: [900, 655], manual: "https://kalixxe.github.io/Manuales/CORTE_BOBINAS.pdf" },
+  { nombre: "CORTE PANTASOTA", coords: [770, 650], manual: "https://kalixxe.github.io/Manuales/CORTE_PANTASOTA.pdf" },
+  { nombre: "QUILTING HC 3500 BANDAS1", coords: [800, 420], manual: "https://kalixxe.github.io/Manuales/QUILTING_HC_3500_BANDAS1.pdf" },
+  { nombre: "QUILTING HC 3500 BANDAS2", coords: [800, 335], manual: "https://kalixxe.github.io/Manuales/QUILTING_HC_3500_BANDAS2.pdf" }
+];
 
-    const estadoColores = {
-      "Reparado": "green",
-      "Pendiente": "yellow",
-      "En seguimiento": "orange",
-      "Fuera de servicio": "red"
+const map = L.map('map', {
+  crs: L.CRS.Simple,
+  minZoom: -1,
+  maxZoom: 2,
+  zoomControl: true
+});
+
+const bounds = [[0, 0], [1300, 1600]];
+const image = L.imageOverlay('img/layout_horizontal.png', bounds).addTo(map);
+map.setView([600, 750], 0);
+
+L.control.attribution({
+  position: 'bottomleft',
+  prefix: '<img src="https://geo-way.github.io/GeoWay.io/images/Logo5.png" alt="GEOWAY" style="height:20px;vertical-align:middle;"> GEOWAY 2025'
+}).addTo(map);
+
+async function obtenerDatosMantenimiento(maquina) {
+  try {
+    const res = await fetch("https://sim-io.onrender.com/api/mantenimiento");
+    const data = await res.json();
+    const ult = data.find(d => d.maquina?.toLowerCase() === maquina.toLowerCase());
+    return {
+      estado: ult?.estadoaccion || "Reparado",
+      fecha: ult?.fecha?.split("T")[0] || "-"
     };
+  } catch (err) {
+    console.warn("Error obteniendo datos de", maquina);
+    return { estado: "Reparado", fecha: "-" };
+  }
+}
 
-    const map = L.map('map', {
-      crs: L.CRS.Simple,
-      minZoom: -1,
-      maxZoom: 2,
-      zoomControl: true
-    });
+maquinas.forEach(async ({ nombre, coords, manual }) => {
+  const { estado, fecha } = await obtenerDatosMantenimiento(nombre);
+  const color = estadoColores[estado] || "gray";
+  const icon = L.circleMarker(coords, {
+    radius: 10,
+    color: color,
+    fillColor: color,
+    fillOpacity: 0.9
+  }).addTo(map);
 
-    const bounds = [[0, 0], [1300, 1600]];
-    L.imageOverlay('img/layout_horizontal.png', bounds).addTo(map);
-    map.setView([600, 750], 0);
+  const encoded = encodeURIComponent(nombre);
+  icon.bindPopup(`
+    <div class="text-sm">
+      <p class="font-bold">🔧 ${nombre}</p>
+      <p class="text-xs text-gray-600">🗓️ Último mantenimiento: ${fecha}</p>
+      <a href="${manual}" target="_blank" class="text-blue-600 underline block mt-1">📥 Descargar manual</a>
+      <a href="mantenimiento.html?maquina=${encoded}" class="text-blue-600 underline block">🔧 Ver mantenimientos</a>
+    </div>
+  `);
+});
+</script>
 
-    const attributionControl = L.control.attribution({ prefix: false }).addTo(map);
-    attributionControl.setPrefix(
-      `<span class="geoway">
-        © 2025 <a href="https://geo-way.github.io/GeoWay.io/" target="_blank" class="hover:underline text-blue-300">GEOWAY</a>
-        <img src="https://geo-way.github.io/GeoWay.io/images/Logo5.png" alt="GEOWAY Logo">
-      </span>`
-    );
-
-    maquinas.forEach(({ nombre, coords, manual }) => {
-      const marker = L.circleMarker(coords, {
-        radius: 10,
-        color: 'blue',
-        fillColor: 'blue',
-        fillOpacity: 0.8
-      }).addTo(map);
-
-      const encoded = encodeURIComponent(nombre);
-      marker.bindPopup(`
-        <div class="text-sm">
-          <p class="font-bold">🔧 ${nombre}</p>
-          <a href="${manual}" target="_blank" class="text-blue-600 underline block mt-1">📥 Descargar manual</a>
-          <a href="mantenimiento.html?maquina=${encoded}" class="text-blue-600 underline block">🔧 Ver mantenimientos</a>
-        </div>
-      `);
-    });
-  </script>
 </body>
 </html>
