@@ -7,18 +7,8 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <style>
-    .radar {
-      animation: pulse 2s infinite;
-      border-radius: 9999px;
-      opacity: 0.5;
-    }
-    @keyframes pulse {
-      0% { transform: scale(1); opacity: 0.5; }
-      50% { transform: scale(1.6); opacity: 0.2; }
-      100% { transform: scale(1); opacity: 0.5; }
-    }
-  </style>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet-beautify-marker-icon@1.0.7/dist/leaflet-beautify-marker-icon.css"/>
+  <script src="https://unpkg.com/leaflet-beautify-marker-icon@1.0.7/dist/leaflet-beautify-marker-icon.min.js"></script>
 </head>
 <body class="bg-gray-100">
   <header class="bg-white shadow-md sticky top-0 z-50">
@@ -38,12 +28,12 @@
 
   <main class="max-w-7xl mx-auto mt-10 px-4">
     <h1 class="text-xl font-bold mb-4">📍 Diagrama de Máquinas</h1>
-    <div id="map" class="w-full h-[80vh] rounded shadow relative"></div>
-    <div class="absolute bottom-10 right-10 bg-white shadow-md rounded p-3 text-sm">
-      <p class="mb-1 font-semibold">🟢 Reparado</p>
-      <p class="mb-1 text-yellow-500">🟡 Pendiente</p>
-      <p class="mb-1 text-orange-500">🟠 En seguimiento</p>
-      <p class="text-red-600">🔴 Fuera de servicio</p>
+    <div id="map" class="w-full h-[80vh] rounded shadow"></div>
+    <div class="mt-4 text-sm">
+      <span class="inline-block w-3 h-3 rounded-full bg-green-500 mr-1"></span>Reparado
+      <span class="inline-block w-3 h-3 rounded-full bg-yellow-400 mx-2"></span>Pendiente
+      <span class="inline-block w-3 h-3 rounded-full bg-orange-500 mx-2"></span>En seguimiento
+      <span class="inline-block w-3 h-3 rounded-full bg-red-600 mx-2"></span>Fuera de servicio
     </div>
   </main>
 
@@ -59,87 +49,89 @@
   </footer>
 
   <script>
-    const estadosColores = {
-      "Reparado": "#22c55e",
-      "Pendiente": "#facc15",
-      "En seguimiento": "#f97316",
-      "Fuera de servicio": "#dc2626"
+    const estadoColores = {
+      "Reparado": "green",
+      "Pendiente": "yellow",
+      "En seguimiento": "orange",
+      "Fuera de servicio": "red"
     };
 
     const maquinas = [
-      { nombre: "PISTOLA CUADROS", coords: [892, 206], estado: "Pendiente" },
-      { nombre: "PISTOLA SEMIFLEX", coords: [822, 206], estado: "Reparado" },
-      { nombre: "PISTOLA CERRAR", coords: [750, 206], estado: "Fuera de servicio" },
-      { nombre: "EMBALADORA 2 TK381", coords: [120, 390], estado: "Reparado" },
-      { nombre: "BOX TK386", coords: [690, 170], estado: "Pendiente" },
-      { nombre: "PORTER", coords: [770, 575], estado: "Reparado" },
-      { nombre: "CORTE BOBINAS", coords: [900, 655], estado: "En seguimiento" },
-      { nombre: "CORTE PANTASOTA", coords: [770, 650], estado: "Fuera de servicio" },
-      { nombre: "QUILTING HC 3500 BANDAS1", coords: [800, 420], estado: "Pendiente" },
-      { nombre: "QUILTING HC 3500 BANDAS2", coords: [800, 335], estado: "Reparado" },
-      { nombre: "QUILTIADORA 2", coords: [210, 888], estado: "En seguimiento" },
-      { nombre: "QUILTIADORA 3", coords: [300, 888], estado: "Pendiente" },
-      { nombre: "EMBALADORA 1", coords: [200, 390], estado: "Fuera de servicio" },
-      { nombre: "ZONA POKCKET LR-PS-LINE 19F09", coords: [380, 1120], estado: "Reparado" },
-      { nombre: "ZONA BONNEL", coords: [380, 1250], estado: "Reparado" },
-      { nombre: "ZONA TAPA-TAPA TK900", coords: [400, 888], estado: "En seguimiento" },
-      { nombre: "COSTURA", coords: [170, 760], estado: "Pendiente" },
-      { nombre: "QUILTIADORA 1", coords: [115, 888], estado: "Reparado" },
-      { nombre: "DAMAGE", coords: [170, 680], estado: "Fuera de servicio" },
-      { nombre: "CERRADORA 5", coords: [255, 548], estado: "Reparado" },
-      { nombre: "CERRADORA 4", coords: [290, 548], estado: "Reparado" },
-      { nombre: "CERRADORA 3", coords: [330, 548], estado: "Pendiente" },
-      { nombre: "CERRADORA 2", coords: [370, 548], estado: "Fuera de servicio" },
-      { nombre: "TK050", coords: [255, 480], estado: "Pendiente" },
-      { nombre: "CERRADORA 1", coords: [515, 390], estado: "En seguimiento" },
-      { nombre: "PRENSA PILLOW TK 19F09", coords: [280, 345], estado: "Reparado" },
-      { nombre: "ENCOLADORA 1", coords: [510, 645], estado: "Reparado" },
-      { nombre: "ENCOLADORA 2", coords: [510, 810], estado: "Pendiente" },
+      { nombre: "PISTOLA CUADROS", coords: [892, 206], manual: "https://kalixxe.github.io/Manuales/PISTOLA_CUADROS.pdf" },
+      { nombre: "PISTOLA SEMIFLEX", coords: [822, 206], manual: "https://kalixxe.github.io/Manuales/PISTOLA_SEMIFLEX.pdf" },
+      { nombre: "PISTOLA CERRAR", coords: [750, 206], manual: "https://kalixxe.github.io/Manuales/PISTOLA_CERRAR.pdf" },
+      { nombre: "EMBALADORA 2 TK381", coords: [120, 390], manual: "https://kalixxe.github.io/Manuales/EMBALADORA_2_TK381.pdf" },
+      { nombre: "BOX TK386", coords: [690, 170], manual: "https://kalixxe.github.io/Manuales/BOX_TK386.pdf" },
+      { nombre: "PORTER", coords: [770, 575], manual: "https://kalixxe.github.io/Manuales/PORTER.pdf" },
+      { nombre: "CORTE BOBINAS", coords: [900, 655], manual: "https://kalixxe.github.io/Manuales/CORTE_BOBINAS.pdf" },
+      { nombre: "CORTE PANTASOTA", coords: [770, 650], manual: "https://kalixxe.github.io/Manuales/CORTE_PANTASOTA.pdf" },
+      { nombre: "QUILTING HC 3500 BANDAS1", coords: [800, 420], manual: "https://kalixxe.github.io/Manuales/QUILTING_HC_3500_BANDAS1.pdf" },
+      { nombre: "QUILTING HC 3500 BANDAS2", coords: [800, 335], manual: "https://kalixxe.github.io/Manuales/QUILTING_HC_3500_BANDAS2.pdf" },
+      { nombre: "QUILTIADORA 2", coords: [210, 888], manual: "https://kalixxe.github.io/Manuales/QUILTIADORA_2.pdf" },
+      { nombre: "QUILTIADORA 3", coords: [300, 888], manual: "https://kalixxe.github.io/Manuales/QUILTIADORA_3.pdf" },
+      { nombre: "EMBALADORA 1", coords: [200, 390], manual: "https://kalixxe.github.io/Manuales/EMBALADORA_1.pdf" },
+      { nombre: "ZONA POKCKET LR-PS-LINE 19F09", coords: [380, 1120], manual: "https://kalixxe.github.io/Manuales/ZONA_POKCKET_LR-PS-LINE_19F09.pdf" },
+      { nombre: "ZONA BONNEL", coords: [380, 1250], manual: "https://kalixxe.github.io/Manuales/ZONA_BONNEL.pdf" },
+      { nombre: "ZONA TAPA-TAPA TK900", coords: [400, 888], manual: "https://kalixxe.github.io/Manuales/ZONA_TAPA-TAPA_TK900.pdf" },
+      { nombre: "COSTURA", coords: [170, 760], manual: "https://kalixxe.github.io/Manuales/COSTURA.pdf" },
+      { nombre: "QUILTIADORA 1", coords: [115, 888], manual: "https://kalixxe.github.io/Manuales/QUILTIADORA_1.pdf" },
+      { nombre: "DAMAGE", coords: [170, 680], manual: "https://kalixxe.github.io/Manuales/DAMAGE.pdf" },
+      { nombre: "CERRADORA 5", coords: [255, 548], manual: "https://kalixxe.github.io/Manuales/CERRADORA_5.pdf" },
+      { nombre: "CERRADORA 4", coords: [290, 548], manual: "https://kalixxe.github.io/Manuales/CERRADORA_4.pdf" },
+      { nombre: "CERRADORA 3", coords: [330, 548], manual: "https://kalixxe.github.io/Manuales/CERRADORA_3.pdf" },
+      { nombre: "CERRADORA 2", coords: [370, 548], manual: "https://kalixxe.github.io/Manuales/CERRADORA_2.pdf" },
+      { nombre: "TK050", coords: [255, 480], manual: "https://kalixxe.github.io/Manuales/TK050.pdf" },
+      { nombre: "CERRADORA 1", coords: [515, 390], manual: "https://kalixxe.github.io/Manuales/CERRADORA_1.pdf" },
+      { nombre: "PRENSA PILLOW TK 19F09", coords: [280, 345], manual: "https://kalixxe.github.io/Manuales/PRENSA_PILLOW_TK_19F09.pdf" },
+      { nombre: "ENCOLADORA 1", coords: [510, 645], manual: "https://kalixxe.github.io/Manuales/ENCOLADORA_1.pdf" },
+      { nombre: "ENCOLADORA 2", coords: [510, 810], manual: "https://kalixxe.github.io/Manuales/ENCOLADORA_2.pdf" }
     ];
 
     const map = L.map('map', {
       crs: L.CRS.Simple,
       minZoom: -1,
       maxZoom: 2,
-      zoomControl: false
+      zoomControl: true
     });
 
-    const bounds = [[0, 0], [1300, 1500]];
+    const bounds = [[0, 0], [1300, 1600]];
     const image = L.imageOverlay('img/layout_horizontal.png', bounds).addTo(map);
-    map.setView([650, 750], 0);
+    map.setView([600, 750], 0);
 
-    function manualUrl(nombre) {
-      const override = {
-        "PORTER": "https://kalixxe.github.io/Manuales/PORTER_CUSTOM.pdf"
-      };
-      if (override[nombre]) return override[nombre];
-      return `https://kalixxe.github.io/Manuales/${nombre.replace(/\s+/g, '_').replace(/[^a-zA-Z0-9_]/g, '')}.pdf`;
+    async function obtenerEstado(maquina) {
+      try {
+        const res = await fetch("https://sim-io.onrender.com/api/mantenimiento");
+        const data = await res.json();
+        const ult = data.find(d => d.maquina?.toLowerCase() === maquina.toLowerCase());
+        return ult?.estadoaccion || "Reparado";
+      } catch (err) {
+        console.warn("Error al obtener estado para", maquina);
+        return "Reparado";
+      }
     }
 
-    maquinas.forEach(({ nombre, coords, estado }) => {
-      const color = estadosColores[estado] || "gray";
+    maquinas.forEach(async ({ nombre, coords, manual }) => {
+      const estado = await obtenerEstado(nombre);
+      const color = estadoColores[estado] || "gray";
 
-      const outerCircle = L.circle(coords, {
-        radius: 18,
-        color: color,
-        weight: 2,
-        fill: false,
-        className: "radar"
-      }).addTo(map);
+      const icono = L.BeautifyIcon.icon({
+        icon: 'gear',
+        iconShape: 'circle-dot',
+        borderColor: color,
+        backgroundColor: color,
+        textColor: '#fff',
+        borderWidth: 4,
+        spin: true
+      });
 
-      const inner = L.circleMarker(coords, {
-        radius: 7,
-        color: color,
-        fillColor: color,
-        fillOpacity: 0.9
-      }).addTo(map);
+      const marker = L.marker(coords, { icon: icono }).addTo(map);
+      const encodedMaquina = encodeURIComponent(nombre);
 
-      inner.bindPopup(`
+      marker.bindPopup(`
         <div class="text-sm">
           <p class="font-bold">🔧 ${nombre}</p>
-          <p class="mb-1">🟡 Estado: ${estado}</p>
-          <a href="${manualUrl(nombre)}" target="_blank" class="text-blue-600 underline block mt-1">📥 Descargar manual</a>
-          <a href="mantenimiento.html?maquina=${encodeURIComponent(nombre)}" class="text-blue-600 underline block">🔧 Ver mantenimientos</a>
+          <a href="${manual}" target="_blank" class="text-blue-600 underline block mt-1">📥 Descargar manual</a>
+          <a href="mantenimiento.html?maquina=${encodedMaquina}" class="text-blue-600 underline block">🔧 Ver mantenimientos</a>
         </div>
       `);
     });
