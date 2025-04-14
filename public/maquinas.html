@@ -38,79 +38,99 @@
     </div>
   </footer>
 
-<script>
-const estadoColores = {
-  "Reparado": "green",
-  "Pendiente": "yellow",
-  "En seguimiento": "orange",
-  "Fuera de servicio": "red"
-};
-
-const maquinas = [
-  { nombre: "PISTOLA CUADROS", coords: [892, 206], manual: "https://kalixxe.github.io/Manuales/PISTOLA_CUADROS.pdf" },
-  { nombre: "PISTOLA SEMIFLEX", coords: [822, 206], manual: "https://kalixxe.github.io/Manuales/PISTOLA_SEMIFLEX.pdf" },
-  { nombre: "PISTOLA CERRAR", coords: [750, 206], manual: "https://kalixxe.github.io/Manuales/PISTOLA_CERRAR.pdf" },
-  { nombre: "EMBALADORA 2 TK381", coords: [120, 390], manual: "https://kalixxe.github.io/Manuales/EMBALADORA_2_TK381.pdf" },
-  { nombre: "BOX TK386", coords: [690, 170], manual: "https://kalixxe.github.io/Manuales/BOX_TK386.pdf" },
-  { nombre: "PORTER", coords: [770, 575], manual: "https://kalixxe.github.io/Manuales/PORTER.pdf" },
-  { nombre: "CORTE BOBINAS", coords: [900, 655], manual: "https://kalixxe.github.io/Manuales/CORTE_BOBINAS.pdf" },
-  { nombre: "CORTE PANTASOTA", coords: [770, 650], manual: "https://kalixxe.github.io/Manuales/CORTE_PANTASOTA.pdf" },
-  { nombre: "QUILTING HC 3500 BANDAS1", coords: [800, 420], manual: "https://kalixxe.github.io/Manuales/QUILTING_HC_3500_BANDAS1.pdf" },
-  { nombre: "QUILTING HC 3500 BANDAS2", coords: [800, 335], manual: "https://kalixxe.github.io/Manuales/QUILTING_HC_3500_BANDAS2.pdf" }
-];
-
-const map = L.map('map', {
-  crs: L.CRS.Simple,
-  minZoom: -1,
-  maxZoom: 2,
-  zoomControl: true
-});
-
-const bounds = [[0, 0], [1300, 1600]];
-const image = L.imageOverlay('img/layout_horizontal.png', bounds).addTo(map);
-map.setView([600, 750], 0);
-
-L.control.attribution({
-  position: 'bottomleft',
-  prefix: '<img src="https://geo-way.github.io/GeoWay.io/images/Logo5.png" alt="GEOWAY" style="height:20px;vertical-align:middle;"> GEOWAY 2025'
-}).addTo(map);
-
-async function obtenerDatosMantenimiento(maquina) {
-  try {
-    const res = await fetch("https://sim-io.onrender.com/api/mantenimiento");
-    const data = await res.json();
-    const ult = data.find(d => d.maquina?.toLowerCase() === maquina.toLowerCase());
-    return {
-      estado: ult?.estadoaccion || "Reparado",
-      fecha: ult?.fecha?.split("T")[0] || "-"
+  <script>
+    const estadoColores = {
+      "Reparado": "green",
+      "Pendiente": "yellow",
+      "En seguimiento": "orange",
+      "Fuera de servicio": "red"
     };
-  } catch (err) {
-    console.warn("Error obteniendo datos de", maquina);
-    return { estado: "Reparado", fecha: "-" };
-  }
-}
 
-maquinas.forEach(async ({ nombre, coords, manual }) => {
-  const { estado, fecha } = await obtenerDatosMantenimiento(nombre);
-  const color = estadoColores[estado] || "gray";
-  const icon = L.circleMarker(coords, {
-    radius: 10,
-    color: color,
-    fillColor: color,
-    fillOpacity: 0.9
-  }).addTo(map);
+    const maquinas = [
+      { nombre: "PISTOLA CUADROS", coords: [892, 206] },
+      { nombre: "PISTOLA SEMIFLEX", coords: [822, 206] },
+      { nombre: "PISTOLA CERRAR", coords: [750, 206] },
+      { nombre: "EMBALADORA 2 TK381", coords: [120, 390] },
+      { nombre: "BOX TK386", coords: [690, 170] },
+      { nombre: "PORTER", coords: [770, 575] },
+      { nombre: "CORTE BOBINAS", coords: [900, 655] },
+      { nombre: "CORTE PANTASOTA", coords: [770, 650] },
+      { nombre: "QUILTING HC 3500 BANDAS1", coords: [800, 420] },
+      { nombre: "QUILTING HC 3500 BANDAS2", coords: [800, 335] },
+      { nombre: "QUILTIADORA 2", coords: [210, 888] },
+      { nombre: "QUILTIADORA 3", coords: [300, 888] },
+      { nombre: "EMBALADORA 1", coords: [200, 390] },
+      { nombre: "ZONA POKCKET LR-PS-LINE 19F09", coords: [380, 1120] },
+      { nombre: "ZONA BONNEL", coords: [380, 1250] },
+      { nombre: "ZONA TAPA-TAPA TK900", coords: [400, 888] },
+      { nombre: "COSTURA", coords: [170, 760] },
+      { nombre: "QUILTIADORA 1", coords: [115, 888] },
+      { nombre: "DAMAGE", coords: [170, 680] },
+      { nombre: "CERRADORA 5", coords: [255, 548] },
+      { nombre: "CERRADORA 4", coords: [290, 548] },
+      { nombre: "CERRADORA 3", coords: [330, 548] },
+      { nombre: "CERRADORA 2", coords: [370, 548] },
+      { nombre: "TK050", coords: [255, 480] },
+      { nombre: "CERRADORA 1", coords: [515, 390] },
+      { nombre: "PRENSA PILLOW TK 19F09", coords: [280, 345] },
+      { nombre: "ENCOLADORA 1", coords: [510, 645] },
+      { nombre: "ENCOLADORA 2", coords: [510, 810] },
+    ];
 
-  const encoded = encodeURIComponent(nombre);
-  icon.bindPopup(`
-    <div class="text-sm">
-      <p class="font-bold">🔧 ${nombre}</p>
-      <p class="text-xs text-gray-600">🗓️ Último mantenimiento: ${fecha}</p>
-      <a href="${manual}" target="_blank" class="text-blue-600 underline block mt-1">📥 Descargar manual</a>
-      <a href="mantenimiento.html?maquina=${encoded}" class="text-blue-600 underline block">🔧 Ver mantenimientos</a>
-    </div>
-  `);
-});
-</script>
+    const map = L.map('map', {
+      crs: L.CRS.Simple,
+      minZoom: -1,
+      maxZoom: 2,
+      zoomControl: true
+    });
 
+    const bounds = [[0, 0], [1300, 1600]];
+    const image = L.imageOverlay('img/layout_horizontal.png', bounds).addTo(map);
+    map.setView([600, 750], 0);
+
+    L.control.attribution({
+      position: 'bottomleft'
+    }).addAttribution('<img src="https://geo-way.github.io/GeoWay.io/images/Logo5.png" alt="GEOWAY Logo" height="20" style="display:inline-block; vertical-align:middle;"/> Powered by GEOWAY 2025').addTo(map);
+
+    async function obtenerEstadoYFecha(maquina) {
+      try {
+        const res = await fetch("https://sim-io.onrender.com/api/mantenimiento");
+        const data = await res.json();
+        const ult = data.filter(d => d.maquina?.toLowerCase() === maquina.toLowerCase())
+                        .sort((a,b) => new Date(b.fecha) - new Date(a.fecha))[0];
+        return {
+          estado: ult?.estadoaccion || "Reparado",
+          fecha: ult?.fecha?.split("T")[0] || "Sin datos"
+        };
+      } catch (err) {
+        return { estado: "Reparado", fecha: "Error" };
+      }
+    }
+
+    maquinas.forEach(async ({ nombre, coords }) => {
+      const { estado, fecha } = await obtenerEstadoYFecha(nombre);
+      const color = estadoColores[estado] || "gray";
+
+      const marker = L.circleMarker(coords, {
+        radius: 8,
+        color: color,
+        fillColor: color,
+        fillOpacity: 0.9
+      }).addTo(map);
+
+      const fileName = nombre.replace(/\s+/g, '_').replace(/[^a-zA-Z0-9_]/g, '') + ".pdf";
+      const urlManual = `https://kalixxe.github.io/Manuales/${fileName}`;
+
+      const encodedMaquina = encodeURIComponent(nombre);
+      marker.bindPopup(`
+        <div class="text-sm">
+          <p class="font-bold">🔧 ${nombre}</p>
+          <p>📅 Último mantenimiento: ${fecha}</p>
+          <a href="${urlManual}" target="_blank" class="text-blue-600 underline block mt-1">📥 Descargar manual</a>
+          <a href="mantenimiento.html?maquina=${encodedMaquina}" class="text-blue-600 underline block">🔧 Ver mantenimientos</a>
+        </div>
+      `);
+    });
+  </script>
 </body>
 </html>
