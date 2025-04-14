@@ -19,7 +19,7 @@
         <a href="index.html" class="text-gray-700 hover:text-red-600">Home</a>
         <a href="inventario.html" class="text-gray-700 hover:text-red-600">Inventario</a>
         <a href="mantenimiento.html" class="text-gray-700 hover:text-red-600">Mantenimiento</a>
-        <a href="maquinas.html" class="text-red-600 font-bold">Diagrama de Máquinas</a>
+        <a href="maquinas.html" class="text-red-600 hover:text-red-600">Diagrama de Máquinas</a>
       </nav>
     </div>
   </header>
@@ -87,7 +87,7 @@
       attributionControl: true
     });
 
-    const bounds = [[0, 0], [1300, 1600]];
+    const bounds = [[0, 0], [1000, 1500]];
     L.imageOverlay('img/layout_horizontal.png', bounds).addTo(map);
     map.setView([600, 750], 0);
 
