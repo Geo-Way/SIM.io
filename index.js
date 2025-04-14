@@ -14,10 +14,22 @@ app.use(bodyParser.json());
 app.use(express.static('public'));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, 'uploads/');
+  },
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname);
+    const uniqueName = Date.now() + '-' + Math.round(Math.random() * 1E9) + ext;
+    cb(null, uniqueName);
+  }
+});
+
 const upload = multer({
-  dest: 'uploads/',
+  storage,
   limits: { fileSize: 500 * 1024 } // 500 KB
 });
+
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
