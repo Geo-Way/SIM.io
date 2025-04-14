@@ -31,13 +31,23 @@
 
   <footer class="bg-gray-600 text-gray-200 text-center py-6 mt-10 text-sm">
     <div class="max-w-4xl mx-auto px-4 flex flex-col items-center space-y-2">
-      <p>
-        © 2025 <a href="https://geo-way.github.io/GeoWay.io/index.html" target="_blank" class="text-blue-300 hover:underline">Poweraded by GEOWAY</a>
-      </p>
+      <p>© 2025 <strong><a href="https://geo-way.github.io/GeoWay.io/index.html" class="hover:underline">GEOWAY</a></strong>, Technology-Based Initiative – IBT. All rights reserved.</p>
+      <img src="https://geo-way.github.io/GeoWay.io/images/Logo5.png" alt="GEOWAY Logo" class="h-8 md:h-6 w-auto">
     </div>
   </footer>
 
   <script>
+    const map = L.map('map', {
+      crs: L.CRS.Simple,
+      minZoom: -1,
+      maxZoom: 2,
+      zoomControl: true
+    });
+
+    const bounds = [[0, 0], [1000, 1500]];
+    const image = L.imageOverlay('img/layout_horizontal.png', bounds).addTo(map);
+    map.setView([600, 750], 0);
+
     const estadoColores = {
       "Reparado": "green",
       "Pendiente": "yellow",
@@ -76,56 +86,54 @@
       { nombre: "ENCOLADORA 2", coords: [510, 810], manual: "https://kalixxe.github.io/Manuales/ENCOLADORA_2.pdf" }
     ];
 
-    const map = L.map('map', {
-      crs: L.CRS.Simple,
-      minZoom: -1,
-      maxZoom: 2,
-      zoomControl: true,
-      attributionControl: true
-    });
-
-    const bounds = [[0, 0], [1000, 1500]];
-    L.imageOverlay('img/layout_horizontal.png', bounds).addTo(map);
-    map.setView([600, 750], 0);
-
-    L.control.attribution({position: 'bottomleft'}).addAttribution(
-      '<a href="https://geo-way.github.io/GeoWay.io/index.html" target="_blank"><img src="https://geo-way.github.io/GeoWay.io/images/Logo5.png" style="height:20px;vertical-align:middle;margin-right:4px">Powered by GEOWAY</a>'
-    ).addTo(map);
-
-    async function obtenerUltimoEstado(maquina) {
+    async function obtenerEstado(maquina) {
       try {
         const res = await fetch("https://sim-io.onrender.com/api/mantenimiento");
         const data = await res.json();
         const ult = data.find(d => d.maquina?.toLowerCase() === maquina.toLowerCase());
-        return {
-          estado: ult?.estadoaccion || "Reparado",
-          fecha: ult?.fecha ? new Date(ult.fecha).toLocaleDateString() : "Sin registro"
-        };
-      } catch (e) {
+        return { estado: ult?.estadoaccion || "Reparado", fecha: ult?.fecha?.split("T")[0] || "Sin registro" };
+      } catch {
         return { estado: "Reparado", fecha: "Sin datos" };
       }
     }
 
     maquinas.forEach(async ({ nombre, coords, manual }) => {
-      const { estado, fecha } = await obtenerUltimoEstado(nombre);
+      const { estado, fecha } = await obtenerEstado(nombre);
       const color = estadoColores[estado] || "gray";
-
       const marker = L.circleMarker(coords, {
-        radius: 10,
-        color: color,
+        radius: 8,
+        color,
         fillColor: color,
-        fillOpacity: 0.8
+        fillOpacity: 1
       }).addTo(map);
 
       marker.bindPopup(`
         <div class="text-sm">
           <p class="font-bold">🔧 ${nombre}</p>
-          <p class="text-xs">🕒 Último: ${fecha}</p>
+          <p class="text-xs">📅 Último mantenimiento: ${fecha}</p>
           <a href="${manual}" target="_blank" class="text-blue-600 underline block mt-1">📥 Descargar manual</a>
           <a href="mantenimiento.html?maquina=${encodeURIComponent(nombre)}" class="text-blue-600 underline block">🔧 Ver mantenimientos</a>
         </div>
       `);
     });
+
+    const legend = L.control({ position: 'topright' });
+    legend.onAdd = function () {
+      const div = L.DomUtil.create('div', 'bg-white p-2 text-xs rounded shadow');
+      div.innerHTML = `
+        <strong>Leyenda</strong><br>
+        <span class="inline-block w-3 h-3 rounded-full bg-green-500 mr-1"></span>Reparado<br>
+        <span class="inline-block w-3 h-3 rounded-full bg-yellow-400 mr-1"></span>Pendiente<br>
+        <span class="inline-block w-3 h-3 rounded-full bg-orange-500 mr-1"></span>En seguimiento<br>
+        <span class="inline-block w-3 h-3 rounded-full bg-red-600 mr-1"></span>Fuera de servicio
+      `;
+      return div;
+    };
+    legend.addTo(map);
+
+    L.control.attribution({
+      prefix: '<a href="https://geo-way.github.io/GeoWay.io/index.html" target="_blank">Powered by GEOWAY</a> <img src="https://geo-way.github.io/GeoWay.io/images/Logo5.png" alt="GEOWAY" style="height: 14px; vertical-align: middle;">'
+    }).addTo(map);
   </script>
 </body>
 </html>
