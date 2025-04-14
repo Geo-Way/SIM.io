@@ -1,525 +1,117 @@
-<!-- Archivo completo de mantenimiento.html actualizado -->
 <!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="utf-8"/>
-  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Mantenimiento</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100 text-gray-900">
 
-<!-- Aquí insertamos el header y el formulario como ya los tienes -->
-
-  <body class="bg-gray-100 text-gray-900">
-
-<!-- Header Profesional y Responsive -->
 <header class="bg-white shadow-md sticky top-0 z-50">
   <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
-    <!-- Logo y título -->
     <a href="index.html" class="flex items-center space-x-2">
       <img src="https://images.squarespace-cdn.com/content/v1/58a36221d482e9bca4af6eac/34694fc3-6f92-4054-8a58-3776436c00dc/IMG_9869+2.PNG?format=2500w" alt="Logo" class="h-10 w-auto" />
       <span class="text-xl font-bold text-red-600">SIMio</span>
     </a>
-
-    <!-- Menú para escritorio -->
     <nav class="hidden md:flex space-x-6 text-sm font-medium">
       <a href="index.html" class="text-gray-700 hover:text-red-600">Home</a>
       <a href="inventario.html" class="text-gray-700 hover:text-red-600">Inventario</a>
-      <a href="mantenimiento.html" class="text-red-600 hover:text-red-600 font-bold">Mantenimiento</a>
-       <a href="maquinas.html" class="text-gray-700 hover:text-red-600">Diagrama de Máquinas</a>
-              <a href="info.html" title="Ver documentación" class="text-gray-500 hover:text-red-600">
-          ℹ️
-        </a>
+      <a href="mantenimiento.html" class="text-red-600 font-bold">Mantenimiento</a>
+      <a href="maquinas.html" class="text-gray-700 hover:text-red-600">Diagrama de Máquinas</a>
+      <a href="info.html" title="Ver documentación" class="text-gray-500 hover:text-red-600">ℹ️</a>
     </nav>
-
-    <!-- Botón hamburguesa -->
-    <button id="menuToggle" class="md:hidden text-gray-700 focus:outline-none">
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-          d="M4 6h16M4 12h16M4 18h16" />
-      </svg>
-    </button>
-  </div>
-
-  <!-- Menú para móviles -->
-  <div id="mobileMenu" class="md:hidden hidden px-4 pb-4">
-    <a href="index.html" class="block py-2 text-gray-700 hover:text-red-600">Home</a>
-    <a href="inventario.html" class="block py-2 text-gray-700 hover:text-red-600">Inventario</a>
-    <a href="mantenimiento.html" class="block py-2 text-gray-700 hover:text-red-600">Mantenimiento</a>
   </div>
 </header>
-  
-<main class="max-w-7xl mx-auto mt-10 p-4">
-  <h2 class="text-lg font-semibold text-gray-700 mb-4">📄 Formulario de Mantenimiento</h2>
-  <form id="formMantenimiento" enctype="multipart/form-data" class="grid md:grid-cols-3 gap-4 bg-white p-6 rounded shadow mb-6">
-    <input class="p-2 border rounded" name="maquina" placeholder="Máquina" required/>
-    <input class="p-2 border rounded" name="linea" placeholder="Línea"/>
-    <input class="p-2 border rounded" name="fecha" type="date"/>
-    <input class="p-2 border rounded" name="tecnico" placeholder="Técnico"/>
-    <input class="p-2 border rounded" name="tiempo" type="number" placeholder="Horas mantenimiento" step="0.1"/>
-    <input class="p-2 border rounded" name="observaciones" placeholder="Observaciones"/>
-    <input type="hidden" name="id" id="idMantenimiento" />
 
-
-    <!-- Foto -->
-<div>
-  <label class="block text-sm font-medium text-gray-700 mb-1" for="fotoman">Subir o Tomar Foto</label>
-  <input class="p-2 border rounded w-full" type="file" name="fotoman" id="fotoman" accept="image/*" capture="environment"/>
-</div>
-
-    <!-- Selects -->
-    <select name="estadomotor" class="p-2 border rounded">
-      <option value="">Motor</option>
-      <option>Operativo</option>
-      <option>Ruido Anormal</option>
-      <option>Vibración</option>
-      <option>Sobrecalentamiento</option>
-      <option>Sin funcionamiento</option>
-    </select>
-    <select name="transmision" class="p-2 border rounded">
-      <option value="">Transmisión</option>
-      <option>Operativa</option>
-      <option>Desgaste</option>
-      <option>Desalineada</option>
-      <option>Falla</option>
-    </select>
-    <select name="hidraulico" class="p-2 border rounded">
-      <option value="">Hidráulico</option>
-      <option>Sin fugas</option>
-      <option>Con fugas</option>
-      <option>Baja presión</option>
-      <option>Obstruido</option>
-    </select>
-    <select name="neumatico" class="p-2 border rounded">
-      <option value="">Neumático</option>
-      <option>Correcto</option>
-      <option>Fuga de aire</option>
-      <option>Pérdida de presión</option>
-      <option>Desgaste excesivo</option>
-    </select>
-    <select name="electrico" class="p-2 border rounded">
-      <option value="">Eléctrico</option>
-      <option>Funciona bien</option>
-      <option>Corto circuito</option>
-      <option>Sensor fallando</option>
-      <option>Sin señal</option>
-    </select>
-    <select name="estadoaccion" class="p-2 border rounded">
-      <option value="">Estado Acción</option>
-      <option>Reparado</option>
-      <option>Pendiente</option>
-      <option>En seguimiento</option>
-      <option>Fuera de servicio</option>
-    </select>
-
-    <!-- Checkboxes -->
-    <fieldset class="col-span-full space-x-2">
-      <legend class="font-semibold">Síntomas Encontrados</legend>
-      <label><input type="checkbox" name="sintomas" value="Ruido Anormal"/> Ruido Anormal</label>
-      <label><input type="checkbox" name="sintomas" value="Fugas de Líquido"/> Fugas de Líquido</label>
-      <label><input type="checkbox" name="sintomas" value="Olor a Quemado"/> Olor a Quemado</label>
-      <label><input type="checkbox" name="sintomas" value="Corrosión"/> Corrosión</label>
-      <label><input type="checkbox" name="sintomas" value="Vibración Excesiva"/> Vibración Excesiva</label>
-      <label><input type="checkbox" name="sintomas" value="Sobrecalentamiento"/> Sobrecalentamiento</label>
-      <label><input type="checkbox" name="sintomas" value="Humo"/> Humo</label>
-      <label><input type="checkbox" name="sintomas" value="Desgaste Irregular"/> Desgaste Irregular</label>
-    </fieldset>
-
-    <button class="col-span-full bg-red-600 text-white p-2 rounded hover:bg-red-700" type="submit">Guardar</button>
+<main class="p-4 max-w-7xl mx-auto">
+  <h2 class="text-lg font-semibold mb-4">Registrar nuevo mantenimiento</h2>
+  <form id="formMantenimiento" class="grid grid-cols-1 md:grid-cols-3 gap-4 bg-white p-4 rounded shadow mb-6">
+    <input class="p-2 border rounded" name="maquina" placeholder="Máquina" required type="text" />
+    <input class="p-2 border rounded" name="linea" placeholder="Línea" type="text" />
+    <input class="p-2 border rounded" name="fecha" type="date" />
+    <input class="p-2 border rounded" name="tecnico" placeholder="Técnico" type="text" />
+    <input class="p-2 border rounded" name="tiempo" placeholder="Tiempo estimado" type="text" />
+    <input class="p-2 border rounded" name="observaciones" placeholder="Observaciones" type="text" />
+    <input class="p-2 border rounded" name="estadoaccion" placeholder="Estado" type="text" />
+    <input class="p-2 border rounded" name="fotoman" type="file" accept="image/*" />
+    <div class="col-span-full">
+      <label class="block text-sm font-medium text-gray-700 mb-1">Síntomas</label>
+      <div class="flex flex-wrap gap-2">
+        <label><input type="checkbox" name="sintomas" value="Ruido"/> Ruido</label>
+        <label><input type="checkbox" name="sintomas" value="Vibración"/> Vibración</label>
+        <label><input type="checkbox" name="sintomas" value="Fuga"/> Fuga</label>
+      </div>
+    </div>
+    <button class="btn-agregar col-span-full bg-red-600 text-white p-2 rounded hover:bg-red-700" type="submit">Guardar</button>
   </form>
-  <hr class="my-10 border-t-2"/>
-  
-<h2 class="text-xl font-semibold text-gray-700 mb-4">📋 Filtrar mantenimientos</h2>
-<div class="bg-white p-4 rounded shadow mb-6">
-  <div class="grid md:grid-cols-6 gap-4 mb-4">
-    <input id="filtroMaquina" placeholder="Máquina" class="p-2 border rounded" />
-    <input id="filtroLinea" placeholder="Línea" class="p-2 border rounded" />
-    <input id="filtroTecnico" placeholder="Técnico" class="p-2 border rounded" />
-    <input type="date" id="filtroFechaDesde" class="p-2 border rounded" />
-    <input type="date" id="filtroFechaHasta" class="p-2 border rounded" />
-    <select id="filtroEstado" class="p-2 border rounded">
-      <option value="">Estado</option>
-      <option>Reparado</option>
-      <option>Pendiente</option>
-      <option>En seguimiento</option>
-      <option>Fuera de servicio</option>
-    </select>
-  </div>
-  <div class="flex justify-end gap-2">
-    <button onclick="aplicarFiltros()" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded">Filtrar</button>
-    <button onclick="limpiarFiltros()" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold px-4 py-2 rounded">Limpiar</button>
-  </div>
-</div>
 
-  <h2 class="text-lg font-semibold text-gray-700 mb-2">Historial de Mantenimientos</h2>
+  <h2 class="text-lg font-semibold my-6">Historial de mantenimientos</h2>
   <div class="overflow-x-auto bg-white p-4 rounded shadow">
-    <table class="min-w-full table-auto text-sm">
-<thead class="bg-gray-200">
-  <tr>
-    <th class="p-2">Fecha</th>
-    <th class="p-2">Máquina</th>
-    <th class="p-2">Línea</th>
-    <th class="p-2">Técnico</th>
-    <th class="p-2">Horas</th>
-    <th class="p-2">Motor</th>
-    <th class="p-2">Transmisión</th>
-    <th class="p-2">Hidráulico</th>
-    <th class="p-2">Neumático</th>
-    <th class="p-2">Eléctrico</th>
-    <th class="p-2">Síntomas</th>
-    <th class="p-2">Observaciones</th>
-    <th class="p-2">Acción</th>
-    <th class="p-2">Foto</th>
-    <th class="p-2">✏️ Editar</th>
-    <th class="p-2">🗑️ Eliminar</th>
-  </tr>
-</thead>
-
-      <tbody id="tablaMantenimiento"></tbody>
+    <table class="min-w-full table-auto">
+      <thead class="bg-gray-200 text-left">
+        <tr>
+          <th class="p-2">Máquina</th>
+          <th class="p-2">Fecha</th>
+          <th class="p-2">Técnico</th>
+          <th class="p-2">Estado</th>
+          <th class="p-2">Acciones</th>
+        </tr>
+      </thead>
+      <tbody id="cuerpoMantenimientos" class="text-sm"></tbody>
     </table>
   </div>
-  
-<div class="mt-4 flex gap-4">
-  <button onclick="window.print()" class="bg-green-600 hover:bg-green-700 text-white font-semibold px-4 py-2 rounded">Imprimir PDF</button>
-  <button onclick="exportarCSV()" class="bg-yellow-500 hover:bg-yellow-600 text-white font-semibold px-4 py-2 rounded">Exportar CSV</button>
-</div>
-
 </main>
 
-<div id="modalFoto" class="hidden fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
-  <img id="imagenGrande" class="max-h-[90vh] max-w-[90vw] border-4 border-white shadow-xl"/>
-</div>
-
-
-<script>
-let datosMantenimiento = [];
-let idEditando = null;
-
-function aplicarFiltros() {
-  const desde = document.getElementById("filtroFechaDesde").value;
-  const hasta = document.getElementById("filtroFechaHasta").value;
-  const maquina = (document.getElementById("filtroMaquina").value ?? "").toLowerCase();
-  const linea = (document.getElementById("filtroLinea").value ?? "").toLowerCase();
-  const tecnico = (document.getElementById("filtroTecnico").value ?? "").toLowerCase();
-  const estado = (document.getElementById("filtroEstado").value ?? "").toLowerCase();
-
-  const filtrados = datosMantenimiento.filter(row => {
-    const fecha = row.fecha ?? "";
-    return (!desde || fecha >= desde) &&
-           (!hasta || fecha <= hasta) &&
-           (!maquina || (row.maquina ?? "").toLowerCase().includes(maquina)) &&
-           (!linea || (row.linea ?? "").toLowerCase().includes(linea)) &&
-           (!tecnico || (row.tecnico ?? "").toLowerCase().includes(tecnico)) &&
-           (!estado || (row.estadoaccion ?? "").toLowerCase().includes(estado));
-  });
-
-  renderTabla(filtrados);
-}
-
-function limpiarFiltros() {
-  document.getElementById("filtroFechaDesde").value = "";
-  document.getElementById("filtroFechaHasta").value = "";
-  document.getElementById("filtroMaquina").value = "";
-  document.getElementById("filtroLinea").value = "";
-  document.getElementById("filtroTecnico").value = "";
-  document.getElementById("filtroEstado").value = "";
-  renderTabla(datosMantenimiento);
-}
-
-function renderTabla(data) {
-  const tbody = document.getElementById("tablaMantenimiento");
-  tbody.innerHTML = "";
-  data.forEach(row => {
-    const tr = document.createElement("tr");
-tr.innerHTML = `
-  <td class="p-2">${row.fecha}</td>
-  <td class="p-2">${row.maquina}</td>
-  <td class="p-2">${row.linea}</td>
-  <td class="p-2">${row.tecnico}</td>
-  <td class="p-2">${row.tiempo}</td>
-  <td class="p-2">${row.estadomotor}</td>
-  <td class="p-2">${row.transmision}</td>
-  <td class="p-2">${row.hidraulico}</td>
-  <td class="p-2">${row.neumatico}</td>
-  <td class="p-2">${row.electrico}</td>
-  <td class="p-2">${row.sintomas}</td>
-  <td class="p-2">${row.observaciones}</td>
-  <td class="p-2">${row.estadoaccion}</td>
-  <td class="p-2"><button onclick="verFoto('${row.fotoman}')" class="text-blue-600 underline">Ver foto</button></td>
-  <td class="p-2 text-center">
-    <button onclick="editarMantenimiento(${row.id})" class="text-yellow-600 hover:scale-110 transition">✏️</button>
-  </td>
-  <td class="p-2 text-center">
-    <button onclick="eliminarMantenimiento(${row.id})" type="button" class="text-red-600 hover:scale-110 transition">🗑️</button>
-  </td>
-`;
-
-    tbody.appendChild(tr);
-  });
-}
-
-function verFoto(ruta) {
-  const modal = document.getElementById("modalFoto");
-  const img = document.getElementById("imagenGrande");
-  img.src = ruta;
-  modal.classList.remove("hidden");
-  modal.onclick = () => modal.classList.add("hidden");
-}
-
-function editarMantenimiento(id) {
-  const mantenimiento = datosMantenimiento.find(item => item.id === id);
-  if (!mantenimiento) return;
-
-  const form = document.getElementById("formMantenimiento");
-
-  // Asignamos el ID global y al campo oculto
-  idEditando = id;
-  form.querySelector("#idMantenimiento").value = id;
-
-  // Rellenamos los campos del formulario
-  form.maquina.value = mantenimiento.maquina || "";
-  form.linea.value = mantenimiento.linea || "";
-  form.fecha.value = mantenimiento.fecha?.split("T")[0] || "";
-  form.tecnico.value = mantenimiento.tecnico || "";
-  form.tiempo.value = mantenimiento.tiempo || "";
-  form.observaciones.value = mantenimiento.observaciones || "";
-
-  form.estadomotor.value = mantenimiento.estadomotor || "";
-  form.transmision.value = mantenimiento.transmision || "";
-  form.hidraulico.value = mantenimiento.hidraulico || "";
-  form.neumatico.value = mantenimiento.neumatico || "";
-  form.electrico.value = mantenimiento.electrico || "";
-  form.estadoaccion.value = mantenimiento.estadoaccion || "";
-
-  // Rellenamos los checkboxes de síntomas
-  const sintomas = Array.isArray(mantenimiento.sintomas) ? mantenimiento.sintomas : [];
-  form.querySelectorAll('input[name="sintomas"]').forEach(cb => {
-    cb.checked = sintomas.includes(cb.value);
-  });
-
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-}
-  
-
-async function eliminarMantenimiento(id) {
-  if (!confirm("¿Estás seguro de eliminar este mantenimiento?")) return;
-  try {
-    console.log("🧨 Eliminando ID:", id);
-    const res = await fetch(`https://sim-io.onrender.com/api/mantenimiento/${id}`, {
-      method: "DELETE"
-    });
-    const text = await res.text();
-    console.log("📡 Respuesta:", text);
-    if (!res.ok) throw new Error(text);
-    alert("✅ Eliminado correctamente.");
-    cargarMantenimientos();
-  } catch (err) {
-    console.error("❌ Error al eliminar:", err.message);
-    alert("Hubo un error al eliminar el mantenimiento:\n" + err.message);
-  }
-}
-
- 
-
-
-  
-function exportarCSV() {
-  let csv = "Fecha,Máquina,Línea,Técnico,Horas,Motor,Transmisión,Hidráulico,Neumático,Eléctrico,Síntomas,Observaciones,Acción,Foto\n";
-  datosMantenimiento.forEach(row => {
-    csv += `${row.fecha},${row.maquina},${row.linea},${row.tecnico},${row.tiempo},${row.estadomotor},${row.transmision},${row.hidraulico},${row.neumatico},${row.electrico},${row.sintomas},${row.observaciones},${row.estadoaccion},${row.fotoman}\n`;
-  });
-  const blob = new Blob([csv], { type: "text/csv" });
-  const url = window.URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = "mantenimientos.csv";
-  a.click();
-  window.URL.revokeObjectURL(url);
-}
-
-async function cargarMantenimientos() {
-  try {
-    const res = await fetch("https://sim-io.onrender.com/api/mantenimiento");
-    datosMantenimiento = await res.json();
-    renderTabla(datosMantenimiento);
-  } catch (err) {
-    console.error("Error al cargar mantenimientos:", err);
-  }
-}
-
-
- 
-
-window.onload = cargarMantenimientos;
-
-</script>
-    
-<!-- funcion para la hamburgesa de Menú para móviles -->
-<script>
-  const menuToggle = document.getElementById("menuToggle");
-  const mobileMenu = document.getElementById("mobileMenu");
-
-  menuToggle.addEventListener("click", () => {
-    mobileMenu.classList.toggle("hidden");
-  });
-  
-</script>
-<!-- ... (omitido por brevedad, ya está bien estructurado) -->
-
-<script>
-
-
-
-
-async function eliminarMantenimiento(id) {
-  if (!confirm("¿Estás seguro de eliminar este mantenimiento?")) return;
-
-  try {
-    const res = await fetch(`https://sim-io.onrender.com/api/mantenimiento/${id}`, { method: "DELETE" });
-    if (!res.ok) throw new Error("Error al eliminar");
-    alert("✅ Eliminado correctamente.");
-    cargarMantenimientos();
-  } catch (err) {
-    alert("❌ Error al eliminar.");
-    console.error(err);
-  }
-}
-</script>
-
-<script>
-document.getElementById("formMantenimiento").addEventListener("submit", async function (e) {
-  e.preventDefault();
-
-  const form = e.target;
-  const formData = new FormData(form);
-
-  // Añadir síntomas (checkboxes)
-  const sintomasSeleccionados = Array.from(form.querySelectorAll('input[name="sintomas"]:checked'))
-    .map(cb => cb.value);
-  formData.delete("sintomas"); // elimina anteriores si los hubiera
-  sintomasSeleccionados.forEach(val => formData.append("sintomas", val));
-
-  // Validar imagen solo si es un nuevo registro (no edición)
-  const archivo = formData.get("fotoman");
-  if (!idEditando && archivo && archivo.size > 500 * 1024) {
-    alert("⚠️ La imagen excede los 500 KB permitidos.");
-    return;
-  }
-
-  try {
-    const method = idEditando ? "PUT" : "POST";
-    const url = idEditando
-      ? `https://sim-io.onrender.com/api/mantenimiento/${idEditando}`
-      : `https://sim-io.onrender.com/api/mantenimiento`;
-
-    const res = await fetch(url, {
-      method,
-      body: formData
-    });
-
-    if (!res.ok) throw new Error(await res.text());
-
-    alert(`✅ Mantenimiento ${idEditando ? "actualizado" : "guardado"} correctamente.`);
-    form.reset();
-    idEditando = null;
-    cargarMantenimientos();
-  } catch (err) {
-    console.error("❌ Error al guardar:", err.message);
-    alert("❌ Hubo un error al guardar el mantenimiento.");
-  }
-});
-</script>
-
-    
-
-<!-- Footer final -->
 <footer class="bg-gray-600 text-gray-200 text-center py-6 mt-10 text-sm">
   <div class="max-w-4xl mx-auto px-4 flex flex-col items-center space-y-2">
-    <p>
-      © 2025 <strong>GEOWAY</strong>, Technology-Based Initiative – IBT. All rights reserved.
-    </p>
+    <p>© 2025 <strong>GEOWAY</strong>, Technology-Based Initiative – IBT. All rights reserved.</p>
     <a href="https://geo-way.github.io/GeoWay.io/index.html" target="_blank" class="hover:opacity-80 transition-opacity">
       <img src="https://geo-way.github.io/GeoWay.io/images/Logo5.png" alt="GEOWAY Logo" class="h-8 invert">
     </a>
   </div>
 </footer>
 
-<!-- Modal de edición *** eliminado -->
-
 <script>
-// Comprimir imagen antes de enviar
-async function comprimirImagen(file, calidad = 0.6) {
-  const bitmap = await createImageBitmap(file);
-  const canvas = document.createElement("canvas");
-  const MAX_WIDTH = 1024;
-  const scale = MAX_WIDTH / bitmap.width;
-  canvas.width = MAX_WIDTH;
-  canvas.height = bitmap.height * scale;
-  const ctx = canvas.getContext("2d");
-  ctx.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
-  return new Promise((resolve) => {
-    canvas.toBlob((blob) => resolve(blob), "image/jpeg", calidad);
+const cuerpo = document.getElementById("cuerpoMantenimientos");
+
+async function cargarMantenimientos() {
+  const res = await fetch("https://sim-io.onrender.com/api/mantenimiento");
+  const data = await res.json();
+  cuerpo.innerHTML = "";
+  data.forEach(m => {
+    const fila = document.createElement("tr");
+    fila.innerHTML = `
+      <td>${m.maquina}</td>
+      <td>${m.fecha}</td>
+      <td>${m.tecnico}</td>
+      <td>${m.estadoaccion}</td>
+      <td>
+        <button class="btn-editar text-blue-600">✏️</button>
+        <button class="btn-borrar text-red-600">🗑️</button>
+      </td>
+    `;
+    cuerpo.appendChild(fila);
   });
 }
 
-// Evento del formulario actualizado con compresión
-const formMantenimiento = document.getElementById("formMantenimiento");
+cargarMantenimientos();
 
-formMantenimiento.addEventListener("submit", async function (e) {
-  e.preventDefault();
-
-  const form = e.target;
-  const formData = new FormData();
-
-  // Extraer campos manualmente porque usamos imagen comprimida
-  const fields = ["maquina", "linea", "fecha", "tecnico", "tiempo", "observaciones",
-    "estadomotor", "transmision", "hidraulico", "neumatico", "electrico", "estadoaccion"];
-  fields.forEach(name => {
-    formData.append(name, form[name].value);
-  });
-
-  // ID si está editando
-  if (idEditando) {
-    formData.append("id", idEditando);
-  }
-
-  // Checkbox de síntomas
-  const sintomasSeleccionados = Array.from(form.querySelectorAll('input[name="sintomas"]:checked'))
-    .map(cb => cb.value);
-  sintomasSeleccionados.forEach(val => formData.append("sintomas", val));
-
-  // Comprimir imagen si hay
-  const archivo = form.fotoman.files[0];
-  if (archivo) {
-    const comprimida = await comprimirImagen(archivo, 0.6);
-    formData.append("fotoman", comprimida, archivo.name);
-  }
-
-  try {
-    const method = idEditando ? "PUT" : "POST";
-    const url = idEditando
-      ? `https://sim-io.onrender.com/api/mantenimiento/${idEditando}`
-      : `https://sim-io.onrender.com/api/mantenimiento`;
-
-    const res = await fetch(url, {
-      method,
-      body: formData
+// Simular control de roles
+document.addEventListener("DOMContentLoaded", () => {
+  const role = localStorage.getItem('role');
+  if (role === "viewer") {
+    document.querySelectorAll(".btn-editar, .btn-borrar, .btn-agregar").forEach(btn => {
+      btn.disabled = true;
+      btn.classList.add("opacity-50", "cursor-not-allowed");
+      btn.title = "Solo lectura";
     });
 
-    if (!res.ok) throw new Error(await res.text());
-
-    alert(`✅ Mantenimiento ${idEditando ? "actualizado" : "guardado"} correctamente.`);
-    form.reset();
-    idEditando = null;
-    cargarMantenimientos();
-  } catch (err) {
-    console.error("❌ Error al guardar:", err.message);
-    alert("❌ Hubo un error al guardar el mantenimiento.");
+    const form = document.getElementById("formMantenimiento");
+    if (form) form.style.display = "none";
   }
 });
 </script>
 
-    
 </body>
 </html>
