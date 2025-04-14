@@ -18,10 +18,12 @@
 <!-- Header -->
 <header class="bg-white shadow-md sticky top-0 z-50">
   <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
-    <a href="index.html" class="flex items-center space-x-2">
-      <img src="https://images.squarespace-cdn.com/content/v1/58a36221d482e9bca4af6eac/34694fc3-6f92-4054-8a58-3776436c00dc/IMG_9869+2.PNG" alt="Logo" class="h-10 w-auto" />
-      <span class="text-xl font-bold text-red-600">SIMio</span>
-    </a>
+<a href="index.html" class="flex items-center space-x-2">
+  <img src="https://images.squarespace-cdn.com/content/v1/58a36221d482e9bca4af6eac/34694fc3-6f92-4054-8a58-3776436c00dc/IMG_9869+2.PNG" alt="Logo" class="h-10 w-auto" />
+  <span class="text-xl font-bold text-red-600">SIMio</span>
+  <span id="rolVisual" class="text-sm text-gray-500 italic ml-4">(Rol: <span id="nombreRol">cargando...</span>)</span>
+</a>
+
     <nav class="hidden md:flex space-x-6 text-sm font-medium">
       <a href="index.html" class="text-gray-700 hover:text-red-600">Home</a>
       <a href="inventario.html" class="text-red-600 font-bold">Inventario</a>
@@ -142,6 +144,18 @@
     }
     cargarInventario();
   });
+
+  document.addEventListener("DOMContentLoaded", () => {
+  const role = localStorage.getItem("role") || "viewer";
+  const spanRol = document.getElementById("nombreRol");
+  if (spanRol) spanRol.textContent = role;
+
+  if (role === "viewer") {
+    document.getElementById("formInventario").style.display = "none";
+  }
+  cargarInventario();
+});
+
 </script>
 </body>
 </html>
