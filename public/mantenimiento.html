@@ -5,113 +5,70 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Mantenimiento</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .disabled-btn {
+      opacity: 0.5;
+      pointer-events: none;
+    }
+  </style>
 </head>
 <body class="bg-gray-100 text-gray-900">
-
-<header class="bg-white shadow-md sticky top-0 z-50">
-  <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
-    <a href="index.html" class="flex items-center space-x-2">
-      <img src="https://images.squarespace-cdn.com/content/v1/58a36221d482e9bca4af6eac/34694fc3-6f92-4054-8a58-3776436c00dc/IMG_9869+2.PNG?format=2500w" alt="Logo" class="h-10 w-auto" />
-      <span class="text-xl font-bold text-red-600">SIMio</span>
-    </a>
-    <nav class="hidden md:flex space-x-6 text-sm font-medium">
-      <a href="index.html" class="text-gray-700 hover:text-red-600">Home</a>
-      <a href="inventario.html" class="text-gray-700 hover:text-red-600">Inventario</a>
-      <a href="mantenimiento.html" class="text-red-600 font-bold">Mantenimiento</a>
-      <a href="maquinas.html" class="text-gray-700 hover:text-red-600">Diagrama de Máquinas</a>
-      <a href="info.html" title="Ver documentación" class="text-gray-500 hover:text-red-600">ℹ️</a>
-    </nav>
-  </div>
-</header>
-
-<main class="p-4 max-w-7xl mx-auto">
-  <h2 class="text-lg font-semibold mb-4">Registrar nuevo mantenimiento</h2>
-  <form id="formMantenimiento" class="grid grid-cols-1 md:grid-cols-3 gap-4 bg-white p-4 rounded shadow mb-6">
-    <input class="p-2 border rounded" name="maquina" placeholder="Máquina" required type="text" />
-    <input class="p-2 border rounded" name="linea" placeholder="Línea" type="text" />
-    <input class="p-2 border rounded" name="fecha" type="date" />
-    <input class="p-2 border rounded" name="tecnico" placeholder="Técnico" type="text" />
-    <input class="p-2 border rounded" name="tiempo" placeholder="Tiempo estimado" type="text" />
-    <input class="p-2 border rounded" name="observaciones" placeholder="Observaciones" type="text" />
-    <input class="p-2 border rounded" name="estadoaccion" placeholder="Estado" type="text" />
-    <input class="p-2 border rounded" name="fotoman" type="file" accept="image/*" />
-    <div class="col-span-full">
-      <label class="block text-sm font-medium text-gray-700 mb-1">Síntomas</label>
-      <div class="flex flex-wrap gap-2">
-        <label><input type="checkbox" name="sintomas" value="Ruido"/> Ruido</label>
-        <label><input type="checkbox" name="sintomas" value="Vibración"/> Vibración</label>
-        <label><input type="checkbox" name="sintomas" value="Fuga"/> Fuga</label>
-      </div>
+  <main class="max-w-7xl mx-auto mt-10 p-4">
+    <h2 class="text-lg font-semibold text-gray-700 mb-4">📋 Historial de Mantenimientos</h2>
+    <div class="overflow-x-auto bg-white p-4 rounded shadow">
+      <table class="min-w-full table-auto text-sm">
+        <thead class="bg-gray-200">
+          <tr>
+            <th class="p-2">Fecha</th>
+            <th class="p-2">Máquina</th>
+            <th class="p-2">Técnico</th>
+            <th class="p-2">Foto</th>
+            <th class="p-2">✏️ Editar</th>
+            <th class="p-2">🗑️ Eliminar</th>
+          </tr>
+        </thead>
+        <tbody id="tablaMantenimiento">
+          <tr>
+            <td class="p-2">2025-04-14</td>
+            <td class="p-2">CERRADORA 2</td>
+            <td class="p-2">Pedro López</td>
+            <td class="p-2">
+              <img src="https://via.placeholder.com/80" class="w-12 h-12 rounded shadow-md cursor-pointer hover:scale-150 transition-transform duration-300" onclick="verFoto('https://via.placeholder.com/800')" />
+            </td>
+            <td class="p-2 text-center">
+              <button class="btn-editar text-yellow-600 hover:scale-110 transition">✏️</button>
+            </td>
+            <td class="p-2 text-center">
+              <button class="btn-borrar text-red-600 hover:scale-110 transition">🗑️</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
-    <button class="btn-agregar col-span-full bg-red-600 text-white p-2 rounded hover:bg-red-700" type="submit">Guardar</button>
-  </form>
+  </main>
 
-  <h2 class="text-lg font-semibold my-6">Historial de mantenimientos</h2>
-  <div class="overflow-x-auto bg-white p-4 rounded shadow">
-    <table class="min-w-full table-auto">
-      <thead class="bg-gray-200 text-left">
-        <tr>
-          <th class="p-2">Máquina</th>
-          <th class="p-2">Fecha</th>
-          <th class="p-2">Técnico</th>
-          <th class="p-2">Estado</th>
-          <th class="p-2">Acciones</th>
-        </tr>
-      </thead>
-      <tbody id="cuerpoMantenimientos" class="text-sm"></tbody>
-    </table>
+  <div id="modalFoto" class="hidden fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
+    <img id="imagenGrande" class="max-h-[90vh] max-w-[90vw] border-4 border-white shadow-xl"/>
   </div>
-</main>
 
-<footer class="bg-gray-600 text-gray-200 text-center py-6 mt-10 text-sm">
-  <div class="max-w-4xl mx-auto px-4 flex flex-col items-center space-y-2">
-    <p>© 2025 <strong>GEOWAY</strong>, Technology-Based Initiative – IBT. All rights reserved.</p>
-    <a href="https://geo-way.github.io/GeoWay.io/index.html" target="_blank" class="hover:opacity-80 transition-opacity">
-      <img src="https://geo-way.github.io/GeoWay.io/images/Logo5.png" alt="GEOWAY Logo" class="h-8 invert">
-    </a>
-  </div>
-</footer>
+  <script>
+    function verFoto(ruta) {
+      const modal = document.getElementById("modalFoto");
+      const img = document.getElementById("imagenGrande");
+      img.src = ruta;
+      modal.classList.remove("hidden");
+      modal.onclick = () => modal.classList.add("hidden");
+    }
 
-<script>
-const cuerpo = document.getElementById("cuerpoMantenimientos");
-
-async function cargarMantenimientos() {
-  const res = await fetch("https://sim-io.onrender.com/api/mantenimiento");
-  const data = await res.json();
-  cuerpo.innerHTML = "";
-  data.forEach(m => {
-    const fila = document.createElement("tr");
-    fila.innerHTML = `
-      <td>${m.maquina}</td>
-      <td>${m.fecha}</td>
-      <td>${m.tecnico}</td>
-      <td>${m.estadoaccion}</td>
-      <td>
-        <button class="btn-editar text-blue-600">✏️</button>
-        <button class="btn-borrar text-red-600">🗑️</button>
-      </td>
-    `;
-    cuerpo.appendChild(fila);
-  });
-}
-
-cargarMantenimientos();
-
-// Simular control de roles
-document.addEventListener("DOMContentLoaded", () => {
-  const role = localStorage.getItem('role');
-  if (role === "viewer") {
-    document.querySelectorAll(".btn-editar, .btn-borrar, .btn-agregar").forEach(btn => {
-      btn.disabled = true;
-      btn.classList.add("opacity-50", "cursor-not-allowed");
-      btn.title = "Solo lectura";
+    document.addEventListener("DOMContentLoaded", () => {
+      const role = localStorage.getItem('role');
+      if (role === "viewer") {
+        document.querySelectorAll(".btn-editar, .btn-borrar").forEach(btn => {
+          btn.classList.add("disabled-btn");
+          btn.title = "Solo lectura";
+        });
+      }
     });
-
-    const form = document.getElementById("formMantenimiento");
-    if (form) form.style.display = "none";
-  }
-});
-</script>
-
+  </script>
 </body>
 </html>
