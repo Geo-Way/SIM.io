@@ -1,74 +1,107 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
   <title>Mantenimiento</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <style>
-    .disabled-btn {
-      opacity: 0.5;
-      pointer-events: none;
-    }
-  </style>
-</head>
-<body class="bg-gray-100 text-gray-900">
-  <main class="max-w-7xl mx-auto mt-10 p-4">
-    <h2 class="text-lg font-semibold text-gray-700 mb-4">📋 Historial de Mantenimientos</h2>
-    <div class="overflow-x-auto bg-white p-4 rounded shadow">
-      <table class="min-w-full table-auto text-sm">
-        <thead class="bg-gray-200">
-          <tr>
-            <th class="p-2">Fecha</th>
-            <th class="p-2">Máquina</th>
-            <th class="p-2">Técnico</th>
-            <th class="p-2">Foto</th>
-            <th class="p-2">✏️ Editar</th>
-            <th class="p-2">🗑️ Eliminar</th>
-          </tr>
-        </thead>
-        <tbody id="tablaMantenimiento">
-          <tr>
-            <td class="p-2">2025-04-14</td>
-            <td class="p-2">CERRADORA 2</td>
-            <td class="p-2">Pedro López</td>
-            <td class="p-2">
-              <img src="https://via.placeholder.com/80" class="w-12 h-12 rounded shadow-md cursor-pointer hover:scale-150 transition-transform duration-300" onclick="verFoto('https://via.placeholder.com/800')" />
-            </td>
-            <td class="p-2 text-center">
-              <button class="btn-editar text-yellow-600 hover:scale-110 transition">✏️</button>
-            </td>
-            <td class="p-2 text-center">
-              <button class="btn-borrar text-red-600 hover:scale-110 transition">🗑️</button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  </main>
-
-  <div id="modalFoto" class="hidden fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
-    <img id="imagenGrande" class="max-h-[90vh] max-w-[90vw] border-4 border-white shadow-xl"/>
-  </div>
-
   <script>
-    function verFoto(ruta) {
-      const modal = document.getElementById("modalFoto");
-      const img = document.getElementById("imagenGrande");
-      img.src = ruta;
-      modal.classList.remove("hidden");
-      modal.onclick = () => modal.classList.add("hidden");
-    }
-
     document.addEventListener("DOMContentLoaded", () => {
-      const role = localStorage.getItem('role');
+      const role = localStorage.getItem("role") || "admin";
       if (role === "viewer") {
-        document.querySelectorAll(".btn-editar, .btn-borrar").forEach(btn => {
-          btn.classList.add("disabled-btn");
-          btn.title = "Solo lectura";
-        });
+        const form = document.getElementById("formMantenimiento");
+        if (form) form.style.display = "none";
+        window.viewerMode = true;
+      } else {
+        window.viewerMode = false;
       }
     });
   </script>
+</head>
+<body class="bg-gray-100 text-gray-900">
+<main class="max-w-7xl mx-auto mt-10 p-4">
+  <form id="formMantenimiento" enctype="multipart/form-data" class="grid md:grid-cols-3 gap-4 bg-white p-6 rounded shadow mb-6">
+    <input class="p-2 border rounded" name="maquina" placeholder="Máquina" required/>
+    <input class="p-2 border rounded" name="linea" placeholder="Línea"/>
+    <input class="p-2 border rounded" name="fecha" type="date"/>
+    <input class="p-2 border rounded" name="tecnico" placeholder="Técnico"/>
+    <input class="p-2 border rounded" name="tiempo" type="number" placeholder="Horas" step="0.1"/>
+    <input class="p-2 border rounded" name="observaciones" placeholder="Observaciones"/>
+    <input type="file" class="p-2 border rounded" name="fotoman" accept="image/*"/>
+    <button type="submit" class="col-span-full bg-red-600 text-white p-2 rounded hover:bg-red-700">Guardar</button>
+  </form>
+
+  <table class="min-w-full table-auto text-sm bg-white p-4 rounded shadow" id="tablaMantenimiento">
+    <thead class="bg-gray-200">
+      <tr>
+        <th class="p-2">Fecha</th>
+        <th class="p-2">Máquina</th>
+        <th class="p-2">Técnico</th>
+        <th class="p-2">Foto</th>
+        <th class="p-2">✏️</th>
+        <th class="p-2">🗑️</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+</main>
+
+<script>
+let datos = [
+  {
+    id: 1,
+    fecha: "2025-04-14",
+    maquina: "Cortadora",
+    tecnico: "Carlos",
+    fotoman: "https://via.placeholder.com/80"
+  }
+];
+
+function renderTabla() {
+  const tbody = document.querySelector("#tablaMantenimiento tbody");
+  tbody.innerHTML = "";
+  datos.forEach(item => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td class="p-2">${item.fecha}</td>
+      <td class="p-2">${item.maquina}</td>
+      <td class="p-2">${item.tecnico}</td>
+      <td class="p-2"><img src="${item.fotoman}" class="h-16 w-auto rounded shadow" onclick="verFoto('${item.fotoman}')"/></td>
+      <td class="p-2 text-center">
+        <button class="btn-editar text-yellow-600 hover:scale-110 transition" onclick="editar(${item.id})">✏️</button>
+      </td>
+      <td class="p-2 text-center">
+        <button class="btn-borrar text-red-600 hover:scale-110 transition" onclick="eliminar(${item.id})">🗑️</button>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  if (window.viewerMode) {
+    document.querySelectorAll(".btn-editar, .btn-borrar").forEach(btn => {
+      btn.disabled = true;
+      btn.classList.add("opacity-50", "cursor-not-allowed");
+      btn.title = "Acceso restringido";
+    });
+  }
+}
+
+function verFoto(url) {
+  window.open(url, "_blank");
+}
+
+function editar(id) {
+  alert("Editar id " + id);
+}
+function eliminar(id) {
+  if (confirm("Eliminar id " + id)) {
+    datos = datos.filter(d => d.id !== id);
+    renderTabla();
+  }
+}
+
+document.addEventListener("DOMContentLoaded", renderTabla);
+</script>
 </body>
 </html>
