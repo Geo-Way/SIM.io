@@ -31,52 +31,16 @@
 
   <footer class="bg-gray-600 text-gray-200 text-center py-6 mt-10 text-sm">
     <div class="max-w-4xl mx-auto px-4 flex flex-col items-center space-y-2">
-      <p>© 2025 <strong>GEOWAY</strong>, Technology-Based Initiative – IBT. All rights reserved.</p>
+      <p>
+        © 2025 <strong>GEOWAY</strong>, Technology-Based Initiative – IBT. All rights reserved.
+      </p>
       <a href="https://geo-way.github.io/GeoWay.io/index.html" target="_blank" class="hover:opacity-80 transition-opacity">
-        <img src="https://geo-way.github.io/GeoWay.io/images/Logo5.png" alt="GEOWAY Logo" class="h-8 invert">
+        <img src="https://geo-way.github.io/GeoWay.io/images/Logo5.png" alt="GEOWAY Logo" class="h-6 md:h-8 invert">
       </a>
     </div>
   </footer>
 
   <script>
-    const estadoColores = {
-      "Reparado": "green",
-      "Pendiente": "yellow",
-      "En seguimiento": "orange",
-      "Fuera de servicio": "red"
-    };
-
-    const maquinas = [
-      { nombre: "PISTOLA CUADROS", coords: [892, 206] },
-      { nombre: "PISTOLA SEMIFLEX", coords: [822, 206] },
-      { nombre: "PISTOLA CERRAR", coords: [750, 206] },
-      { nombre: "EMBALADORA 2 TK381", coords: [120, 390] },
-      { nombre: "BOX TK386", coords: [690, 170] },
-      { nombre: "PORTER", coords: [770, 575] },
-      { nombre: "CORTE BOBINAS", coords: [900, 655] },
-      { nombre: "CORTE PANTASOTA", coords: [770, 650] },
-      { nombre: "QUILTING HC 3500 BANDAS1", coords: [800, 420] },
-      { nombre: "QUILTING HC 3500 BANDAS2", coords: [800, 335] },
-      { nombre: "QUILTIADORA 2", coords: [210, 888] },
-      { nombre: "QUILTIADORA 3", coords: [300, 888] },
-      { nombre: "EMBALADORA 1", coords: [200, 390] },
-      { nombre: "ZONA POKCKET LR-PS-LINE 19F09", coords: [380, 1120] },
-      { nombre: "ZONA BONNEL", coords: [380, 1250] },
-      { nombre: "ZONA TAPA-TAPA TK900", coords: [400, 888] },
-      { nombre: "COSTURA", coords: [170, 760] },
-      { nombre: "QUILTIADORA 1", coords: [115, 888] },
-      { nombre: "DAMAGE", coords: [170, 680] },
-      { nombre: "CERRADORA 5", coords: [255, 548] },
-      { nombre: "CERRADORA 4", coords: [290, 548] },
-      { nombre: "CERRADORA 3", coords: [330, 548] },
-      { nombre: "CERRADORA 2", coords: [370, 548] },
-      { nombre: "TK050", coords: [255, 480] },
-      { nombre: "CERRADORA 1", coords: [515, 390] },
-      { nombre: "PRENSA PILLOW TK 19F09", coords: [280, 345] },
-      { nombre: "ENCOLADORA 1", coords: [510, 645] },
-      { nombre: "ENCOLADORA 2", coords: [510, 810] },
-    ];
-
     const map = L.map('map', {
       crs: L.CRS.Simple,
       minZoom: -1,
@@ -88,49 +52,12 @@
     const image = L.imageOverlay('img/layout_horizontal.png', bounds).addTo(map);
     map.setView([600, 750], 0);
 
-    L.control.attribution({
-      position: 'bottomleft'
-    }).addAttribution('<img src="https://geo-way.github.io/GeoWay.io/images/Logo5.png" alt="GEOWAY Logo" height="20" style="display:inline-block; vertical-align:middle;"/> Powered by GEOWAY 2025').addTo(map);
+    // Atribución personalizada en la esquina inferior izquierda
+    L.control.attribution({ position: 'bottomleft' }).addTo(map);
+    map.attributionControl.setPrefix('');
+    map.attributionControl.addAttribution('<a href="https://geo-way.github.io/GeoWay.io/index.html" target="_blank">Powered by <strong>GEOWAY</strong></a>');
 
-    async function obtenerEstadoYFecha(maquina) {
-      try {
-        const res = await fetch("https://sim-io.onrender.com/api/mantenimiento");
-        const data = await res.json();
-        const ult = data.filter(d => d.maquina?.toLowerCase() === maquina.toLowerCase())
-                        .sort((a,b) => new Date(b.fecha) - new Date(a.fecha))[0];
-        return {
-          estado: ult?.estadoaccion || "Reparado",
-          fecha: ult?.fecha?.split("T")[0] || "Sin datos"
-        };
-      } catch (err) {
-        return { estado: "Reparado", fecha: "Error" };
-      }
-    }
-
-    maquinas.forEach(async ({ nombre, coords }) => {
-      const { estado, fecha } = await obtenerEstadoYFecha(nombre);
-      const color = estadoColores[estado] || "gray";
-
-      const marker = L.circleMarker(coords, {
-        radius: 8,
-        color: color,
-        fillColor: color,
-        fillOpacity: 0.9
-      }).addTo(map);
-
-      const fileName = nombre.replace(/\s+/g, '_').replace(/[^a-zA-Z0-9_]/g, '') + ".pdf";
-      const urlManual = `https://kalixxe.github.io/Manuales/${fileName}`;
-
-      const encodedMaquina = encodeURIComponent(nombre);
-      marker.bindPopup(`
-        <div class="text-sm">
-          <p class="font-bold">🔧 ${nombre}</p>
-          <p>📅 Último mantenimiento: ${fecha}</p>
-          <a href="${urlManual}" target="_blank" class="text-blue-600 underline block mt-1">📥 Descargar manual</a>
-          <a href="mantenimiento.html?maquina=${encodedMaquina}" class="text-blue-600 underline block">🔧 Ver mantenimientos</a>
-        </div>
-      `);
-    });
+    // Leaflet default attribution permanece a la derecha automáticamente
   </script>
 </body>
 </html>
