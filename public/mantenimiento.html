@@ -34,6 +34,8 @@ const rolUsuario = localStorage.getItem("rol") || "viewer";
       <a href="mantenimiento.html" class="text-red-600 hover:text-red-600 font-bold">Mantenimiento</a>
        <a href="maquinas.html" class="text-gray-700 hover:text-red-600">Diagrama de Máquinas</a>
     </nav>
+<span id="rolVisual" class="text-xs text-gray-600 italic ml-4">(Rol: <span id="nombreRol">desconocido</span>)</span>
+
 
     <!-- Botón hamburguesa -->
     <button id="menuToggle" class="md:hidden text-gray-700 focus:outline-none">
@@ -539,5 +541,47 @@ formMantenimiento.addEventListener("submit", async function (e) {
 </script>
 
     
+
+<script>
+document.getElementById("nombreRol").innerText = rolUsuario;
+
+if (rolUsuario === "viewer") {
+  const btnGuardar = document.getElementById("btnGuardar");
+  if (btnGuardar) btnGuardar.style.display = "none";
+}
+
+// Asegurar que los botones se rendericen correctamente para admin/tecnico
+function renderTabla(data) {
+  const tbody = document.getElementById("tablaMantenimiento");
+  tbody.innerHTML = "";
+  data.forEach(row => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td class="p-2">${row.fecha}</td>
+      <td class="p-2">${row.maquina}</td>
+      <td class="p-2">${row.linea}</td>
+      <td class="p-2">${row.tecnico}</td>
+      <td class="p-2">${row.tiempo}</td>
+      <td class="p-2">${row.estadomotor}</td>
+      <td class="p-2">${row.transmision}</td>
+      <td class="p-2">${row.hidraulico}</td>
+      <td class="p-2">${row.neumatico}</td>
+      <td class="p-2">${row.electrico}</td>
+      <td class="p-2">${row.sintomas}</td>
+      <td class="p-2">${row.observaciones}</td>
+      <td class="p-2">${row.estadoaccion}</td>
+      <td class="p-2"><button onclick="verFoto('${row.fotoman}')" class="text-blue-600 underline">Ver foto</button></td>
+      <td class="p-2 text-center">
+        ${rolUsuario === "viewer" ? "" : `<button onclick="editarMantenimiento(${row.id})" class="text-yellow-600 hover:scale-110 transition">✏️</button>`}
+      </td>
+      <td class="p-2 text-center">
+        ${rolUsuario === "viewer" ? "" : `<button onclick="eliminarMantenimiento(${row.id})" type="button" class="text-red-600 hover:scale-110 transition">🗑️</button>`}
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+</script>
+
 </body>
 </html>
