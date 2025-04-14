@@ -1,17 +1,17 @@
-<!-- Archivo completo de mantenimiento.html actualizado -->
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="utf-8"/>
-  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Mantenimiento</title>
   <script src="https://cdn.tailwindcss.com"></script>
-
-<script>
-const rolUsuario = localStorage.getItem("role") || "viewer";
-</script>
-
-
+  <script>
+    const rolUsuario = localStorage.getItem("role") || "viewer";
+    if (!localStorage.getItem("loggedIn")) {
+      alert("Debes iniciar sesión para acceder.");
+      window.location.href = "index.html";
+    }
+  </script>
 </head>
 
 <script>
