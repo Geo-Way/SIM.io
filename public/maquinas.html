@@ -1,16 +1,14 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Diagrama de Máquinas</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 </head>
 <body class="bg-gray-100">
-
-  <!-- HEADER -->
   <header class="bg-white shadow-md sticky top-0 z-50">
     <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
       <a href="index.html" class="flex items-center space-x-2">
@@ -26,7 +24,6 @@
     </div>
   </header>
 
-  <!-- MAIN -->
   <main class="max-w-7xl mx-auto mt-10 px-4">
     <h1 class="text-xl font-bold mb-4">📍 Diagrama de Máquinas</h1>
     <div id="map" class="w-full h-[80vh] rounded shadow"></div>
@@ -38,50 +35,57 @@
     </div>
   </main>
 
-  <!-- FOOTER -->
   <footer class="bg-gray-600 text-gray-200 text-center py-6 mt-10 text-sm">
     <div class="max-w-4xl mx-auto px-4 flex flex-col items-center space-y-2">
-      <p>© 2025 <strong>GEOWAY</strong>, Technology-Based Initiative – IBT. All rights reserved.</p>
+      <p>
+        © 2025 <strong>GEOWAY</strong>, Technology-Based Initiative – IBT. All rights reserved.
+      </p>
       <a href="https://geo-way.github.io/GeoWay.io/index.html" target="_blank" class="hover:opacity-80 transition-opacity">
         <img src="https://geo-way.github.io/GeoWay.io/images/Logo5.png" alt="GEOWAY Logo" class="h-8 invert">
       </a>
     </div>
   </footer>
 
-  <!-- MAP SCRIPT -->
   <script>
+    const estadoColores = {
+      "Reparado": "green",
+      "Pendiente": "yellow",
+      "En seguimiento": "orange",
+      "Fuera de servicio": "red"
+    };
+
     const maquinas = [
-      { nombre: "PISTOLA CUADROS", coords: [892, 206], manual: "https://kalixxe.github.io/Manuales/PISTOLA_CUADROS.pdf" },
-      { nombre: "PISTOLA SEMIFLEX", coords: [822, 206], manual: "https://kalixxe.github.io/Manuales/PISTOLA_SEMIFLEX.pdf" },
-      { nombre: "PISTOLA CERRAR", coords: [750, 206], manual: "https://kalixxe.github.io/Manuales/PISTOLA_CERRAR.pdf" },
-      { nombre: "EMBALADORA 2 TK381", coords: [120, 390], manual: "https://kalixxe.github.io/Manuales/EMBALADORA_2_TK381.pdf" },
-      { nombre: "BOX TK386", coords: [690, 170], manual: "https://kalixxe.github.io/Manuales/BOX_TK386.pdf" },
-      { nombre: "PORTER", coords: [770, 575], manual: "https://kalixxe.github.io/Manuales/PORTER.pdf" },
-      { nombre: "CORTE BOBINAS", coords: [900, 655], manual: "https://kalixxe.github.io/Manuales/CORTE_BOBINAS.pdf" },
-      { nombre: "CORTE PANTASOTA", coords: [770, 650], manual: "https://kalixxe.github.io/Manuales/CORTE_PANTASOTA.pdf" },
-      { nombre: "QUILTING HC 3500 BANDAS1", coords: [800, 420], manual: "https://kalixxe.github.io/Manuales/QUILTING_HC_3500_BANDAS1.pdf" },
-      { nombre: "QUILTING HC 3500 BANDAS2", coords: [800, 335], manual: "https://kalixxe.github.io/Manuales/QUILTING_HC_3500_BANDAS2.pdf" },
-      { nombre: "QUILTIADORA 2", coords: [210, 888], manual: "https://kalixxe.github.io/Manuales/QUILTIADORA_2.pdf" },
-      { nombre: "QUILTIADORA 3", coords: [300, 888], manual: "https://kalixxe.github.io/Manuales/QUILTIADORA_3.pdf" },
-      { nombre: "EMBALADORA 1", coords: [200, 390], manual: "https://kalixxe.github.io/Manuales/EMBALADORA_1.pdf" },
-      { nombre: "ZONA POKCKET LR-PS-LINE 19F09", coords: [380, 1120], manual: "https://kalixxe.github.io/Manuales/ZONA_POKCKET_LR-PS-LINE_19F09.pdf" },
-      { nombre: "ZONA BONNEL", coords: [380, 1250], manual: "https://kalixxe.github.io/Manuales/ZONA_BONNEL.pdf" },
-      { nombre: "ZONA TAPA-TAPA TK900", coords: [400, 888], manual: "https://kalixxe.github.io/Manuales/ZONA_TAPA-TAPA_TK900.pdf" },
-      { nombre: "COSTURA", coords: [170, 760], manual: "https://kalixxe.github.io/Manuales/COSTURA.pdf" },
-      { nombre: "QUILTIADORA 1", coords: [115, 888], manual: "https://kalixxe.github.io/Manuales/QUILTIADORA_1.pdf" },
-      { nombre: "DAMAGE", coords: [170, 680], manual: "https://kalixxe.github.io/Manuales/DAMAGE.pdf" },
-      { nombre: "CERRADORA 5", coords: [255, 548], manual: "https://kalixxe.github.io/Manuales/CERRADORA_5.pdf" },
-      { nombre: "CERRADORA 4", coords: [290, 548], manual: "https://kalixxe.github.io/Manuales/CERRADORA_4.pdf" },
-      { nombre: "CERRADORA 3", coords: [330, 548], manual: "https://kalixxe.github.io/Manuales/CERRADORA_3.pdf" },
-      { nombre: "CERRADORA 2", coords: [370, 548], manual: "https://kalixxe.github.io/Manuales/CERRADORA_2.pdf" },
-      { nombre: "TK050", coords: [255, 480], manual: "https://kalixxe.github.io/Manuales/TK050.pdf" },
-      { nombre: "CERRADORA 1", coords: [515, 390], manual: "https://kalixxe.github.io/Manuales/CERRADORA_1.pdf" },
-      { nombre: "PRENSA PILLOW TK 19F09", coords: [280, 345], manual: "https://kalixxe.github.io/Manuales/PRENSA_PILLOW_TK_19F09.pdf" },
-      { nombre: "ENCOLADORA 1", coords: [510, 645], manual: "https://kalixxe.github.io/Manuales/ENCOLADORA_1.pdf" },
-      { nombre: "ENCOLADORA 2", coords: [510, 810], manual: "https://kalixxe.github.io/Manuales/ENCOLADORA_2.pdf" }
+      { nombre: "PISTOLA CUADROS", coords: [892, 206] },
+      { nombre: "PISTOLA SEMIFLEX", coords: [822, 206] },
+      { nombre: "PISTOLA CERRAR", coords: [750, 206] },
+      { nombre: "EMBALADORA 2 TK381", coords: [120, 390] },
+      { nombre: "BOX TK386", coords: [690, 170] },
+      { nombre: "PORTER", coords: [770, 575] },
+      { nombre: "CORTE BOBINAS", coords: [900, 655] },
+      { nombre: "CORTE PANTASOTA", coords: [770, 650] },
+      { nombre: "QUILTING HC 3500 BANDAS1", coords: [800, 420] },
+      { nombre: "QUILTING HC 3500 BANDAS2", coords: [800, 335] },
+      { nombre: "QUILTIADORA 2", coords: [210, 888] },
+      { nombre: "QUILTIADORA 3", coords: [300, 888] },
+      { nombre: "EMBALADORA 1", coords: [200, 390] },
+      { nombre: "ZONA POKCKET LR-PS-LINE 19F09", coords: [380, 1120] },
+      { nombre: "ZONA BONNEL", coords: [380, 1250] },
+      { nombre: "ZONA TAPA-TAPA TK900", coords: [400, 888] },
+      { nombre: "COSTURA", coords: [170, 760] },
+      { nombre: "QUILTIADORA 1", coords: [115, 888] },
+      { nombre: "DAMAGE", coords: [170, 680] },
+      { nombre: "CERRADORA 5", coords: [255, 548] },
+      { nombre: "CERRADORA 4", coords: [290, 548] },
+      { nombre: "CERRADORA 3", coords: [330, 548] },
+      { nombre: "CERRADORA 2", coords: [370, 548] },
+      { nombre: "TK050", coords: [255, 480] },
+      { nombre: "CERRADORA 1", coords: [515, 390] },
+      { nombre: "PRENSA PILLOW TK 19F09", coords: [280, 345] },
+      { nombre: "ENCOLADORA 1", coords: [510, 645] },
+      { nombre: "ENCOLADORA 2", coords: [510, 810] },
     ];
 
-    const map = L.map("map", {
+    const map = L.map('map', {
       crs: L.CRS.Simple,
       minZoom: -1,
       maxZoom: 2,
@@ -89,16 +93,44 @@
     });
 
     const bounds = [[0, 0], [1300, 1600]];
-    const image = L.imageOverlay("img/layout_horizontal.png", bounds).addTo(map);
-    map.fitBounds(bounds);
+    const image = L.imageOverlay('img/layout_horizontal.png', bounds).addTo(map);
+    map.setView([600, 750], 0);
 
-    maquinas.forEach(({ nombre, coords, manual }) => {
-      const marker = L.marker(coords).addTo(map);
+    async function obtenerEstado(maquina) {
+      try {
+        const res = await fetch("https://sim-io.onrender.com/api/mantenimiento");
+        const data = await res.json();
+        const ult = data.find(d => d.maquina?.toLowerCase() === maquina.toLowerCase());
+        return ult?.estadoaccion || "Reparado";
+      } catch (err) {
+        console.warn("Error al obtener estado para", maquina);
+        return "Reparado";
+      }
+    }
+
+    maquinas.forEach(async ({ nombre, coords }) => {
+      const estado = await obtenerEstado(nombre);
+      const color = estadoColores[estado] || "gray";
+      const icon = L.divIcon({
+        className: `bg-${color}-500 rounded-full h-4 w-4 border-2 border-white`,
+        iconSize: [10, 10],
+        popupAnchor: [0, -10]
+      });
+
+      const marker = L.circleMarker(coords, {
+        radius: 10,
+        color: color,
+        fillColor: color,
+        fillOpacity: 1
+      }).addTo(map);
+
       const encodedMaquina = encodeURIComponent(nombre);
+      const manualLink = `https://kalixxe.github.io/Manuales/${nombre.replace(/\s+/g, '_').replace(/[^a-zA-Z0-9_]/g, '')}.pdf`;
+
       marker.bindPopup(`
         <div class="text-sm">
           <p class="font-bold">🔧 ${nombre}</p>
-          <a href="${manual}" target="_blank" class="text-blue-600 underline block mt-1">📥 Descargar manual</a>
+          <a href="${manualLink}" target="_blank" class="text-blue-600 underline block mt-1">📥 Descargar manual</a>
           <a href="mantenimiento.html?maquina=${encodedMaquina}" class="text-blue-600 underline block">🔧 Ver mantenimientos</a>
         </div>
       `);
