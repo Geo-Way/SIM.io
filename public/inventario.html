@@ -335,23 +335,20 @@ document.getElementById("formInventario").addEventListener("submit", async funct
 
   <script>
   document.addEventListener("DOMContentLoaded", () => {
-    const role = localStorage.getItem('role');
+  const role = localStorage.getItem('role');
 
-    if (role === "viewer") {
-      // Desactivar botones con clase específicas
-      document.querySelectorAll(".btn-editar, .btn-borrar, .btn-agregar").forEach(btn => {
-        btn.disabled = true;
-        btn.classList.add("opacity-50", "cursor-not-allowed");
-        btn.title = "Acceso restringido - solo lectura";
-      });
+  if (role === "viewer") {
+    document.querySelectorAll(".btn-editar, .btn-borrar, .btn-agregar").forEach(btn => {
+      btn.disabled = true;
+      btn.classList.add("opacity-50", "cursor-not-allowed");
+      btn.title = "Acceso restringido - solo lectura";
+    });
 
-      // Ocultar el formulario si existe
-      const form = document.getElementById("formInventario");
-      if (form) {
-        form.style.display = "none";
-      }
-    }
-  });
+    const form = document.getElementById("formInventario");
+    if (form) form.style.display = "none";
+  }
+});
+
 </script>
 
 
