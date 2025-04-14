@@ -212,7 +212,8 @@ async function cargarInventario() {
       <td class="text-center"><button onclick="abrirModalEdicion(${item.id}, this)">✏️</button></td>
       <td class="text-center"><button class="btn-editar" onclick="abrirModalEdicion(${item.id}, this)">✏️</button></td>
 
-      <td class="text-center"><button onclick="eliminarArticulo(${item.id})">🗑️</button></td>
+      <td class="text-center"><button class="btn-borrar" onclick="eliminarArticulo(${item.id})">🗑️</button></td>
+
     `;
     cuerpo.appendChild(fila);
   });
