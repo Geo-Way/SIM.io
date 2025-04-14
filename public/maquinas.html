@@ -19,14 +19,14 @@
         <a href="index.html" class="text-gray-700 hover:text-red-600">Home</a>
         <a href="inventario.html" class="text-gray-700 hover:text-red-600">Inventario</a>
         <a href="mantenimiento.html" class="text-gray-700 hover:text-red-600">Mantenimiento</a>
-        <a href="maquinas.html" class="text-red-600 hover:text-red-600">Diagrama de Máquinas</a>
+        <a href="maquinas.html" class="text-red-600 font-bold">Diagrama de Máquinas</a>
       </nav>
     </div>
   </header>
 
-  <main class="max-w-7xl mx-auto mt-6 px-2 md:px-4">
-    <h1 class="text-xl font-bold mb-4 text-center md:text-left">📍 Diagrama de Máquinas</h1>
-    <div id="map" class="w-full h-[75vh] md:h-[80vh] rounded shadow"></div>
+  <main class="max-w-7xl mx-auto mt-10 px-4">
+    <h1 class="text-xl font-bold mb-4">📍 Diagrama de Máquinas</h1>
+    <div id="map" class="w-full h-[80vh] rounded shadow"></div>
   </main>
 
   <footer class="bg-gray-600 text-gray-200 text-center py-6 mt-10 text-sm">
@@ -40,14 +40,20 @@
     </div>
   </footer>
 
-  <script>
-    const estadoColores = {
-      "Reparado": "green",
-      "Pendiente": "yellow",
-      "En seguimiento": "orange",
-      "Fuera de servicio": "red"
-    };
+  <style>
+    .leaflet-control-attribution span.geoway {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .leaflet-control-attribution img {
+      height: 16px;
+      vertical-align: middle;
+      filter: invert(1);
+    }
+  </style>
 
+  <script>
     const maquinas = [
       { nombre: "PISTOLA CUADROS", coords: [892, 206], manual: "https://kalixxe.github.io/Manuales/PISTOLA_CUADROS.pdf" },
       { nombre: "PISTOLA SEMIFLEX", coords: [822, 206], manual: "https://kalixxe.github.io/Manuales/PISTOLA_SEMIFLEX.pdf" },
@@ -76,65 +82,49 @@
       { nombre: "CERRADORA 1", coords: [515, 390], manual: "https://kalixxe.github.io/Manuales/CERRADORA_1.pdf" },
       { nombre: "PRENSA PILLOW TK 19F09", coords: [280, 345], manual: "https://kalixxe.github.io/Manuales/PRENSA_PILLOW_TK_19F09.pdf" },
       { nombre: "ENCOLADORA 1", coords: [510, 645], manual: "https://kalixxe.github.io/Manuales/ENCOLADORA_1.pdf" },
-      { nombre: "ENCOLADORA 2", coords: [510, 810], manual: "https://kalixxe.github.io/Manuales/ENCOLADORA_2.pdf" }
+      { nombre: "ENCOLADORA 2", coords: [510, 810], manual: "https://kalixxe.github.io/Manuales/ENCOLADORA_2.pdf" },
     ];
+
+    const estadoColores = {
+      "Reparado": "green",
+      "Pendiente": "yellow",
+      "En seguimiento": "orange",
+      "Fuera de servicio": "red"
+    };
 
     const map = L.map('map', {
       crs: L.CRS.Simple,
       minZoom: -1,
       maxZoom: 2,
-      zoomControl: true,
-      attributionControl: true
+      zoomControl: true
     });
 
-    const bounds = [[0, 0], [1000, 1500]];
+    const bounds = [[0, 0], [1300, 1600]];
     L.imageOverlay('img/layout_horizontal.png', bounds).addTo(map);
     map.setView([600, 750], 0);
 
-    const legend = L.control({ position: 'topright' });
-    legend.onAdd = function () {
-      const div = L.DomUtil.create('div', 'bg-white p-2 rounded shadow text-xs');
-      div.innerHTML = `
-        <strong>Estado</strong><br>
-        <span class='inline-block w-3 h-3 bg-green-500 rounded-full'></span> Reparado<br>
-        <span class='inline-block w-3 h-3 bg-yellow-400 rounded-full'></span> Pendiente<br>
-        <span class='inline-block w-3 h-3 bg-orange-500 rounded-full'></span> En seguimiento<br>
-        <span class='inline-block w-3 h-3 bg-red-600 rounded-full'></span> Fuera de servicio<br>
-        <div class="mt-2 text-center">
-          <img src="https://geo-way.github.io/GeoWay.io/images/Logo5.png" class="h-4 inline"/>
-        </div>
-      `;
-      return div;
-    };
-    legend.addTo(map);
+    const attributionControl = L.control.attribution({ prefix: false }).addTo(map);
+    attributionControl.setPrefix(
+      `<span class="geoway">
+        © 2025 <a href="https://geo-way.github.io/GeoWay.io/" target="_blank" class="hover:underline text-blue-300">GEOWAY</a>
+        <img src="https://geo-way.github.io/GeoWay.io/images/Logo5.png" alt="GEOWAY Logo">
+      </span>`
+    );
 
-    async function obtenerEstado(maquina) {
-      try {
-        const res = await fetch("https://sim-io.onrender.com/api/mantenimiento");
-        const data = await res.json();
-        const ult = data.find(d => d.maquina?.toLowerCase() === maquina.toLowerCase());
-        return ult?.estadoaccion || "Reparado";
-      } catch {
-        return "Reparado";
-      }
-    }
-
-    maquinas.forEach(async ({ nombre, coords, manual }) => {
-      const estado = await obtenerEstado(nombre);
-      const color = estadoColores[estado] || "gray";
-
+    maquinas.forEach(({ nombre, coords, manual }) => {
       const marker = L.circleMarker(coords, {
-        radius: 8,
-        color,
-        fillColor: color,
-        fillOpacity: 0.9
+        radius: 10,
+        color: 'blue',
+        fillColor: 'blue',
+        fillOpacity: 0.8
       }).addTo(map);
 
+      const encoded = encodeURIComponent(nombre);
       marker.bindPopup(`
         <div class="text-sm">
           <p class="font-bold">🔧 ${nombre}</p>
           <a href="${manual}" target="_blank" class="text-blue-600 underline block mt-1">📥 Descargar manual</a>
-          <a href="mantenimiento.html?maquina=${encodeURIComponent(nombre)}" class="text-blue-600 underline block">🔧 Ver mantenimientos</a>
+          <a href="mantenimiento.html?maquina=${encoded}" class="text-blue-600 underline block">🔧 Ver mantenimientos</a>
         </div>
       `);
     });
