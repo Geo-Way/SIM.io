@@ -50,6 +50,8 @@ const rolUsuario = localStorage.getItem("role") || "viewer";
     <a href="index.html" class="flex items-center space-x-2">
       <img src="https://images.squarespace-cdn.com/content/v1/58a36221d482e9bca4af6eac/34694fc3-6f92-4054-8a58-3776436c00dc/IMG_9869+2.PNG?format=2500w" alt="Logo" class="h-10 w-auto" />
       <span class="text-xl font-bold text-red-600">SIMio</span>
+<span id="rolVisual" class="text-sm text-gray-500 italic ml-4">(Rol: <span id="nombreRol">...</span>)</span>
+
     </a>
 
     <!-- Menú para escritorio -->
@@ -614,6 +616,17 @@ function renderTabla(data) {
     const rol = localStorage.getItem("rol") || "viewer";
     const spanRol = document.getElementById("nombreRol");
     if (spanRol) spanRol.textContent = rol;
+  });
+</script>
+
+
+<script>
+  window.addEventListener("DOMContentLoaded", () => {
+    const spanRol = document.getElementById("nombreRol");
+    if (spanRol) {
+      const role = localStorage.getItem("role") || "viewer";
+      spanRol.textContent = role;
+    }
   });
 </script>
 
