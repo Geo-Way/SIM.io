@@ -8,20 +8,18 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <style>
-    .pulse {
-      box-shadow: 0 0 0 rgba(0, 0, 0, 0.4);
+    .radar-ring {
       animation: pulse 2s infinite;
+      border-radius: 50%;
+      width: 30px;
+      height: 30px;
+      position: absolute;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
     }
     @keyframes pulse {
-      0% {
-        box-shadow: 0 0 0 0 rgba(0, 0, 0, 0.4);
-      }
-      70% {
-        box-shadow: 0 0 0 10px rgba(0, 0, 0, 0);
-      }
-      100% {
-        box-shadow: 0 0 0 0 rgba(0, 0, 0, 0);
-      }
+      0% { transform: translate(-50%, -50%) scale(0.8); opacity: 0.6; }
+      100% { transform: translate(-50%, -50%) scale(1.5); opacity: 0; }
     }
   </style>
 </head>
@@ -44,12 +42,11 @@
   <main class="max-w-7xl mx-auto mt-10 px-4">
     <h1 class="text-xl font-bold mb-4">📍 Diagrama de Máquinas</h1>
     <div id="map" class="w-full h-[80vh] rounded shadow relative"></div>
-    <div class="absolute top-20 right-6 bg-white p-3 rounded shadow text-sm">
-      <p class="mb-1 font-semibold">🔵 Estado de máquinas</p>
-      <p><span class="inline-block w-3 h-3 bg-green-500 rounded-full"></span> Reparado</p>
-      <p><span class="inline-block w-3 h-3 bg-yellow-400 rounded-full"></span> Pendiente</p>
-      <p><span class="inline-block w-3 h-3 bg-orange-500 rounded-full"></span> En seguimiento</p>
-      <p><span class="inline-block w-3 h-3 bg-red-600 rounded-full"></span> Fuera de servicio</p>
+    <div class="mt-4 p-4 bg-white rounded shadow inline-block text-sm">
+      <p class="font-semibold mb-1">🟢 Reparado</p>
+      <p class="font-semibold mb-1">🟡 Pendiente</p>
+      <p class="font-semibold mb-1">🟠 En seguimiento</p>
+      <p class="font-semibold mb-1">🔴 Fuera de servicio</p>
     </div>
   </main>
 
@@ -65,22 +62,25 @@
   </footer>
 
   <script>
-    const estadoColores = {
-      "Reparado": "green",
-      "Pendiente": "yellow",
-      "En seguimiento": "orange",
-      "Fuera de servicio": "red"
+    const estados = {
+      "Reparado": "#16a34a",
+      "Pendiente": "#facc15",
+      "En seguimiento": "#fb923c",
+      "Fuera de servicio": "#dc2626"
     };
 
     const maquinas = [
-      { nombre: "PISTOLA CUADROS", coords: [892, 206], estado: "Pendiente" },
-      { nombre: "PISTOLA SEMIFLEX", coords: [822, 206], estado: "Reparado" },
-      { nombre: "PISTOLA CERRAR", coords: [750, 206], estado: "Reparado" },
-      { nombre: "EMBALADORA 2 TK381", coords: [120, 390], estado: "En seguimiento" },
-      { nombre: "BOX TK386", coords: [690, 170], estado: "Reparado" },
-      { nombre: "PORTER", coords: [770, 575], estado: "Fuera de servicio" },
-      { nombre: "CORTE BOBINAS", coords: [900, 655], estado: "Reparado" },
-      { nombre: "CORTE PANTASOTA", coords: [770, 650], estado: "Pendiente" }
+      { nombre: "PISTOLA CUADROS", coords: [892, 206], estadoaccion: "Reparado" },
+      { nombre: "PISTOLA SEMIFLEX", coords: [822, 206], estadoaccion: "Pendiente" },
+      { nombre: "PISTOLA CERRAR", coords: [750, 206], estadoaccion: "En seguimiento" },
+      { nombre: "EMBALADORA 2 TK381", coords: [120, 390], estadoaccion: "Fuera de servicio" },
+      { nombre: "PORTER", coords: [770, 575], estadoaccion: "Reparado" },
+      { nombre: "CORTE BOBINAS", coords: [900, 655], estadoaccion: "Pendiente" },
+      { nombre: "ZONA POKCKET LR-PS-LINE 19F09", coords: [380, 1120], estadoaccion: "En seguimiento" },
+      { nombre: "ZONA BONNEL", coords: [380, 1250], estadoaccion: "Reparado" },
+      { nombre: "ENCOLADORA 1", coords: [510, 645], estadoaccion: "Pendiente" },
+      { nombre: "ENCOLADORA 2", coords: [510, 810], estadoaccion: "Fuera de servicio" },
+      // ... Agrega el resto aquí como desees
     ];
 
     const map = L.map('map', {
@@ -94,33 +94,44 @@
     const image = L.imageOverlay('img/layout_horizontal.png', bounds).addTo(map);
     map.setView([600, 750], 0);
 
-    maquinas.forEach(({ nombre, coords, estado }) => {
-      const color = {
-        "Reparado": '#22c55e',
-        "Pendiente": '#facc15',
-        "En seguimiento": '#f97316',
-        "Fuera de servicio": '#dc2626'
-      }[estado];
+    maquinas.forEach(({ nombre, coords, estadoaccion }) => {
+      const color = estados[estadoaccion] || '#6b7280';
 
-      const icono = L.divIcon({
-        className: 'pulse',
-        html: `<div style="width:20px;height:20px;background-color:${color};border-radius:50%;border:2px solid white"></div>`
-      });
+      const marker = L.circleMarker(coords, {
+        radius: 8,
+        color,
+        fillColor: color,
+        fillOpacity: 1
+      }).addTo(map);
 
-      const marker = L.marker(coords, { icon: icono }).addTo(map);
-
-      const fileName = nombre.replace(/\s+/g, '_').replace(/[^a-zA-Z0-9_]/g, '') + ".pdf";
-      const urlManual = `https://kalixxe.github.io/Manuales/${fileName}`;
+      const urlManual = manualUrl(nombre);
+      const urlMantenimiento = `mantenimiento.html?maquina=${encodeURIComponent(nombre)}`;
 
       marker.bindPopup(`
         <div class="text-sm">
           <p class="font-bold">🔧 ${nombre}</p>
-          <p class="mb-1">Estado: <strong>${estado}</strong></p>
+          <p>Estado: <span class="font-medium" style="color: ${color}">${estadoaccion}</span></p>
           <a href="${urlManual}" target="_blank" class="text-blue-600 underline block mt-1">📥 Descargar manual</a>
-          <a href="mantenimiento.html" class="text-blue-600 underline block">🔧 Ver mantenimientos</a>
+          <a href="${urlMantenimiento}" class="text-blue-600 underline block">🔧 Ver mantenimientos</a>
         </div>
       `);
+
+      const radar = L.divIcon({
+        className: 'radar-icon',
+        html: `<div class="radar-ring" style="background-color:${color};"></div>`
+      });
+      L.marker(coords, { icon: radar }).addTo(map);
     });
+
+    function manualUrl(nombre) {
+      const fileName = nombre.replace(/\s+/g, '_').replace(/[^a-zA-Z0-9_]/g, '') + ".pdf";
+      // Aquí puedes personalizar la URL para cada máquina si lo deseas
+      const overrides = {
+        "ENCOLADORA_1": "https://kalixxe.github.io/Manuales/encoladora1_especial.pdf",
+        "PORTER": "https://kalixxe.github.io/Manuales/manual_porter_v2.pdf"
+      };
+      return overrides[fileName] || `https://kalixxe.github.io/Manuales/${fileName}`;
+    }
   </script>
 </body>
 </html>
