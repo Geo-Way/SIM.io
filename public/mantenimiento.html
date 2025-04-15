@@ -1,120 +1,118 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Informe PDF - SIMio</title>
+  <title>Mantenimiento</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <style>
+    @media print {
+      body {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+    }
+  </style>
 </head>
 <body class="bg-gray-100 text-gray-900">
-  <main class="p-6">
-    <button onclick="generarInformePDF()" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded mb-4">📄 Imprimir PDF</button>
-    <div id="reportePDF" class="p-6 w-[1000px]" style="display:none;">
-      <h1 class="text-xl font-bold mb-4 text-red-700">📄 Informe de Mantenimiento - SIMio</h1>
 
-      <div id="graficoLineaTiempo" class="mb-6"><canvas></canvas></div>
-      <div id="graficoPorLinea" class="mb-6"><canvas></canvas></div>
-      <div id="graficoEstados" class="mb-6"><canvas></canvas></div>
+<!-- Encabezado -->
+<header class="bg-white shadow-md sticky top-0 z-50">
+  <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+    <a href="index.html" class="flex items-center space-x-2">
+      <img src="https://images.squarespace-cdn.com/content/v1/58a36221d482e9bca4af6eac/34694fc3-6f92-4054-8a58-3776436c00dc/IMG_9869+2.PNG?format=2500w" class="h-10 w-auto"/>
+      <span class="text-xl font-bold text-red-600">SIMio</span>
+      <span id="rolVisual" class="text-sm text-gray-500 italic ml-4">(Rol: <span id="nombreRol">...</span>)</span>
+    </a>
+  </div>
+</header>
 
-      <div id="tablaResumen" class="mt-6 text-sm"></div>
+<!-- Botón PDF -->
+<main class="max-w-7xl mx-auto mt-10 p-4">
+  <div class="mb-4">
+    <button onclick="generarInformePDF()" class="bg-green-600 hover:bg-green-700 text-white font-semibold px-4 py-2 rounded">📄 Imprimir PDF</button>
+  </div>
+</main>
 
-      <div class="text-center mt-10 text-xs text-gray-600">
-        © 2025 GEOWAY, Technology-Based Initiative – IBT. All rights reserved.
-      </div>
-    </div>
-  </main>
+<!-- Contenedor oculto para informe -->
+<div id="reportePDF" class="p-6" style="display:none;">
+  <h1 class="text-xl font-bold mb-4 text-red-600">📄 Informe de Mantenimiento - SIMio</h1>
+  <div id="graficoLineaTiempo" class="mb-6"><canvas></canvas></div>
+  <div id="graficoPorLinea" class="mb-6"><canvas></canvas></div>
+  <div id="graficoEstados" class="mb-6"><canvas></canvas></div>
+  <div id="tablaResumen" class="text-sm"></div>
+  <div class="text-center mt-10 text-xs text-gray-600">
+    © 2025 GEOWAY, Technology-Based Initiative – IBT. All rights reserved.
+  </div>
+</div>
 
-  <script>
-    const datosMantenimiento = [
-      {
-        fecha: "2025-04-10", maquina: "Prensa A", linea: "Línea 1", tecnico: "Carlos",
-        tiempo: 2, estadomotor: "Operativo", transmision: "Operativa", hidraulico: "Sin fugas",
-        neumatico: "Correcto", electrico: "Funciona bien", sintomas: ["Ruido Anormal", "Humo"],
-        observaciones: "Mantenimiento preventivo", estadoaccion: "Reparado"
-      },
-      {
-        fecha: "2025-04-12", maquina: "Cortadora B", linea: "Línea 2", tecnico: "Lucía",
-        tiempo: 3, estadomotor: "Sobrecalentamiento", transmision: "Falla", hidraulico: "Obstruido",
-        neumatico: "Desgaste excesivo", electrico: "Sin señal", sintomas: ["Fugas de Líquido"],
-        observaciones: "Falla crítica detectada", estadoaccion: "Pendiente"
-      }
-    ];
+<!-- Script PDF + gráficos -->
+<script>
+  const datosMantenimiento = [
+    { fecha: "2025-01-01", maquina: "Corte", linea: "A", tecnico: "Carlos", tiempo: 2, estadomotor: "Operativo", transmision: "Operativa", hidraulico: "Sin fugas", neumatico: "Correcto", electrico: "Funciona bien", sintomas: "Ruido", observaciones: "Todo ok", estadoaccion: "Reparado" },
+    { fecha: "2025-01-02", maquina: "Prensa", linea: "B", tecnico: "Laura", tiempo: 3, estadomotor: "Ruido Anormal", transmision: "Desgaste", hidraulico: "Con fugas", neumatico: "Fuga de aire", electrico: "Sensor fallando", sintomas: "Fugas", observaciones: "Requiere seguimiento", estadoaccion: "Pendiente" }
+  ];
 
-    async function generarInformePDF() {
-      if (!datosMantenimiento.length) return alert("No hay datos para generar el informe.");
+  async function generarInformePDF() {
+    const element = document.getElementById("reportePDF");
+    element.style.display = "block";
+    element.style.position = "absolute";
+    element.style.left = "-9999px";
 
-      const resumen = datosMantenimiento;
-      const fechas = resumen.map(d => d.fecha);
-      const fechasAgrupadas = fechas.reduce((acc, f) => {
-        acc[f] = (acc[f] || 0) + 1; return acc;
-      }, {});
-      const fechasOrdenadas = Object.keys(fechasAgrupadas).sort();
-      const valoresFechas = fechasOrdenadas.map(f => fechasAgrupadas[f]);
+    const fechas = datosMantenimiento.map(d => d.fecha);
+    const conteoPorFecha = fechas.reduce((acc, f) => { acc[f] = (acc[f] || 0) + 1; return acc; }, {});
+    const fechasOrdenadas = Object.keys(conteoPorFecha).sort();
+    const valoresFechas = fechasOrdenadas.map(f => conteoPorFecha[f]);
 
-      const porLinea = {}, porEstado = {};
-      resumen.forEach(d => {
-        porLinea[d.linea || "Sin línea"] = (porLinea[d.linea || "Sin línea"] || 0) + 1;
-        porEstado[d.estadoaccion || "Sin estado"] = (porEstado[d.estadoaccion || "Sin estado"] || 0) + 1;
-      });
+    const porLinea = {}, porEstado = {};
+    datosMantenimiento.forEach(d => {
+      porLinea[d.linea] = (porLinea[d.linea] || 0) + 1;
+      porEstado[d.estadoaccion] = (porEstado[d.estadoaccion] || 0) + 1;
+    });
 
-      const g1 = document.querySelector("#graficoLineaTiempo canvas").getContext("2d");
-      const g2 = document.querySelector("#graficoPorLinea canvas").getContext("2d");
-      const g3 = document.querySelector("#graficoEstados canvas").getContext("2d");
+    const tabla = document.getElementById("tablaResumen");
+    tabla.innerHTML = `<table class="table-auto w-full border text-xs">
+      <thead class="bg-red-100 text-red-900"><tr>
+        <th>Fecha</th><th>Máquina</th><th>Línea</th><th>Técnico</th><th>Horas</th><th>Motor</th><th>Transmisión</th><th>Hidráulico</th><th>Neumático</th><th>Eléctrico</th><th>Síntomas</th><th>Observaciones</th><th>Acción</th>
+      </tr></thead><tbody>` +
+      datosMantenimiento.map(d => `
+        <tr class="border-t">
+          <td>${d.fecha}</td><td>${d.maquina}</td><td>${d.linea}</td><td>${d.tecnico}</td><td>${d.tiempo}</td>
+          <td>${d.estadomotor}</td><td>${d.transmision}</td><td>${d.hidraulico}</td><td>${d.neumatico}</td><td>${d.electrico}</td>
+          <td>${d.sintomas}</td><td>${d.observaciones}</td><td>${d.estadoaccion}</td>
+        </tr>`).join("") + `</tbody></table>`;
 
-      new Chart(g1, {
-        type: "line",
-        data: { labels: fechasOrdenadas, datasets: [{ label: "Mantenimientos por Fecha", data: valoresFechas, borderColor: "red", fill: false }] },
-        options: { responsive: false }
-      });
-      new Chart(g2, {
-        type: "bar",
-        data: { labels: Object.keys(porLinea), datasets: [{ label: "Por Línea", data: Object.values(porLinea), backgroundColor: "red" }] },
-        options: { responsive: false }
-      });
-      new Chart(g3, {
-        type: "pie",
-        data: { labels: Object.keys(porEstado), datasets: [{ label: "Estados", data: Object.values(porEstado) }] },
-        options: { responsive: false }
-      });
+    const charts = document.querySelectorAll("canvas");
+    charts.forEach(c => c.remove()); // limpiar canvas
 
-      document.getElementById("tablaResumen").innerHTML = `
-        <table style="width:100%; border-collapse:collapse; font-size:10px;">
-          <thead style="background:#dc3545; color:white;">
-            <tr><th>Fecha</th><th>Máquina</th><th>Línea</th><th>Técnico</th><th>Horas</th>
-            <th>Motor</th><th>Transmisión</th><th>Hidráulico</th><th>Neumático</th>
-            <th>Eléctrico</th><th>Síntomas</th><th>Observaciones</th><th>Estado</th></tr>
-          </thead>
-          <tbody>
-            ${resumen.map(d => `<tr style="border-bottom:1px solid #ddd;">
-              <td>${d.fecha}</td><td>${d.maquina}</td><td>${d.linea}</td><td>${d.tecnico}</td><td>${d.tiempo}</td>
-              <td>${d.estadomotor}</td><td>${d.transmision}</td><td>${d.hidraulico}</td><td>${d.neumatico}</td>
-              <td>${d.electrico}</td><td>${Array.isArray(d.sintomas) ? d.sintomas.join(", ") : d.sintomas}</td><td>${d.observaciones}</td><td>${d.estadoaccion}</td>
-            </tr>`).join('')}
-          </tbody>
-        </table>`;
+    const c1 = document.createElement("canvas");
+    const c2 = document.createElement("canvas");
+    const c3 = document.createElement("canvas");
+    document.getElementById("graficoLineaTiempo").appendChild(c1);
+    document.getElementById("graficoPorLinea").appendChild(c2);
+    document.getElementById("graficoEstados").appendChild(c3);
 
-      await new Promise(r => setTimeout(r, 1500));
+    new Chart(c1, { type: 'line', data: { labels: fechasOrdenadas, datasets: [{ label: 'Por Fecha', data: valoresFechas }] } });
+    new Chart(c2, { type: 'bar', data: { labels: Object.keys(porLinea), datasets: [{ label: 'Por Línea', data: Object.values(porLinea) }] } });
+    new Chart(c3, { type: 'pie', data: { labels: Object.keys(porEstado), datasets: [{ label: 'Por Estado', data: Object.values(porEstado) }] } });
 
-      const element = document.getElementById("reportePDF");
-      element.style.display = "block";
-      element.style.position = "absolute";
-      element.style.left = "-9999px";
+    await new Promise(r => setTimeout(r, 1200));
 
-      await html2pdf().from(element).set({
-        margin: 0.5,
-        filename: `informe_mantenimiento_${new Date().toISOString().slice(0, 10)}.pdf`,
-        image: { type: "jpeg", quality: 0.95 },
-        html2canvas: { scale: 2 },
-        jsPDF: { unit: "in", format: "a4", orientation: "landscape" }
-      }).save();
+    await html2pdf().from(element).set({
+      margin: 0.5,
+      filename: `informe_mantenimiento_${new Date().toISOString().slice(0,10)}.pdf`,
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { scale: 2 },
+      jsPDF: { unit: 'in', format: 'a4', orientation: 'landscape' }
+    }).save();
 
-      element.style.display = "none";
-      element.style.position = "";
-      element.style.left = "";
-    }
-  </script>
+    element.style.display = "none";
+    element.style.position = "";
+    element.style.left = "";
+  }
+</script>
+
 </body>
 </html>
