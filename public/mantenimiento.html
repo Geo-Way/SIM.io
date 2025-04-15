@@ -1,19 +1,23 @@
 <!-- Archivo completo de mantenimiento.html actualizado -->
 <!DOCTYPE html>
-
 <html lang="es">
 <head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>Mantenimiento</title>
-<script src="https://cdn.tailwindcss.com"></script>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>Mantenimiento</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+
 <script>
 const rolUsuario = localStorage.getItem("role") || "viewer";
 </script>
+
+
 <script>
   const rolUsuario = localStorage.getItem("role") || "viewer";
 </script>
+
 </head>
+
 <script>
   const rolUsuario = localStorage.getItem("role") || "viewer";
 
@@ -22,8 +26,12 @@ const rolUsuario = localStorage.getItem("role") || "viewer";
     window.location.href = "index.html";
   }
 </script>
+
 <body class="bg-gray-100 text-gray-900">
+
 <!-- Aquí insertamos el header y el formulario como ya los tienes -->
+
+  
 <script>
   const rolUsuario = localStorage.getItem("role") || "viewer";
 
@@ -32,173 +40,197 @@ const rolUsuario = localStorage.getItem("role") || "viewer";
     window.location.href = "index.html";
   }
 </script>
+
 <body class="bg-gray-100 text-gray-900">
+
 <!-- Header Profesional y Responsive -->
 <header class="bg-white shadow-md sticky top-0 z-50">
-<div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
-<!-- Logo y título -->
-<a class="flex items-center space-x-2" href="index.html">
-<img alt="Logo" class="h-10 w-auto" src="https://images.squarespace-cdn.com/content/v1/58a36221d482e9bca4af6eac/34694fc3-6f92-4054-8a58-3776436c00dc/IMG_9869+2.PNG?format=2500w"/>
-<span class="text-xl font-bold text-red-600">SIMio</span>
-<span class="text-sm text-gray-500 italic ml-4" id="rolVisual">(Rol: <span id="nombreRol">...</span>)</span>
-</a>
-<!-- Menú para escritorio -->
-<nav class="hidden md:flex space-x-6 text-sm font-medium">
-<a class="text-gray-700 hover:text-red-600" href="index.html">Home</a>
-<a class="text-gray-700 hover:text-red-600" href="inventario.html">Inventario</a>
-<a class="text-red-600 hover:text-red-600 font-bold" href="mantenimiento.html">Mantenimiento</a>
-<a class="text-gray-700 hover:text-red-600" href="maquinas.html">Diagrama de Máquinas</a>
-<a class="text-gray-500 hover:text-red-600" href="info.html" title="Ver documentación"> ℹ️ </a>
-</nav>
-<!-- Botón hamburguesa -->
-<button class="md:hidden text-gray-700 focus:outline-none" id="menuToggle">
-<svg class="h-6 w-6" fill="none" stroke="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-<path d="M4 6h16M4 12h16M4 18h16" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
-</svg>
-</button>
-</div>
-<!-- Menú para móviles -->
-<div class="md:hidden hidden px-4 pb-4" id="mobileMenu">
-<a class="block py-2 text-gray-700 hover:text-red-600" href="index.html">Home</a>
-<a class="block py-2 text-gray-700 hover:text-red-600" href="inventario.html">Inventario</a>
-<a class="block py-2 text-gray-700 hover:text-red-600" href="mantenimiento.html">Mantenimiento</a>
-</div>
+  <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+    <!-- Logo y título -->
+    <a href="index.html" class="flex items-center space-x-2">
+      <img src="https://images.squarespace-cdn.com/content/v1/58a36221d482e9bca4af6eac/34694fc3-6f92-4054-8a58-3776436c00dc/IMG_9869+2.PNG?format=2500w" alt="Logo" class="h-10 w-auto" />
+      <span class="text-xl font-bold text-red-600">SIMio</span>
+<span id="rolVisual" class="text-sm text-gray-500 italic ml-4">(Rol: <span id="nombreRol">...</span>)</span>
+
+    </a>
+
+    <!-- Menú para escritorio -->
+    <nav class="hidden md:flex space-x-6 text-sm font-medium">
+      <a href="index.html" class="text-gray-700 hover:text-red-600">Home</a>
+      <a href="inventario.html" class="text-gray-700 hover:text-red-600">Inventario</a>
+      <a href="mantenimiento.html" class="text-red-600 hover:text-red-600 font-bold">Mantenimiento</a>
+       <a href="maquinas.html" class="text-gray-700 hover:text-red-600">Diagrama de Máquinas</a>
+    </nav>
+<span id="rolVisual" class="text-xs text-gray-600 italic ml-4">(Rol: <span id="nombreRol">desconocido</span>)</span>
+
+
+    <!-- Botón hamburguesa -->
+    <button id="menuToggle" class="md:hidden text-gray-700 focus:outline-none">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M4 6h16M4 12h16M4 18h16" />
+      </svg>
+    </button>
+  </div>
+
+  <!-- Menú para móviles -->
+  <div id="mobileMenu" class="md:hidden hidden px-4 pb-4">
+    <a href="index.html" class="block py-2 text-gray-700 hover:text-red-600">Home</a>
+    <a href="inventario.html" class="block py-2 text-gray-700 hover:text-red-600">Inventario</a>
+    <a href="mantenimiento.html" class="block py-2 text-gray-700 hover:text-red-600">Mantenimiento</a>
+  </div>
 </header>
+  
 <main class="max-w-7xl mx-auto mt-10 p-4">
-<h2 class="text-lg font-semibold text-gray-700 mb-4">📄 Formulario de Mantenimiento</h2>
-<form class="grid md:grid-cols-3 gap-4 bg-white p-6 rounded shadow mb-6" enctype="multipart/form-data" id="formMantenimiento">
-<input class="p-2 border rounded" name="maquina" placeholder="Máquina" required=""/>
-<input class="p-2 border rounded" name="linea" placeholder="Línea"/>
-<input class="p-2 border rounded" name="fecha" type="date"/>
-<input class="p-2 border rounded" name="tecnico" placeholder="Técnico"/>
-<input class="p-2 border rounded" name="tiempo" placeholder="Horas mantenimiento" step="0.1" type="number"/>
-<input class="p-2 border rounded" name="observaciones" placeholder="Observaciones"/>
-<input id="idMantenimiento" name="id" type="hidden"/>
-<!-- Foto -->
+  <h2 class="text-lg font-semibold text-gray-700 mb-4">📄 Formulario de Mantenimiento</h2>
+  <form id="formMantenimiento" enctype="multipart/form-data" class="grid md:grid-cols-3 gap-4 bg-white p-6 rounded shadow mb-6">
+    <input class="p-2 border rounded" name="maquina" placeholder="Máquina" required/>
+    <input class="p-2 border rounded" name="linea" placeholder="Línea"/>
+    <input class="p-2 border rounded" name="fecha" type="date"/>
+    <input class="p-2 border rounded" name="tecnico" placeholder="Técnico"/>
+    <input class="p-2 border rounded" name="tiempo" type="number" placeholder="Horas mantenimiento" step="0.1"/>
+    <input class="p-2 border rounded" name="observaciones" placeholder="Observaciones"/>
+    <input type="hidden" name="id" id="idMantenimiento" />
+
+
+    <!-- Foto -->
 <div>
-<label class="block text-sm font-medium text-gray-700 mb-1" for="fotoman">Subir o Tomar Foto</label>
-<input accept="image/*" capture="environment" class="p-2 border rounded w-full" id="fotoman" name="fotoman" type="file"/>
+  <label class="block text-sm font-medium text-gray-700 mb-1" for="fotoman">Subir o Tomar Foto</label>
+  <input class="p-2 border rounded w-full" type="file" name="fotoman" id="fotoman" accept="image/*" capture="environment"/>
 </div>
-<!-- Selects -->
-<select class="p-2 border rounded" name="estadomotor">
-<option value="">Motor</option>
-<option>Operativo</option>
-<option>Ruido Anormal</option>
-<option>Vibración</option>
-<option>Sobrecalentamiento</option>
-<option>Sin funcionamiento</option>
-</select>
-<select class="p-2 border rounded" name="transmision">
-<option value="">Transmisión</option>
-<option>Operativa</option>
-<option>Desgaste</option>
-<option>Desalineada</option>
-<option>Falla</option>
-</select>
-<select class="p-2 border rounded" name="hidraulico">
-<option value="">Hidráulico</option>
-<option>Sin fugas</option>
-<option>Con fugas</option>
-<option>Baja presión</option>
-<option>Obstruido</option>
-</select>
-<select class="p-2 border rounded" name="neumatico">
-<option value="">Neumático</option>
-<option>Correcto</option>
-<option>Fuga de aire</option>
-<option>Pérdida de presión</option>
-<option>Desgaste excesivo</option>
-</select>
-<select class="p-2 border rounded" name="electrico">
-<option value="">Eléctrico</option>
-<option>Funciona bien</option>
-<option>Corto circuito</option>
-<option>Sensor fallando</option>
-<option>Sin señal</option>
-</select>
-<select class="p-2 border rounded" name="estadoaccion">
-<option value="">Estado Acción</option>
-<option>Reparado</option>
-<option>Pendiente</option>
-<option>En seguimiento</option>
-<option>Fuera de servicio</option>
-</select>
-<!-- Checkboxes -->
-<fieldset class="col-span-full space-x-2">
-<legend class="font-semibold">Síntomas Encontrados</legend>
-<label><input name="sintomas" type="checkbox" value="Ruido Anormal"/> Ruido Anormal</label>
-<label><input name="sintomas" type="checkbox" value="Fugas de Líquido"/> Fugas de Líquido</label>
-<label><input name="sintomas" type="checkbox" value="Olor a Quemado"/> Olor a Quemado</label>
-<label><input name="sintomas" type="checkbox" value="Corrosión"/> Corrosión</label>
-<label><input name="sintomas" type="checkbox" value="Vibración Excesiva"/> Vibración Excesiva</label>
-<label><input name="sintomas" type="checkbox" value="Sobrecalentamiento"/> Sobrecalentamiento</label>
-<label><input name="sintomas" type="checkbox" value="Humo"/> Humo</label>
-<label><input name="sintomas" type="checkbox" value="Desgaste Irregular"/> Desgaste Irregular</label>
-</fieldset>
-<button class="col-span-full bg-red-600 text-white p-2 rounded hover:bg-red-700" id="btnGuardar" type="submit">Guardar</button>
-</form>
-<hr class="my-10 border-t-2"/>
+
+    <!-- Selects -->
+    <select name="estadomotor" class="p-2 border rounded">
+      <option value="">Motor</option>
+      <option>Operativo</option>
+      <option>Ruido Anormal</option>
+      <option>Vibración</option>
+      <option>Sobrecalentamiento</option>
+      <option>Sin funcionamiento</option>
+    </select>
+    <select name="transmision" class="p-2 border rounded">
+      <option value="">Transmisión</option>
+      <option>Operativa</option>
+      <option>Desgaste</option>
+      <option>Desalineada</option>
+      <option>Falla</option>
+    </select>
+    <select name="hidraulico" class="p-2 border rounded">
+      <option value="">Hidráulico</option>
+      <option>Sin fugas</option>
+      <option>Con fugas</option>
+      <option>Baja presión</option>
+      <option>Obstruido</option>
+    </select>
+    <select name="neumatico" class="p-2 border rounded">
+      <option value="">Neumático</option>
+      <option>Correcto</option>
+      <option>Fuga de aire</option>
+      <option>Pérdida de presión</option>
+      <option>Desgaste excesivo</option>
+    </select>
+    <select name="electrico" class="p-2 border rounded">
+      <option value="">Eléctrico</option>
+      <option>Funciona bien</option>
+      <option>Corto circuito</option>
+      <option>Sensor fallando</option>
+      <option>Sin señal</option>
+    </select>
+    <select name="estadoaccion" class="p-2 border rounded">
+      <option value="">Estado Acción</option>
+      <option>Reparado</option>
+      <option>Pendiente</option>
+      <option>En seguimiento</option>
+      <option>Fuera de servicio</option>
+    </select>
+
+    <!-- Checkboxes -->
+    <fieldset class="col-span-full space-x-2">
+      <legend class="font-semibold">Síntomas Encontrados</legend>
+      <label><input type="checkbox" name="sintomas" value="Ruido Anormal"/> Ruido Anormal</label>
+      <label><input type="checkbox" name="sintomas" value="Fugas de Líquido"/> Fugas de Líquido</label>
+      <label><input type="checkbox" name="sintomas" value="Olor a Quemado"/> Olor a Quemado</label>
+      <label><input type="checkbox" name="sintomas" value="Corrosión"/> Corrosión</label>
+      <label><input type="checkbox" name="sintomas" value="Vibración Excesiva"/> Vibración Excesiva</label>
+      <label><input type="checkbox" name="sintomas" value="Sobrecalentamiento"/> Sobrecalentamiento</label>
+      <label><input type="checkbox" name="sintomas" value="Humo"/> Humo</label>
+      <label><input type="checkbox" name="sintomas" value="Desgaste Irregular"/> Desgaste Irregular</label>
+    </fieldset>
+
+    <button id="btnGuardar" class="col-span-full bg-red-600 text-white p-2 rounded hover:bg-red-700" type="submit">Guardar</button>
+  </form>
+  <hr class="my-10 border-t-2"/>
+  
 <h2 class="text-xl font-semibold text-gray-700 mb-4">📋 Filtrar mantenimientos</h2>
 <div class="bg-white p-4 rounded shadow mb-6">
-<div class="grid md:grid-cols-6 gap-4 mb-4">
-<input class="p-2 border rounded" id="filtroMaquina" placeholder="Máquina"/>
-<input class="p-2 border rounded" id="filtroLinea" placeholder="Línea"/>
-<input class="p-2 border rounded" id="filtroTecnico" placeholder="Técnico"/>
-<input class="p-2 border rounded" id="filtroFechaDesde" type="date"/>
-<input class="p-2 border rounded" id="filtroFechaHasta" type="date"/>
-<select class="p-2 border rounded" id="filtroEstado">
-<option value="">Estado</option>
-<option>Reparado</option>
-<option>Pendiente</option>
-<option>En seguimiento</option>
-<option>Fuera de servicio</option>
-</select>
+  <div class="grid md:grid-cols-6 gap-4 mb-4">
+    <input id="filtroMaquina" placeholder="Máquina" class="p-2 border rounded" />
+    <input id="filtroLinea" placeholder="Línea" class="p-2 border rounded" />
+    <input id="filtroTecnico" placeholder="Técnico" class="p-2 border rounded" />
+    <input type="date" id="filtroFechaDesde" class="p-2 border rounded" />
+    <input type="date" id="filtroFechaHasta" class="p-2 border rounded" />
+    <select id="filtroEstado" class="p-2 border rounded">
+      <option value="">Estado</option>
+      <option>Reparado</option>
+      <option>Pendiente</option>
+      <option>En seguimiento</option>
+      <option>Fuera de servicio</option>
+    </select>
+  </div>
+  <div class="flex justify-end gap-2">
+    <button onclick="aplicarFiltros()" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded">Filtrar</button>
+    <button onclick="limpiarFiltros()" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold px-4 py-2 rounded">Limpiar</button>
+  </div>
 </div>
-<div class="flex justify-end gap-2">
-<button class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded" onclick="aplicarFiltros()">Filtrar</button>
-<button class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold px-4 py-2 rounded" onclick="limpiarFiltros()">Limpiar</button>
-</div>
-</div>
-<h2 class="text-lg font-semibold text-gray-700 mb-2">Historial de Mantenimientos</h2>
-<div class="overflow-x-auto bg-white p-4 rounded shadow">
-<table class="min-w-full table-auto text-sm">
+
+  <h2 class="text-lg font-semibold text-gray-700 mb-2">Historial de Mantenimientos</h2>
+  <div class="overflow-x-auto bg-white p-4 rounded shadow">
+    <table class="min-w-full table-auto text-sm">
 <thead class="bg-gray-200">
-<tr>
-<th class="p-2">Fecha</th>
-<th class="p-2">Máquina</th>
-<th class="p-2">Línea</th>
-<th class="p-2">Técnico</th>
-<th class="p-2">Horas</th>
-<th class="p-2">Motor</th>
-<th class="p-2">Transmisión</th>
-<th class="p-2">Hidráulico</th>
-<th class="p-2">Neumático</th>
-<th class="p-2">Eléctrico</th>
-<th class="p-2">Síntomas</th>
-<th class="p-2">Observaciones</th>
-<th class="p-2">Acción</th>
-<th class="p-2">Foto</th>
-<th class="p-2">✏️ Editar</th>
-<th class="p-2">🗑️ Eliminar</th>
-</tr>
+  <tr>
+    <th class="p-2">Fecha</th>
+    <th class="p-2">Máquina</th>
+    <th class="p-2">Línea</th>
+    <th class="p-2">Técnico</th>
+    <th class="p-2">Horas</th>
+    <th class="p-2">Motor</th>
+    <th class="p-2">Transmisión</th>
+    <th class="p-2">Hidráulico</th>
+    <th class="p-2">Neumático</th>
+    <th class="p-2">Eléctrico</th>
+    <th class="p-2">Síntomas</th>
+    <th class="p-2">Observaciones</th>
+    <th class="p-2">Acción</th>
+    <th class="p-2">Foto</th>
+    <th class="p-2">✏️ Editar</th>
+    <th class="p-2">🗑️ Eliminar</th>
+  </tr>
 </thead>
-<tbody id="tablaMantenimiento"></tbody>
-</table>
-</div>
+
+      <tbody id="tablaMantenimiento"></tbody>
+    </table>
+  </div>
+  
 <div class="mt-4 flex gap-4">
-<button class="bg-green-600 hover:bg-green-700 text-white font-semibold px-4 py-2 rounded" onclick="window.print()">Imprimir PDF</button>
-<button class="bg-yellow-500 hover:bg-yellow-600 text-white font-semibold px-4 py-2 rounded" onclick="exportarCSV()">Exportar CSV</button>
+  <button onclick="window.print()" class="bg-green-600 hover:bg-green-700 text-white font-semibold px-4 py-2 rounded">Imprimir PDF</button>
+  <button onclick="exportarCSV()" class="bg-yellow-500 hover:bg-yellow-600 text-white font-semibold px-4 py-2 rounded">Exportar CSV</button>
 </div>
+
+
 <script>
 if (rolUsuario === "viewer") {
   const btnGuardar = document.getElementById("btnGuardar");
   if (btnGuardar) btnGuardar.style.display = "none";
 }
 </script>
+
 </main>
-<div class="hidden fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50" id="modalFoto">
-<img class="max-h-[90vh] max-w-[90vw] border-4 border-white shadow-xl" id="imagenGrande"/>
+
+<div id="modalFoto" class="hidden fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
+  <img id="imagenGrande" class="max-h-[90vh] max-w-[90vw] border-4 border-white shadow-xl"/>
 </div>
+
+
 <script>
 let datosMantenimiento = [];
 let idEditando = null;
@@ -361,6 +393,7 @@ async function cargarMantenimientos() {
 window.onload = cargarMantenimientos;
 
 </script>
+    
 <!-- funcion para la hamburgesa de Menú para móviles -->
 <script>
   const menuToggle = document.getElementById("menuToggle");
@@ -372,6 +405,7 @@ window.onload = cargarMantenimientos;
   
 </script>
 <!-- ... (omitido por brevedad, ya está bien estructurado) -->
+
 <script>
 
 
@@ -391,8 +425,10 @@ async function eliminarMantenimiento(id) {
   }
 }
 </script>
-<script>
 
+<script>
+document.getElementById("formMantenimiento").addEventListener("submit", async function (e) {
+  e.preventDefault();
 
   const form = e.target;
   const formData = new FormData(form);
@@ -433,7 +469,23 @@ async function eliminarMantenimiento(id) {
   }
 });
 </script>
+
+    
+
+<!-- Footer final -->
+<footer class="bg-gray-600 text-gray-200 text-center py-6 mt-10 text-sm">
+  <div class="max-w-4xl mx-auto px-4 flex flex-col items-center space-y-2">
+    <p>
+      © 2025 <strong>GEOWAY</strong>, Technology-Based Initiative – IBT. All rights reserved.
+    </p>
+    <a href="https://geo-way.github.io/GeoWay.io/index.html" target="_blank" class="hover:opacity-80 transition-opacity">
+      <img src="https://geo-way.github.io/GeoWay.io/images/Logo5.png" alt="GEOWAY Logo" class="h-8 invert">
+    </a>
+  </div>
+</footer>
+
 <!-- Modal de edición *** eliminado -->
+
 <script>
 // Comprimir imagen antes de enviar
 async function comprimirImagen(file, calidad = 0.6) {
@@ -514,6 +566,9 @@ formMantenimiento.addEventListener("submit", async function (e) {
   }
 });
 </script>
+
+    
+
 <script>
 document.getElementById("nombreRol").innerText = rolUsuario;
 
@@ -554,6 +609,8 @@ function renderTabla(data) {
   });
 }
 </script>
+
+
 <script>
   window.addEventListener("DOMContentLoaded", () => {
     const rol = localStorage.getItem("rol") || "viewer";
@@ -561,6 +618,8 @@ function renderTabla(data) {
     if (spanRol) spanRol.textContent = rol;
   });
 </script>
+
+
 <script>
   window.addEventListener("DOMContentLoaded", () => {
     const spanRol = document.getElementById("nombreRol");
@@ -570,89 +629,6 @@ function renderTabla(data) {
     }
   });
 </script>
-<!-- Footer final -->
-<footer class="bg-gray-600 text-gray-200 text-center py-6 mt-10 text-sm">
-<div class="max-w-4xl mx-auto px-4 flex flex-col items-center space-y-2">
-<p>© 2025 <strong><a class="hover:underline" href="https://geo-way.github.io/GeoWay.io/index.html">GEOWAY</a></strong>, Technology-Based Initiative – IBT. All rights reserved.</p>
-<img alt="GEOWAY Logo" class="h-8 md:h-6 w-auto" src="https://geo-way.github.io/GeoWay.io/images/Logo5.png"/>
-</div>
-</footer>
+
 </body>
-<script>
-async function generarInformePDF() {
-  const element = document.getElementById("reportePDF");
-  element.style.display = "block";
-  element.style.position = "absolute";
-  element.style.left = "-9999px";
-
-  const data = window.datosMantenimiento || [];
-
-  const fechas = data.map(d => d.fecha);
-  const conteoPorFecha = fechas.reduce((acc, f) => {
-    acc[f] = (acc[f] || 0) + 1;
-    return acc;
-  }, {});
-  const fechasOrdenadas = Object.keys(conteoPorFecha).sort();
-  const valoresFechas = fechasOrdenadas.map(f => conteoPorFecha[f]);
-
-  const porLinea = {}, porEstado = {};
-  data.forEach(d => {
-    const linea = d.linea || "Desconocida";
-    const estado = d.estadoaccion || "Sin estado";
-    porLinea[linea] = (porLinea[linea] || 0) + 1;
-    porEstado[estado] = (porEstado[estado] || 0) + 1;
-  });
-
-  const tabla = document.getElementById("tablaResumen");
-  tabla.innerHTML = `<table class="table-auto border w-full text-xs">
-    <thead class="bg-gray-200"><tr>
-      <th>Fecha</th><th>Máquina</th><th>Línea</th><th>Técnico</th><th>Horas</th>
-      <th>Motor</th><th>Transmisión</th><th>Hidráulico</th><th>Neumático</th>
-      <th>Eléctrico</th><th>Síntomas</th><th>Observaciones</th><th>Acción</th>
-    </tr></thead>
-    <tbody>
-      ${data.map(d => `
-        <tr class="border-t">
-          <td>${d.fecha}</td><td>${d.maquina}</td><td>${d.linea}</td><td>${d.tecnico}</td><td>${d.tiempo}</td>
-          <td>${d.estadomotor}</td><td>${d.transmision}</td><td>${d.hidraulico}</td><td>${d.neumatico}</td>
-          <td>${d.electrico}</td><td>${d.sintomas}</td><td>${d.observaciones}</td><td>${d.estadoaccion}</td>
-        </tr>`).join('')}
-    </tbody>
-  </table>`;
-
-  const ctx1 = document.createElement("canvas");
-  const ctx2 = document.createElement("canvas");
-  const ctx3 = document.createElement("canvas");
-  document.getElementById("graficoLineaTiempo").innerHTML = ""; document.getElementById("graficoLineaTiempo").appendChild(ctx1);
-  document.getElementById("graficoPorLinea").innerHTML = ""; document.getElementById("graficoPorLinea").appendChild(ctx2);
-  document.getElementById("graficoEstados").innerHTML = ""; document.getElementById("graficoEstados").appendChild(ctx3);
-
-  new Chart(ctx1, {
-    type: 'line',
-    data: { labels: fechasOrdenadas, datasets: [{ label: 'Mantenimientos por fecha', data: valoresFechas }] }
-  });
-  new Chart(ctx2, {
-    type: 'bar',
-    data: { labels: Object.keys(porLinea), datasets: [{ label: 'Mantenimientos por línea', data: Object.values(porLinea) }] }
-  });
-  new Chart(ctx3, {
-    type: 'pie',
-    data: { labels: Object.keys(porEstado), datasets: [{ label: 'Distribución de estados', data: Object.values(porEstado) }] }
-  });
-
-  await new Promise(resolve => setTimeout(resolve, 1500));
-
-  const options = {
-    margin: 0.5,
-    filename: `informe_mantenimiento_${new Date().toISOString().slice(0, 10)}.pdf`,
-    image: { type: 'jpeg', quality: 0.98 },
-    html2canvas: { scale: 2 },
-    jsPDF: { unit: 'in', format: 'a4', orientation: 'landscape' }
-  };
-
-  await html2pdf().from(element).set(options).save();
-  element.style.display = "none";
-  element.style.position = "";
-  element.style.left = "";
-}
-</script></body></html>
+</html>
