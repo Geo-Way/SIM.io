@@ -439,66 +439,64 @@ async function comprimirImagen(file, calidad = 0.6) {
 // Evento del formulario actualizado con compresión
 const formMantenimiento = document.getElementById("formMantenimiento");
 
-
 if (rolUsuario === "viewer") {
-  document.getElementById("formMantenimiento").addEventListener("submit", function(e) {
+  formMantenimiento.addEventListener("submit", function(e) {
     e.preventDefault();
     alert("No tienes permisos para registrar o editar mantenimientos.");
   });
-}
+} else {
+  formMantenimiento.addEventListener("submit", async function (e) {
+    e.preventDefault();
 
-formMantenimiento.addEventListener("submit", async function (e) {
-  e.preventDefault();
+    const form = e.target;
+    const formData = new FormData();
 
-  const form = e.target;
-  const formData = new FormData();
-
-  // Extraer campos manualmente porque usamos imagen comprimida
-  const fields = ["maquina", "linea", "fecha", "tecnico", "tiempo", "observaciones",
-    "estadomotor", "transmision", "hidraulico", "neumatico", "electrico", "estadoaccion"];
-  fields.forEach(name => {
-    formData.append(name, form[name].value);
-  });
-
-  // ID si está editando
-  if (idEditando) {
-    formData.append("id", idEditando);
-  }
-
-  // Checkbox de síntomas
-  const sintomasSeleccionados = Array.from(form.querySelectorAll('input[name="sintomas"]:checked'))
-    .map(cb => cb.value);
-  sintomasSeleccionados.forEach(val => formData.append("sintomas", val));
-
-  // Comprimir imagen si hay
-  const archivo = form.fotoman.files[0];
-  if (archivo) {
-    const comprimida = await comprimirImagen(archivo, 0.6);
-    formData.append("fotoman", comprimida, archivo.name);
-  }
-
-  try {
-    const method = idEditando ? "PUT" : "POST";
-    const url = idEditando
-      ? `https://sim-io.onrender.com/api/mantenimiento/${idEditando}`
-      : `https://sim-io.onrender.com/api/mantenimiento`;
-
-    const res = await fetch(url, {
-      method,
-      body: formData
+    // Extraer campos manualmente, ya que se usa la compresión de imagen
+    const fields = [
+      "maquina", "linea", "fecha", "tecnico", "tiempo", "observaciones",
+      "estadomotor", "transmision", "hidraulico", "neumatico", "electrico", "estadoaccion"
+    ];
+    fields.forEach(name => {
+      formData.append(name, form[name].value);
     });
 
-    if (!res.ok) throw new Error(await res.text());
+    // Si se está editando, añade el ID
+    if (idEditando) {
+      formData.append("id", idEditando);
+    }
 
-    alert(`✅ Mantenimiento ${idEditando ? "actualizado" : "guardado"} correctamente.`);
-    form.reset();
-    idEditando = null;
-    cargarMantenimientos();
-  } catch (err) {
-    console.error("❌ Error al guardar:", err.message);
-    alert("❌ Hubo un error al guardar el mantenimiento.");
-  }
-});
+    // Checkbox de síntomas
+    const sintomasSeleccionados = Array.from(form.querySelectorAll('input[name="sintomas"]:checked'))
+      .map(cb => cb.value);
+    sintomasSeleccionados.forEach(val => formData.append("sintomas", val));
+
+    // Comprimir imagen si hay
+    const archivo = form.fotoman.files[0];
+    if (archivo) {
+      const comprimida = await comprimirImagen(archivo, 0.6);
+      formData.append("fotoman", comprimida, archivo.name);
+    }
+
+    try {
+      const method = idEditando ? "PUT" : "POST";
+      const url = idEditando
+        ? `https://sim-io.onrender.com/api/mantenimiento/${idEditando}`
+        : `https://sim-io.onrender.com/api/mantenimiento`;
+
+      const res = await fetch(url, { method, body: formData });
+      if (!res.ok) throw new Error(await res.text());
+
+      alert(`✅ Mantenimiento ${idEditando ? "actualizado" : "guardado"} correctamente.`);
+      form.reset();
+      idEditando = null;
+      cargarMantenimientos();
+    } catch (err) {
+      console.error("❌ Error al guardar:", err.message);
+      alert("❌ Hubo un error al guardar el mantenimiento.");
+    }
+  });
+}
+
 </script>
 <script>
 document.getElementById("nombreRol").innerText = rolUsuario;
