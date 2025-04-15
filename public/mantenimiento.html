@@ -412,12 +412,7 @@ document.getElementById("formMantenimiento").addEventListener("submit", async fu
   formData.delete("sintomas"); // elimina anteriores si los hubiera
   sintomasSeleccionados.forEach(val => formData.append("sintomas", val));
 
-  // Validar imagen solo si es un nuevo registro (no edición)
-  const archivo = formData.get("fotoman");
-  if (!idEditando && archivo && archivo.size > 500 * 1024) {
-    alert("⚠️ La imagen excede los 500 KB permitidos.");
-    return;
-  }
+
 
   try {
     const method = idEditando ? "PUT" : "POST";
