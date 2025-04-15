@@ -282,6 +282,48 @@
       }
     }
 
+function editarMantenimiento(id) {
+  let mantenimiento = datosMantenimiento.find(item => item.id === id);
+  if (!mantenimiento) return;
+
+  // Convertir el campo "sintomas" a array si es una cadena
+  let sintomasArray = mantenimiento.sintomas;
+  if (typeof sintomasArray === 'string') {
+    // Elimina las llaves y separa por coma
+    sintomasArray = sintomasArray.slice(1, -1).split(',');
+    // Opcional: limpiar espacios si es necesario
+    sintomasArray = sintomasArray.map(s => s.trim());
+  }
+
+  const form = document.getElementById("formMantenimiento");
+  idEditando = id;
+  form.querySelector("#idMantenimiento").value = id;
+
+  // Rellenar campos del formulario
+  form.maquina.value = mantenimiento.maquina || "";
+  form.linea.value = mantenimiento.linea || "";
+  form.fecha.value = mantenimiento.fecha ? mantenimiento.fecha.split("T")[0] : "";
+  form.tecnico.value = mantenimiento.tecnico || "";
+  form.tiempo.value = mantenimiento.tiempo || "";
+  form.observaciones.value = mantenimiento.observaciones || "";
+  form.estadomotor.value = mantenimiento.estadomotor || "";
+  form.transmision.value = mantenimiento.transmision || "";
+  form.hidraulico.value = mantenimiento.hidraulico || "";
+  form.neumatico.value = mantenimiento.neumatico || "";
+  form.electrico.value = mantenimiento.electrico || "";
+  form.estadoaccion.value = mantenimiento.estadoaccion || "";
+
+  // Marcar los checkboxes de síntomas basándose en el array obtenido
+  form.querySelectorAll('input[name="sintomas"]').forEach(cb => {
+    cb.checked = sintomasArray.includes(cb.value);
+  });
+
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+
+
+    
     function exportarCSV() {
       let csv = "Fecha,Máquina,Línea,Técnico,Horas,Motor,Transmisión,Hidráulico,Neumático,Eléctrico,Síntomas,Observaciones,Acción,Foto\n";
       datosMantenimiento.forEach(row => {
