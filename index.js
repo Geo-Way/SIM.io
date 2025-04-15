@@ -9,37 +9,20 @@ const path = require('path');
 const app = express();
 const port = process.env.PORT || 3000;
 
-// Configuración de CORS y parsers
 app.use(cors());
 app.use(bodyParser.json());
 app.use(express.static('public'));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// Configuración de almacenamiento para multer
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, 'uploads/'); // Directorio para guardar archivos
-  },
-  filename: (req, file, cb) => {
-    const ext = path.extname(file.originalname);
-    const uniqueName = Date.now() + '-' + Math.round(Math.random() * 1e9) + ext;
-    cb(null, uniqueName);
-  }
-});
-
 const upload = multer({
-  storage,
+  dest: 'uploads/',
   limits: { fileSize: 500 * 1024 } // 500 KB
 });
 
-// Configuración de la base de datos PostgreSQL
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl: { rejectUnauthorized: false }
 });
-
-
-// ------------------- INVENTARIO -------------------
 
 // POST - Registrar artículo
 app.post('/api/inventario', async (req, res) => {
@@ -64,7 +47,7 @@ app.post('/api/inventario', async (req, res) => {
     );
     res.status(201).json({ message: 'Artículo guardado correctamente' });
   } catch (error) {
-    console.error('Error al guardar artículo:', error);
+    console.error('Error al guardar:', error);
     res.status(500).json({ error: 'Error al guardar artículo' });
   }
 });
@@ -108,20 +91,16 @@ app.put('/api/inventario/:id', async (req, res) => {
   }
 });
 
-// DELETE - Eliminar artículo
 app.delete("/api/inventario/:id", async (req, res) => {
-  const { id } = req.params;
+  const id = req.params.id;
   try {
     await pool.query("DELETE FROM inventario WHERE id = $1", [id]);
     res.sendStatus(200);
   } catch (err) {
-    console.error("Error al eliminar artículo:", err);
-    res.status(500).send("Error al eliminar artículo");
+    console.error("Error al eliminar:", err);
+    res.status(500).send("Error al eliminar");
   }
 });
-
-
-// ------------------- MANTENIMIENTO -------------------
 
 // GET - Listar mantenimientos
 app.get('/api/mantenimiento', async (req, res) => {
@@ -134,7 +113,7 @@ app.get('/api/mantenimiento', async (req, res) => {
   }
 });
 
-// POST - Guardar mantenimiento (con manejo de foto)
+// POST - Guardar mantenimiento con subida de foto
 app.post('/api/mantenimiento', upload.single('fotoman'), async (req, res) => {
   try {
     let {
@@ -143,28 +122,16 @@ app.post('/api/mantenimiento', upload.single('fotoman'), async (req, res) => {
       neumatico, electrico, observaciones, estadoaccion
     } = req.body;
 
-    // Conversión de "tiempo" a número
-    tiempo = parseFloat(tiempo);
-
-    // Convertir fecha a ISO si es válida
-    if (fecha) {
-      fecha = new Date(fecha).toISOString();
-    }
-
-    // Obtener ruta de la imagen, si existe
     const fotoman = req.file ? `/uploads/${req.file.filename}` : null;
 
-    // Manejar "sintomas": si es arreglo, formatearlo; si es string o vacío, ajustarlo
     if (Array.isArray(sintomas) && sintomas.length > 0) {
       sintomas = `{${sintomas.map(s => `"${s}"`).join(',')}}`;
-    } else if (typeof sintomas === 'string' && sintomas.trim() !== "") {
-      sintomas = `{ "${sintomas}" }`;
     } else {
       sintomas = '{}';
     }
 
-    const insertQuery = `
-      INSERT INTO mantenimiento (
+    await pool.query(
+      `INSERT INTO mantenimiento (
         maquina, linea, fecha, tecnico, tiempo, sintomas,
         estadomotor, transmision, hidraulico,
         neumatico, electrico, observaciones,
@@ -174,23 +141,27 @@ app.post('/api/mantenimiento', upload.single('fotoman'), async (req, res) => {
         $7, $8, $9,
         $10, $11, $12,
         $13, $14
-      )`;
+      )`,
+      [
+        maquina, linea, fecha, tecnico, tiempo, sintomas,
+        estadomotor, transmision, hidraulico,
+        neumatico, electrico, observaciones,
+        estadoaccion, fotoman
+      ]
+    );
 
-    await pool.query(insertQuery, [
-      maquina, linea, fecha, tecnico, tiempo, sintomas,
-      estadomotor, transmision, hidraulico,
-      neumatico, electrico, observaciones,
-      estadoaccion, fotoman
-    ]);
-
-    res.status(201).json({ message: 'Mantenimiento guardado correctamente' });
+    res.status(200).json({ message: 'Mantenimiento guardado correctamente' });
   } catch (error) {
     console.error('Error al guardar mantenimiento:', error);
     res.status(500).json({ error: 'Error al guardar mantenimiento' });
   }
 });
 
-// PUT - Editar mantenimiento (con manejo de foto)
+app.listen(port, () => {
+  console.log(`Servidor corriendo en http://localhost:${port}`);
+});
+
+// PUT - Editar mantenimiento con foto
 app.put('/api/mantenimiento/:id', upload.single('fotoman'), async (req, res) => {
   const { id } = req.params;
   let {
@@ -200,27 +171,14 @@ app.put('/api/mantenimiento/:id', upload.single('fotoman'), async (req, res) => 
   } = req.body;
 
   try {
-    // Conversión de "tiempo" a número
-    tiempo = parseFloat(tiempo);
-
-    // Convertir fecha a ISO si es válida
-    if (fecha) {
-      fecha = new Date(fecha).toISOString();
-    }
-
-    // Obtener ruta de la imagen si se sube; si no, se mantiene lo actual
     const fotoman = req.file ? `/uploads/${req.file.filename}` : null;
 
-    // Manejar "sintomas"
     if (Array.isArray(sintomas) && sintomas.length > 0) {
       sintomas = `{${sintomas.map(s => `"${s}"`).join(',')}}`;
-    } else if (typeof sintomas === 'string' && sintomas.trim() !== "") {
-      sintomas = `{ "${sintomas}" }`;
     } else {
       sintomas = '{}';
     }
 
-    // Construir query de actualización (si se sube nueva foto, actualizar campo fotoman)
     const query = `
       UPDATE mantenimiento SET
         maquina=$1, linea=$2, fecha=$3, tecnico=$4, tiempo=$5,
@@ -231,20 +189,20 @@ app.put('/api/mantenimiento/:id', upload.single('fotoman'), async (req, res) => 
     `;
 
     const values = fotoman
-      ? [maquina, linea, fecha, tecnico, tiempo, sintomas, estadomotor,
-         transmision, hidraulico, neumatico, electrico, observaciones,
-         estadoaccion, fotoman, id]
-      : [maquina, linea, fecha, tecnico, tiempo, sintomas, estadomotor,
-         transmision, hidraulico, neumatico, electrico, observaciones,
-         estadoaccion, id];
+      ? [maquina, linea, fecha, tecnico, tiempo, sintomas, estadomotor, transmision, hidraulico,
+         neumatico, electrico, observaciones, estadoaccion, fotoman, id]
+      : [maquina, linea, fecha, tecnico, tiempo, sintomas, estadomotor, transmision, hidraulico,
+         neumatico, electrico, observaciones, estadoaccion, id];
 
     await pool.query(query, values);
+
     res.status(200).json({ message: 'Mantenimiento actualizado correctamente' });
   } catch (error) {
     console.error('Error al actualizar mantenimiento:', error);
     res.status(500).json({ error: 'Error al actualizar mantenimiento' });
   }
 });
+
 
 // DELETE - Eliminar mantenimiento
 app.delete('/api/mantenimiento/:id', async (req, res) => {
@@ -258,12 +216,5 @@ app.delete('/api/mantenimiento/:id', async (req, res) => {
   }
 });
 
-// Endpoint para test de salud (opcional)
-app.get('/health', (req, res) => {
-  res.send('OK');
-});
 
-// Iniciar el servidor
-app.listen(port, () => {
-  console.log(`Servidor corriendo en http://localhost:${port}`);
-});
+
