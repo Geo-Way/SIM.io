@@ -411,7 +411,8 @@ async function comprimirImagen(file, calidad = 0.6) {
   });
 }
 
-// Evento del formulario actualizado con compresión
+<script>
+// Evento del formulario con compresión
 const formMantenimiento = document.getElementById("formMantenimiento");
 
 if (rolUsuario === "viewer") {
@@ -420,13 +421,12 @@ if (rolUsuario === "viewer") {
     alert("No tienes permisos para registrar o editar mantenimientos.");
   });
 } else {
-  formMantenimiento.addEventListener("submit", async function (e) {
+  formMantenimiento.addEventListener("submit", async function(e) {
     e.preventDefault();
-
     const form = e.target;
     const formData = new FormData();
 
-    // Extraer campos manualmente, ya que se usa la compresión de imagen
+    // Extraer manualmente los campos del formulario
     const fields = [
       "maquina", "linea", "fecha", "tecnico", "tiempo", "observaciones",
       "estadomotor", "transmision", "hidraulico", "neumatico", "electrico", "estadoaccion"
@@ -440,7 +440,7 @@ if (rolUsuario === "viewer") {
       formData.append("id", idEditando);
     }
 
-    // Checkbox de síntomas
+    // Agregar los checkboxes seleccionados de síntomas
     const sintomasSeleccionados = Array.from(form.querySelectorAll('input[name="sintomas"]:checked'))
       .map(cb => cb.value);
     sintomasSeleccionados.forEach(val => formData.append("sintomas", val));
@@ -452,10 +452,32 @@ if (rolUsuario === "viewer") {
       formData.append("fotoman", comprimida, archivo.name);
     }
 
+    // Aquí es donde se hace la llamada al API para guardar los datos
+    try {
+      const method = idEditando ? "PUT" : "POST";
+      const url = idEditando
+        ? `https://sim-io.onrender.com/api/mantenimiento/${idEditando}`
+        : `https://sim-io.onrender.com/api/mantenimiento`;
 
+      const res = await fetch(url, { method, body: formData });
+      if (!res.ok) throw new Error(await res.text());
+
+      alert(`✅ Mantenimiento ${idEditando ? "actualizado" : "guardado"} correctamente.`);
+      form.reset();
+      idEditando = null;
+      cargarMantenimientos();
+    } catch (err) {
+      console.error("❌ Error al guardar:", err.message);
+      alert("❌ Hubo un error al guardar el mantenimiento.");
+    }
+  });
 }
+</script>
+
 
 </script>
+
+  
 <script>
 document.getElementById("nombreRol").innerText = rolUsuario;
 
