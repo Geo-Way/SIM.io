@@ -396,22 +396,6 @@ async function eliminarMantenimiento(id) {
 <script>
 
 
-  const form = e.target;
-  const formData = new FormData(form);
-
-  // Añadir síntomas (checkboxes)
-  const sintomasSeleccionados = Array.from(form.querySelectorAll('input[name="sintomas"]:checked'))
-    .map(cb => cb.value);
-  formData.delete("sintomas"); // elimina anteriores si los hubiera
-  sintomasSeleccionados.forEach(val => formData.append("sintomas", val));
-
-  // Validar imagen solo si es un nuevo registro (no edición)
-  const archivo = formData.get("fotoman");
-  if (!idEditando && archivo && archivo.size > 500 * 1024) {
-    alert("⚠️ La imagen excede los 500 KB permitidos.");
-    return;
-  }
-
   try {
     const method = idEditando ? "PUT" : "POST";
     const url = idEditando
