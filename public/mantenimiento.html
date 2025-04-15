@@ -386,25 +386,7 @@ window.onload = cargarMantenimientos;
 </script>
 <!-- ... (omitido por brevedad, ya está bien estructurado) -->
 
-<script>
 
-
-
-
-async function eliminarMantenimiento(id) {
-  if (!confirm("¿Estás seguro de eliminar este mantenimiento?")) return;
-
-  try {
-    const res = await fetch(`https://sim-io.onrender.com/api/mantenimiento/${id}`, { method: "DELETE" });
-    if (!res.ok) throw new Error("Error al eliminar");
-    alert("✅ Eliminado correctamente.");
-    cargarMantenimientos();
-  } catch (err) {
-    alert("❌ Error al eliminar.");
-    console.error(err);
-  }
-}
-</script>
 
 <script>
 
