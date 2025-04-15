@@ -184,7 +184,7 @@
   </div>
   
 <div class="mt-4 flex gap-4">
-  <button onclick="window.print()" class="bg-green-600 hover:bg-green-700 text-white font-semibold px-4 py-2 rounded">Imprimir PDF</button>
+  <button onclick="generarInformePDF()" class="bg-green-600 hover:bg-green-700 text-white font-semibold px-4 py-2 rounded">Generar Informe PDF</button>
   <button onclick="exportarCSV()" class="bg-yellow-500 hover:bg-yellow-600 text-white font-semibold px-4 py-2 rounded">Exportar CSV</button>
 </div>
 
@@ -524,6 +524,69 @@ if (rolUsuario === "viewer") {
 }
 
 // Asegurar que los botones se rendericen correctamente para admin/tecnico
+async function generarInformePDF() {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+
+  doc.setFontSize(16);
+  doc.text("Informe de Mantenimiento - SIMio", 14, 20);
+  doc.setFontSize(10);
+  doc.text("Generado: " + new Date().toLocaleString(), 14, 28);
+
+  // Imprimir informe de mantenimientos
+  const rows = datosMantenimiento.map(m => [
+    m.fecha, m.maquina, m.linea, m.tecnico, m.tiempo,
+    m.estadomotor, m.transmision, m.hidraulico, m.neumatico,
+    m.electrico, m.sintomas, m.observaciones, m.estadoaccion
+  ]);
+
+  doc.autoTable({
+    head: [["Fecha", "Máquina", "Línea", "Técnico", "Horas", "Motor", "Transmisión", "Hidráulico", "Neumático", "Eléctrico", "Síntomas", "Observaciones", "Acción"]],
+    body: rows,
+    startY: 32,
+    styles: { fontSize: 8, cellWidth: 'wrap' },
+    headStyles: { fillColor: [220, 53, 69] }
+  });
+
+  // Estadísticas por máquina
+  const resumen = {};
+  datosMantenimiento.forEach(r => {
+    resumen[r.maquina] = (resumen[r.maquina] || 0) + 1;
+  });
+
+  const etiquetas = Object.keys(resumen);
+  const valores = Object.values(resumen);
+
+  // Crear gráfico en canvas temporal
+  const canvas = document.createElement("canvas");
+  canvas.width = 600;
+  canvas.height = 300;
+  const ctx = canvas.getContext("2d");
+
+  new Chart(ctx, {
+    type: "bar",
+    data: {
+      labels: etiquetas,
+      datasets: [{
+        label: "Número de mantenimientos",
+        data: valores
+      }]
+    },
+    options: {
+      responsive: false,
+      plugins: { legend: { display: false } }
+    }
+  });
+
+  // Esperar a que renderice
+  await new Promise(resolve => setTimeout(resolve, 1000));
+  const imgData = canvas.toDataURL("image/png");
+  doc.addPage();
+  doc.text("Mantenimientos por máquina", 14, 20);
+  doc.addImage(imgData, "PNG", 14, 30, 180, 80);
+
+  doc.save("informe_mantenimientos.pdf");
+}
 
 </script>
 
