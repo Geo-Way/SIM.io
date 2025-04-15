@@ -1,4 +1,4 @@
-<!-- Archivo completo de mantenimiento.html actualizado -->
+<script>const rolUsuario = localStorage.getItem("role") || "viewer";</script><!-- Archivo completo de mantenimiento.html actualizado -->
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -7,39 +7,21 @@
   <title>Mantenimiento</title>
   <script src="https://cdn.tailwindcss.com"></script>
 
-<script>
-const rolUsuario = localStorage.getItem("role") || "viewer";
-</script>
 
 
-<script>
-  const rolUsuario = localStorage.getItem("role") || "viewer";
-</script>
+
+
 
 </head>
 
-<script>
-  const rolUsuario = localStorage.getItem("role") || "viewer";
 
-  if (!localStorage.getItem("loggedIn")) {
-    alert("Debes iniciar sesión para acceder.");
-    window.location.href = "index.html";
-  }
-</script>
 
 <body class="bg-gray-100 text-gray-900">
 
 <!-- Aquí insertamos el header y el formulario como ya los tienes -->
 
   
-<script>
-  const rolUsuario = localStorage.getItem("role") || "viewer";
 
-  if (!localStorage.getItem("loggedIn")) {
-    alert("Debes iniciar sesión para acceder.");
-    window.location.href = "index.html";
-  }
-</script>
 
 <body class="bg-gray-100 text-gray-900">
 
@@ -61,6 +43,7 @@ const rolUsuario = localStorage.getItem("role") || "viewer";
       <a href="mantenimiento.html" class="text-red-600 hover:text-red-600 font-bold">Mantenimiento</a>
        <a href="maquinas.html" class="text-gray-700 hover:text-red-600">Diagrama de Máquinas</a>
     </nav>
+<span id="rolVisual" class="text-xs text-gray-600 italic ml-4">(Rol: <span id="nombreRol">desconocido</span>)</span>
 
 
     <!-- Botón hamburguesa -->
@@ -610,24 +593,10 @@ function renderTabla(data) {
 </script>
 
 
-<script>
-  window.addEventListener("DOMContentLoaded", () => {
-    const rol = localStorage.getItem("rol") || "viewer";
-    const spanRol = document.getElementById("nombreRol");
-    if (spanRol) spanRol.textContent = rol;
-  });
-</script>
 
 
-<script>
-  window.addEventListener("DOMContentLoaded", () => {
-    const spanRol = document.getElementById("nombreRol");
-    if (spanRol) {
-      const role = localStorage.getItem("role") || "viewer";
-      spanRol.textContent = role;
-    }
-  });
-</script>
+
+
 
 </body>
 </html>
