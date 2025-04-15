@@ -407,11 +407,6 @@ async function eliminarMantenimiento(id) {
 </script>
 
 <script>
-document.getElementById("formMantenimiento").addEventListener("submit", async function (e) {
-  e.preventDefault();
-
-  const form = e.target;
-  const formData = new FormData(form);
 
   // Añadir síntomas (checkboxes)
   const sintomasSeleccionados = Array.from(form.querySelectorAll('input[name="sintomas"]:checked'))
