@@ -418,7 +418,20 @@ window.onload = cargarMantenimientos;
 });
 </script>
 
-    
+ <div id="reportePDF" class="p-6" style="display:none;">
+  <h1 class="text-xl font-bold mb-4">📄 Informe de Mantenimiento - SIMio</h1>
+
+  <div id="graficoLineaTiempo" style="width:100%; height:300px; margin-bottom:20px;"></div>
+  <div id="graficoPorLinea" style="width:100%; height:300px; margin-bottom:20px;"></div>
+  <div id="graficoEstados" style="width:100%; height:300px; margin-bottom:20px;"></div>
+
+  <div id="tablaResumen" class="mt-6 text-sm"></div>
+
+  <div class="text-center mt-10 text-xs text-gray-600">
+    © 2025 GEOWAY, Technology-Based Initiative – IBT. All rights reserved.
+  </div>
+</div>
+   
 
 <!-- Footer final -->
 <footer class="bg-gray-600 text-gray-200 text-center py-6 mt-10 text-sm">
@@ -588,7 +601,99 @@ async function generarInformePDF() {
   doc.save("informe_mantenimientos.pdf");
 }
 
+<script>
+async function generarInformePDF() {
+  const data = datosMantenimiento;
+
+  // Procesar datos para gráficos
+  const fechas = data.map(d => d.fecha);
+  const conteoPorFecha = fechas.reduce((acc, f) => {
+    acc[f] = (acc[f] || 0) + 1;
+    return acc;
+  }, {});
+  const fechasOrdenadas = Object.keys(conteoPorFecha).sort();
+  const valoresFechas = fechasOrdenadas.map(f => conteoPorFecha[f]);
+
+  const porLinea = {};
+  const porEstado = {};
+
+  data.forEach(d => {
+    const linea = d.linea || "Desconocida";
+    const estado = d.estadoaccion || "Sin estado";
+    porLinea[linea] = (porLinea[linea] || 0) + 1;
+    porEstado[estado] = (porEstado[estado] || 0) + 1;
+  });
+
+  // Inyectar la tabla
+  const tabla = document.getElementById("tablaResumen");
+  tabla.innerHTML = `<table class="table-auto border w-full text-xs">
+    <thead class="bg-gray-200"><tr>
+      <th>Fecha</th><th>Máquina</th><th>Línea</th><th>Técnico</th><th>Horas</th>
+      <th>Motor</th><th>Transmisión</th><th>Hidráulico</th><th>Neumático</th>
+      <th>Eléctrico</th><th>Síntomas</th><th>Observaciones</th><th>Acción</th>
+    </tr></thead>
+    <tbody>
+      ${data.map(d => `
+        <tr class="border-t">
+          <td>${d.fecha}</td><td>${d.maquina}</td><td>${d.linea}</td><td>${d.tecnico}</td><td>${d.tiempo}</td>
+          <td>${d.estadomotor}</td><td>${d.transmision}</td><td>${d.hidraulico}</td><td>${d.neumatico}</td>
+          <td>${d.electrico}</td><td>${d.sintomas}</td><td>${d.observaciones}</td><td>${d.estadoaccion}</td>
+        </tr>`).join('')}
+    </tbody>
+  </table>`;
+
+  // Dibujar gráficos
+  const ctx1 = document.createElement("canvas");
+  const ctx2 = document.createElement("canvas");
+  const ctx3 = document.createElement("canvas");
+  document.getElementById("graficoLineaTiempo").innerHTML = ""; document.getElementById("graficoLineaTiempo").appendChild(ctx1);
+  document.getElementById("graficoPorLinea").innerHTML = ""; document.getElementById("graficoPorLinea").appendChild(ctx2);
+  document.getElementById("graficoEstados").innerHTML = ""; document.getElementById("graficoEstados").appendChild(ctx3);
+
+  new Chart(ctx1, {
+    type: 'line',
+    data: { labels: fechasOrdenadas, datasets: [{ label: 'Mantenimientos por fecha', data: valoresFechas }] }
+  });
+
+  new Chart(ctx2, {
+    type: 'bar',
+    data: {
+      labels: Object.keys(porLinea),
+      datasets: [{ label: 'Mantenimientos por línea', data: Object.values(porLinea) }]
+    }
+  });
+
+  new Chart(ctx3, {
+    type: 'pie',
+    data: {
+      labels: Object.keys(porEstado),
+      datasets: [{ label: 'Distribución de estados', data: Object.values(porEstado) }]
+    }
+  });
+
+  // Esperar un poco a que los gráficos se rendericen
+  await new Promise(resolve => setTimeout(resolve, 1500));
+
+  // Generar PDF horizontal
+  const options = {
+    margin: 0.5,
+    filename: `informe_mantenimiento_${new Date().toISOString().slice(0,10)}.pdf`,
+    image: { type: 'jpeg', quality: 0.95 },
+    html2canvas: { scale: 2 },
+    jsPDF: { unit: 'in', format: 'a4', orientation: 'landscape' }
+  };
+
+  const element = document.getElementById("reportePDF");
+  element.style.display = "block";
+  await html2pdf().from(element).set(options).save();
+  element.style.display = "none";
+}
 </script>
+
+  
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 </body>
 </html>
