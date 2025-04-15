@@ -542,6 +542,32 @@ if (rolUsuario === "viewer") {
 </script>
 <script>
 async function generarInformePDF() {
+  const element = document.getElementById("reportePDF");
+
+  // Mostrar el contenedor pero sin interferir en la vista
+  element.style.display = "block";
+  element.style.position = "absolute";
+  element.style.left = "-9999px";
+
+  // Esperar un poco para asegurar renderizado completo (Canvas, DOM, etc.)
+  await new Promise(resolve => setTimeout(resolve, 1500));
+
+  const options = {
+    margin: 0.5,
+    filename: `informe_mantenimiento_${new Date().toISOString().slice(0, 10)}.pdf`,
+    image: { type: 'jpeg', quality: 0.98 },
+    html2canvas: { scale: 2 },
+    jsPDF: { unit: 'in', format: 'a4', orientation: 'landscape' }
+  };
+
+  await html2pdf().from(element).set(options).save();
+
+  // Restaurar visibilidad
+  element.style.display = "none";
+  element.style.position = "";
+  element.style.left = "";
+}
+
   const data = datosMantenimiento;
 
   // Procesar datos para gráficos
