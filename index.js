@@ -14,17 +14,7 @@ app.use(bodyParser.json());
 app.use(express.static('public'));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, 'uploads/');
-  },
-  filename: (req, file, cb) => {
-    const ext = path.extname(file.originalname);
-    const uniqueName = Date.now() + '-' + Math.round(Math.random() * 1E9) + ext;
-    cb(null, uniqueName);
-  }
-});
-
+// ✅ SOLO UNA VEZ: Configuración de almacenamiento para multer
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, 'uploads/');
@@ -41,12 +31,13 @@ const upload = multer({
   limits: { fileSize: 500 * 1024 } // 500 KB
 });
 
-
-
+// Configuración de la base de datos PostgreSQL
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl: { rejectUnauthorized: false }
 });
+
+// ------------------- INVENTARIO -------------------
 
 // POST - Registrar artículo
 app.post('/api/inventario', async (req, res) => {
@@ -115,6 +106,7 @@ app.put('/api/inventario/:id', async (req, res) => {
   }
 });
 
+// DELETE - Eliminar artículo
 app.delete("/api/inventario/:id", async (req, res) => {
   const id = req.params.id;
   try {
@@ -125,6 +117,8 @@ app.delete("/api/inventario/:id", async (req, res) => {
     res.status(500).send("Error al eliminar");
   }
 });
+
+// ------------------- MANTENIMIENTO -------------------
 
 // GET - Listar mantenimientos
 app.get('/api/mantenimiento', async (req, res) => {
@@ -181,10 +175,6 @@ app.post('/api/mantenimiento', upload.single('fotoman'), async (req, res) => {
   }
 });
 
-app.listen(port, () => {
-  console.log(`Servidor corriendo en http://localhost:${port}`);
-});
-
 // PUT - Editar mantenimiento con foto
 app.put('/api/mantenimiento/:id', upload.single('fotoman'), async (req, res) => {
   const { id } = req.params;
@@ -227,7 +217,6 @@ app.put('/api/mantenimiento/:id', upload.single('fotoman'), async (req, res) => 
   }
 });
 
-
 // DELETE - Eliminar mantenimiento
 app.delete('/api/mantenimiento/:id', async (req, res) => {
   const { id } = req.params;
@@ -240,5 +229,12 @@ app.delete('/api/mantenimiento/:id', async (req, res) => {
   }
 });
 
+// Endpoint opcional para test de salud
+app.get('/health', (req, res) => {
+  res.send('OK');
+});
 
-
+// Iniciar servidor
+app.listen(port, () => {
+  console.log(`Servidor corriendo en http://localhost:${port}`);
+});
