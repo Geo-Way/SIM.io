@@ -46,6 +46,8 @@
     <a href="index.html" class="block py-2 text-gray-700 hover:text-red-600">Home</a>
     <a href="inventario.html" class="block py-2 text-gray-700 hover:text-red-600">Inventario</a>
     <a href="mantenimiento.html" class="block py-2 text-gray-700 hover:text-red-600">Mantenimiento</a>
+    <a href="maquinas.html" class="block py-2 text-gray-700 hover:text-red-600">Diagrama de Máquinas</a>
+    <a href="info.html" class="block py-2 text-gray-700 hover:text-red-600"> ℹ️ </a>
   </div>
 </header>
   
@@ -59,7 +61,6 @@
     <input class="p-2 border rounded" name="tiempo" type="number" placeholder="Horas mantenimiento" step="0.1"/>
     <input class="p-2 border rounded" name="observaciones" placeholder="Observaciones"/>
     <input type="hidden" name="id" id="idMantenimiento" />
-
 
     <!-- Foto -->
 <div>
@@ -183,7 +184,6 @@
   <button onclick="window.print()" class="bg-green-600 hover:bg-green-700 text-white font-semibold px-4 py-2 rounded">Imprimir PDF</button>
   <button onclick="exportarCSV()" class="bg-yellow-500 hover:bg-yellow-600 text-white font-semibold px-4 py-2 rounded">Exportar CSV</button>
 </div>
-
 
 <script>
 if (rolUsuario === "viewer") {
@@ -511,8 +511,6 @@ formMantenimiento.addEventListener("submit", async function (e) {
   }
 });
 </script>
-
-    
 
 <script>
 document.getElementById("nombreRol").innerText = rolUsuario;
