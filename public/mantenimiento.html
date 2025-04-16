@@ -595,6 +595,7 @@
       }
     });
   </script>
+
   <script>
   document.addEventListener("DOMContentLoaded", () => {
     const params = new URLSearchParams(window.location.search);
@@ -603,12 +604,15 @@
       const filtroInput = document.getElementById("filtroMaquina");
       if (filtroInput) {
         filtroInput.value = maquina;
-        // Opcionalmente, puedes llamar a la función de filtrado:
-        aplicarFiltros();
+        // Llama a la función de filtrado, si está definida
+        if (typeof aplicarFiltros === "function") {
+          aplicarFiltros();
+        }
       }
     }
   });
 </script>
+
 
   <!-- Footer -->
   <footer class="bg-gray-600 text-gray-200 text-center py-6 mt-10 text-sm">
