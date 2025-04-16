@@ -288,12 +288,14 @@ function editarMantenimiento(id) {
 
   // Convertir el campo "sintomas" a array si es una cadena
   let sintomasArray = mantenimiento.sintomas;
-  if (typeof sintomasArray === 'string') {
-    // Elimina las llaves y separa por coma
-    sintomasArray = sintomasArray.slice(1, -1).split(',');
-    // Opcional: limpiar espacios si es necesario
-    sintomasArray = sintomasArray.map(s => s.trim());
-  }
+    if (!Array.isArray(sintomas)) {
+      sintomas = sintomas ? `{ "${sintomas}" }` : '{}';
+    } else if (sintomas.length > 0) {
+      sintomas = `{${sintomas.map(s => `"${s}"`).join(',')}}`;
+    } else {
+      sintomas = '{}';
+    }
+
 
   const form = document.getElementById("formMantenimiento");
   idEditando = id;
