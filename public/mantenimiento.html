@@ -643,15 +643,21 @@ function generarGraficos() {
 
 // Función que se invoca al presionar el botón de imprimir
 function imprimirInforme() {
-  // Crea el contenedor con gráficos de forma dinámica
+  // Crea el contenedor de gráficos de forma dinámica.
   crearContenedorGrafico();
-  // Genera los gráficos con los datos
+  // Genera los gráficos con los datos.
   generarGraficos();
-  // Invoca la impresión
-  window.print();
-  // Una vez impreso, elimina el contenedor para no dejarlo en el DOM
-  document.getElementById("chartContainer").remove();
+  // Espera 1 segundo para que Chart.js termine de renderizar los gráficos.
+  setTimeout(function() {
+    window.print();
+    // Una vez impreso, elimina el contenedor para no dejarlo en el DOM.
+    const chartContainer = document.getElementById("chartContainer");
+    if (chartContainer) {
+      chartContainer.remove();
+    }
+  }, 1000); // 1000 milisegundos = 1 segundo.
 }
+
 
     
   </script>
