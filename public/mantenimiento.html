@@ -14,44 +14,33 @@
     }
   </script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
- 
   <style>
-  /* Estilos de impresión */
-  @media print {
-    @page { size: landscape; }
-    /* Hacer que el contenedor con scroll se expanda para no cortar la tabla */
-    .overflow-x-auto {
-      overflow: visible !important;
+    /* Estilos de impresión */
+    @media print {
+      @page { size: landscape; }
+      /* Hacer que el contenedor con scroll se expanda para no cortar la tabla */
+      .overflow-x-auto {
+        overflow: visible !important;
+      }
+      /* Ocultar elementos interactivos o de navegación */
+      header, nav, button {
+        display: none !important;
+      }
+      body {
+        font-size: 12px;
+        color: #000;
+      }
     }
-    /* Puedes ocultar elementos interactivos o de navegación si no son necesarios */
-    header, nav, button {
-      display: none !important;
-    }
-    /* Si tienes secciones no relevantes para el informe, o bien ocúltalas */
-    /* Puedes ajustar la fuente o los colores para que queden más profesionales */
-    body {
-      font-size: 12px;
-      color: #000;
-    }
-  }
-
- 
-  .print-only {
-    display: none;
-  }
-  @media print {
+    /* El contenedor dinámico se mostrará solo en impresión */
     .print-only {
-      display: block;
+      display: none;
     }
-  }
-  /* Si deseas ajustar el layout a landscape para la impresión */
-  @media print {
-    @page { size: landscape; }
-  }
- 
-    
-</style>
-
+    @media print {
+      .print-only {
+        display: block;
+      }
+    }
+  </style>
 </head>
 <body class="bg-gray-100 text-gray-900">
   <!-- HEADER -->
@@ -97,13 +86,11 @@
       <input class="p-2 border rounded" name="tiempo" type="number" placeholder="Horas mantenimiento" step="0.1" />
       <input class="p-2 border rounded" name="observaciones" placeholder="Observaciones" />
       <input type="hidden" name="id" id="idMantenimiento" />
-
-      <!-- Campo de imagen sin compresión ni validación de tamaño -->
+      <!-- Campo de imagen (foto opcional) -->
       <div>
         <label class="block text-sm font-medium text-gray-700 mb-1" for="fotoman">Subir o Tomar Foto</label>
         <input class="p-2 border rounded w-full" type="file" name="fotoman" id="fotoman" accept="image/*" capture="environment" />
       </div>
-
       <!-- Selects -->
       <select name="estadomotor" class="p-2 border rounded">
         <option value="">Motor</option>
@@ -148,7 +135,6 @@
         <option>En seguimiento</option>
         <option>Fuera de servicio</option>
       </select>
-
       <!-- Checkboxes -->
       <fieldset class="col-span-full space-x-2">
         <legend class="font-semibold">Síntomas Encontrados</legend>
@@ -161,7 +147,6 @@
         <label><input type="checkbox" name="sintomas" value="Humo" /> Humo</label>
         <label><input type="checkbox" name="sintomas" value="Desgaste Irregular" /> Desgaste Irregular</label>
       </fieldset>
-
       <button id="btnGuardar" class="col-span-full bg-red-600 text-white p-2 rounded hover:bg-red-700" type="submit">
         Guardar
       </button>
@@ -221,20 +206,23 @@
 
     <div class="mt-4 flex gap-4">
       <button onclick="imprimirInforme()" class="bg-green-600 hover:bg-green-700 text-white font-semibold px-4 py-2 rounded">Imprimir Informe PDF</button>
-
       <button onclick="exportarCSV()" class="bg-yellow-500 hover:bg-yellow-600 text-white font-semibold px-4 py-2 rounded">Exportar CSV</button>
     </div>
-      
- 
-
-    
 
     <script>
-      // Si el usuario es "viewer", ocultar el botón Guardar
+      // Actualización del rol en el DOM y ocultar botón Guardar para "viewer"
+      document.getElementById("nombreRol").innerText = rolUsuario;
       if (rolUsuario === "viewer") {
         const btnGuardar = document.getElementById("btnGuardar");
         if (btnGuardar) btnGuardar.style.display = "none";
       }
+      window.addEventListener("DOMContentLoaded", () => {
+        const spanRol = document.getElementById("nombreRol");
+        if (spanRol) {
+          const role = localStorage.getItem("role") || "viewer";
+          spanRol.textContent = role;
+        }
+      });
     </script>
   </main>
 
@@ -245,9 +233,11 @@
 
   <!-- Scripts generales -->
   <script>
+    // Variables globales
     let datosMantenimiento = [];
     let idEditando = null;
 
+    // Filtrado y renderizado de la tabla
     function aplicarFiltros() {
       const desde = document.getElementById("filtroFechaDesde").value;
       const hasta = document.getElementById("filtroFechaHasta").value;
@@ -310,13 +300,23 @@
       });
     }
 
+    async function cargarMantenimientos() {
+      try {
+        const res = await fetch("https://sim-io.onrender.com/api/mantenimiento");
+        datosMantenimiento = await res.json();
+        renderTabla(datosMantenimiento);
+      } catch (err) {
+        console.error("Error al cargar mantenimientos:", err);
+      }
+    }
+
+    window.onload = cargarMantenimientos;
+
     async function eliminarMantenimiento(id) {
       if (!confirm("¿Estás seguro de eliminar este mantenimiento?")) return;
       try {
-        console.log("🧨 Eliminando ID:", id);
         const res = await fetch(`https://sim-io.onrender.com/api/mantenimiento/${id}`, { method: "DELETE" });
         const text = await res.text();
-        console.log("📡 Respuesta:", text);
         if (!res.ok) throw new Error(text);
         alert("✅ Eliminado correctamente.");
         cargarMantenimientos();
@@ -326,158 +326,42 @@
       }
     }
 
-function editarMantenimiento(id) {
-  let mantenimiento = datosMantenimiento.find(item => item.id === id);
-  if (!mantenimiento) return;
+    function editarMantenimiento(id) {
+      let mantenimiento = datosMantenimiento.find(item => item.id === id);
+      if (!mantenimiento) return;
 
-  // Convertir "sintomas" a arreglo
-  let sintomasArray = mantenimiento.sintomas;
-  if (typeof sintomasArray === 'string') {
-    // Si viene en formato {"valor1","valor2"}, quitamos las llaves y comillas
-    sintomasArray = sintomasArray.slice(1, -1).split(',').map(s => s.replace(/"/g, '').trim());
-  }
-  // Ya tenemos el arreglo de síntomas y podemos marcar los checkboxes según corresponda
+      // Convertir "sintomas" a arreglo
+      let sintomasArray = mantenimiento.sintomas;
+      if (typeof sintomasArray === 'string') {
+        sintomasArray = sintomasArray.slice(1, -1).split(',').map(s => s.replace(/"/g, '').trim());
+      }
 
-  const form = document.getElementById("formMantenimiento");
-  idEditando = id;
-  form.querySelector("#idMantenimiento").value = id;
+      const form = document.getElementById("formMantenimiento");
+      idEditando = id;
+      form.querySelector("#idMantenimiento").value = id;
 
-  // Rellenar campos del formulario
-  form.maquina.value = mantenimiento.maquina || "";
-  form.linea.value = mantenimiento.linea || "";
-  form.fecha.value = mantenimiento.fecha ? mantenimiento.fecha.split("T")[0] : "";
-  form.tecnico.value = mantenimiento.tecnico || "";
-  form.tiempo.value = mantenimiento.tiempo || "";
-  form.observaciones.value = mantenimiento.observaciones || "";
-  form.estadomotor.value = mantenimiento.estadomotor || "";
-  form.transmision.value = mantenimiento.transmision || "";
-  form.hidraulico.value = mantenimiento.hidraulico || "";
-  form.neumatico.value = mantenimiento.neumatico || "";
-  form.electrico.value = mantenimiento.electrico || "";
-  form.estadoaccion.value = mantenimiento.estadoaccion || "";
+      // Rellenar campos del formulario
+      form.maquina.value = mantenimiento.maquina || "";
+      form.linea.value = mantenimiento.linea || "";
+      form.fecha.value = mantenimiento.fecha ? mantenimiento.fecha.split("T")[0] : "";
+      form.tecnico.value = mantenimiento.tecnico || "";
+      form.tiempo.value = mantenimiento.tiempo || "";
+      form.observaciones.value = mantenimiento.observaciones || "";
+      form.estadomotor.value = mantenimiento.estadomotor || "";
+      form.transmision.value = mantenimiento.transmision || "";
+      form.hidraulico.value = mantenimiento.hidraulico || "";
+      form.neumatico.value = mantenimiento.neumatico || "";
+      form.electrico.value = mantenimiento.electrico || "";
+      form.estadoaccion.value = mantenimiento.estadoaccion || "";
 
-  // Marcar los checkboxes de síntomas basándonos en el arreglo obtenido
-  form.querySelectorAll('input[name="sintomas"]').forEach(cb => {
-    cb.checked = sintomasArray.includes(cb.value);
-  });
+      // Marcar los checkboxes de síntomas
+      form.querySelectorAll('input[name="sintomas"]').forEach(cb => {
+        cb.checked = sintomasArray.includes(cb.value);
+      });
 
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-}
-
-
-
-function generarGraficos() {
-  // 1. Línea de tiempo de mantenimientos: agrupar por fecha (puedes contar mantenimientos por día)
-  const fechas = {};
-  datosMantenimiento.forEach(item => {
-    const fecha = item.fecha ? item.fecha.split("T")[0] : 'Sin fecha';
-    fechas[fecha] = (fechas[fecha] || 0) + 1;
-  });
-  const labelsTimeline = Object.keys(fechas).sort();
-  const dataTimeline = labelsTimeline.map(fecha => fechas[fecha]);
-
-  const ctxTimeline = document.getElementById('timelineChart').getContext('2d');
-  new Chart(ctxTimeline, {
-    type: 'line',
-    data: {
-      labels: labelsTimeline,
-      datasets: [{
-        label: 'Mantenimientos',
-        data: dataTimeline,
-        borderColor: 'rgba(75,192,192,1)',
-        backgroundColor: 'rgba(75,192,192,0.2)',
-        fill: true,
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
-  });
 
-  // 2. Gráfico de barras por línea: agrupar por el campo "linea"
-  const mantenimientosPorLinea = {};
-  datosMantenimiento.forEach(item => {
-    const linea = item.linea || 'Sin Línea';
-    mantenimientosPorLinea[linea] = (mantenimientosPorLinea[linea] || 0) + 1;
-  });
-  const labelsLine = Object.keys(mantenimientosPorLinea);
-  const dataBar = labelsLine.map(linea => mantenimientosPorLinea[linea]);
-
-  const ctxBar = document.getElementById('lineBarChart').getContext('2d');
-  new Chart(ctxBar, {
-    type: 'bar',
-    data: {
-      labels: labelsLine,
-      datasets: [{
-        label: 'Mantenimientos por Línea',
-        data: dataBar,
-        backgroundColor: 'rgba(153, 102, 255, 0.6)',
-        borderColor: 'rgba(153, 102, 255, 1)',
-        borderWidth: 1
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-    }
-  });
-
-  // 3. Diagrama de torta: agrupar por "estadoaccion"
-  const estadoDistribucion = {};
-  datosMantenimiento.forEach(item => {
-    const estado = item.estadoaccion || 'Sin Estado';
-    estadoDistribucion[estado] = (estadoDistribucion[estado] || 0) + 1;
-  });
-  const labelsPie = Object.keys(estadoDistribucion);
-  const dataPie = labelsPie.map(estado => estadoDistribucion[estado]);
-
-  const ctxPie = document.getElementById('statusPieChart').getContext('2d');
-  new Chart(ctxPie, {
-    type: 'pie',
-    data: {
-      labels: labelsPie,
-      datasets: [{
-        data: dataPie,
-        backgroundColor: [
-          'rgba(255, 99, 132, 0.6)',
-          'rgba(54, 162, 235, 0.6)',
-          'rgba(255, 206, 86, 0.6)',
-          'rgba(75, 192, 192, 0.6)'
-        ]
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-    }
-  });
-}
-
-// Luego de cargar los mantenimientos, llama a generarGraficos() y muestra el informe:
-async function cargarMantenimientos() {
-  try {
-    const res = await fetch("https://sim-io.onrender.com/api/mantenimiento");
-    datosMantenimiento = await res.json();
-    renderTabla(datosMantenimiento);
-    // Mostrar el informe técnico y generar gráficos
-    document.getElementById("informeTecnico").classList.remove("hidden");
-    generarGraficos();
-  } catch (err) {
-    console.error("Error al cargar mantenimientos:", err);
-  }
-}
-
-
-
-
-
-
-
-
-
-    
-    
     function exportarCSV() {
       let csv = "Fecha,Máquina,Línea,Técnico,Horas,Motor,Transmisión,Hidráulico,Neumático,Eléctrico,Síntomas,Observaciones,Acción,Foto\n";
       datosMantenimiento.forEach(row => {
@@ -492,177 +376,191 @@ async function cargarMantenimientos() {
       window.URL.revokeObjectURL(url);
     }
 
-    async function cargarMantenimientos() {
-      try {
-        const res = await fetch("https://sim-io.onrender.com/api/mantenimiento");
-        datosMantenimiento = await res.json();
-        renderTabla(datosMantenimiento);
-      } catch (err) {
-        console.error("Error al cargar mantenimientos:", err);
-      }
+    // Evento de envío del formulario
+    const formMantenimiento = document.getElementById("formMantenimiento");
+    if (rolUsuario === "viewer") {
+      formMantenimiento.addEventListener("submit", function(e) {
+        e.preventDefault();
+        alert("No tienes permisos para registrar o editar mantenimientos.");
+      });
+    } else {
+      formMantenimiento.addEventListener("submit", async function(e) {
+        e.preventDefault();
+        const form = e.target;
+        // Validar los 6 campos obligatorios
+        const maquina = form.maquina.value.trim();
+        const linea = form.linea.value.trim();
+        const fecha = form.fecha.value.trim();
+        const tecnico = form.tecnico.value.trim();
+        const tiempo = form.tiempo.value.trim();
+        const observaciones = form.observaciones.value.trim();
+        if (!maquina || !linea || !fecha || !tecnico || !tiempo || !observaciones) {
+          alert("Por favor, completa los campos obligatorios:\n- Máquina\n- Línea\n- Fecha\n- Técnico\n- Horas mantenimiento\n- Observaciones");
+          return;
+        }
+        const formData = new FormData(form);
+        const sintomasSeleccionados = Array.from(form.querySelectorAll('input[name="sintomas"]:checked'))
+          .map(cb => cb.value);
+        formData.delete("sintomas");
+        sintomasSeleccionados.forEach(val => formData.append("sintomas", val));
+        const archivo = form.fotoman.files[0];
+        if (archivo) {
+          formData.set("fotoman", archivo, archivo.name);
+        }
+        try {
+          const method = idEditando ? "PUT" : "POST";
+          const url = idEditando
+            ? `https://sim-io.onrender.com/api/mantenimiento/${idEditando}`
+            : `https://sim-io.onrender.com/api/mantenimiento`;
+          const res = await fetch(url, { method, body: formData });
+          if (!res.ok) throw new Error(await res.text());
+          alert(`✅ Mantenimiento ${idEditando ? "actualizado" : "guardado"} correctamente.`);
+          form.reset();
+          idEditando = null;
+          cargarMantenimientos();
+        } catch (err) {
+          console.error("❌ Error al guardar:", err.message);
+          alert("❌ Hubo un error al guardar el mantenimiento:\n" + err.message);
+        }
+      });
     }
 
-    window.onload = cargarMantenimientos;
+    // Función para crear de forma dinámica el contenedor de gráficos (se mostrará solo en impresión)
+    function crearContenedorGrafico() {
+      const container = document.createElement("div");
+      container.id = "chartContainer";
+      container.className = "print-only";
+      
+      const h2 = document.createElement("h2");
+      h2.textContent = "Informe Técnico";
+      h2.className = "text-xl font-semibold text-gray-700 mb-4";
+      container.appendChild(h2);
 
+      const canvasTimeline = document.createElement("canvas");
+      canvasTimeline.id = "timelineChart";
+      canvasTimeline.style.marginBottom = "30px";
+      container.appendChild(canvasTimeline);
 
+      const canvasBar = document.createElement("canvas");
+      canvasBar.id = "lineBarChart";
+      canvasBar.style.marginBottom = "30px";
+      container.appendChild(canvasBar);
 
+      const canvasPie = document.createElement("canvas");
+      canvasPie.id = "statusPieChart";
+      container.appendChild(canvasPie);
 
-// Luego de cargar los mantenimientos, llama a generarGraficos() y muestra el informe:
-async function cargarMantenimientos() {
-  try {
-    const res = await fetch("https://sim-io.onrender.com/api/mantenimiento");
-    datosMantenimiento = await res.json();
-    renderTabla(datosMantenimiento);
-    // Mostrar el informe técnico y generar gráficos
-    document.getElementById("informeTecnico").classList.remove("hidden");
-    generarGraficos();
-  } catch (err) {
-    console.error("Error al cargar mantenimientos:", err);
-  }
-}
-
-    // Función para crear de forma dinámica el contenedor de gráficos
-function crearContenedorGrafico() {
-  const container = document.createElement("div");
-  container.id = "chartContainer";
-  container.className = "print-only"; // Se mostrará solo en impresión
-  
-  // Crea los canvas para cada gráfico
-  const h2 = document.createElement("h2");
-  h2.textContent = "Informe Técnico";
-  h2.className = "text-xl font-semibold text-gray-700 mb-4";
-  container.appendChild(h2);
-
-  const canvasTimeline = document.createElement("canvas");
-  canvasTimeline.id = "timelineChart";
-  canvasTimeline.style.marginBottom = "30px"; // opcional para separación
-  container.appendChild(canvasTimeline);
-
-  const canvasBar = document.createElement("canvas");
-  canvasBar.id = "lineBarChart";
-  canvasBar.style.marginBottom = "30px";
-  container.appendChild(canvasBar);
-
-  const canvasPie = document.createElement("canvas");
-  canvasPie.id = "statusPieChart";
-  container.appendChild(canvasPie);
-
-  // Agrega el contenedor al final del body
-  document.body.appendChild(container);
-}
-
-// Función que genera los gráficos, igual que antes
-function generarGraficos() {
-  // 1. Línea de tiempo
-  const fechas = {};
-  datosMantenimiento.forEach(item => {
-    const fecha = item.fecha ? item.fecha.split("T")[0] : 'Sin fecha';
-    fechas[fecha] = (fechas[fecha] || 0) + 1;
-  });
-  const labelsTimeline = Object.keys(fechas).sort();
-  const dataTimeline = labelsTimeline.map(fecha => fechas[fecha]);
-
-  const ctxTimeline = document.getElementById('timelineChart').getContext('2d');
-  new Chart(ctxTimeline, {
-    type: 'line',
-    data: {
-      labels: labelsTimeline,
-      datasets: [{
-        label: 'Mantenimientos',
-        data: dataTimeline,
-        borderColor: 'rgba(75,192,192,1)',
-        backgroundColor: 'rgba(75,192,192,0.2)',
-        fill: true,
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
+      document.body.appendChild(container);
     }
-  });
 
-  // 2. Gráfico de barras por Línea
-  const mantenimientosPorLinea = {};
-  datosMantenimiento.forEach(item => {
-    const linea = item.linea || 'Sin Línea';
-    mantenimientosPorLinea[linea] = (mantenimientosPorLinea[linea] || 0) + 1;
-  });
-  const labelsLine = Object.keys(mantenimientosPorLinea);
-  const dataBar = labelsLine.map(linea => mantenimientosPorLinea[linea]);
+    // Función para generar gráficos usando Chart.js
+    function generarGraficos() {
+      // Gráfico 1: Línea de tiempo de mantenimientos
+      const fechas = {};
+      datosMantenimiento.forEach(item => {
+        const fecha = item.fecha ? item.fecha.split("T")[0] : 'Sin fecha';
+        fechas[fecha] = (fechas[fecha] || 0) + 1;
+      });
+      const labelsTimeline = Object.keys(fechas).sort();
+      const dataTimeline = labelsTimeline.map(fecha => fechas[fecha]);
 
-  const ctxBar = document.getElementById('lineBarChart').getContext('2d');
-  new Chart(ctxBar, {
-    type: 'bar',
-    data: {
-      labels: labelsLine,
-      datasets: [{
-        label: 'Mantenimientos por Línea',
-        data: dataBar,
-        backgroundColor: 'rgba(153, 102, 255, 0.6)',
-        borderColor: 'rgba(153, 102, 255, 1)',
-        borderWidth: 1
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
+      const ctxTimeline = document.getElementById('timelineChart').getContext('2d');
+      new Chart(ctxTimeline, {
+        type: 'line',
+        data: {
+          labels: labelsTimeline,
+          datasets: [{
+            label: 'Mantenimientos',
+            data: dataTimeline,
+            borderColor: 'rgba(75,192,192,1)',
+            backgroundColor: 'rgba(75,192,192,0.2)',
+            fill: true,
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+        }
+      });
+
+      // Gráfico 2: Barras de mantenimientos por Línea
+      const mantenimientosPorLinea = {};
+      datosMantenimiento.forEach(item => {
+        const linea = item.linea || 'Sin Línea';
+        mantenimientosPorLinea[linea] = (mantenimientosPorLinea[linea] || 0) + 1;
+      });
+      const labelsLine = Object.keys(mantenimientosPorLinea);
+      const dataBar = labelsLine.map(linea => mantenimientosPorLinea[linea]);
+
+      const ctxBar = document.getElementById('lineBarChart').getContext('2d');
+      new Chart(ctxBar, {
+        type: 'bar',
+        data: {
+          labels: labelsLine,
+          datasets: [{
+            label: 'Mantenimientos por Línea',
+            data: dataBar,
+            backgroundColor: 'rgba(153, 102, 255, 0.6)',
+            borderColor: 'rgba(153, 102, 255, 1)',
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+        }
+      });
+
+      // Gráfico 3: Diagrama de torta por Estado
+      const estadoDistribucion = {};
+      datosMantenimiento.forEach(item => {
+        const estado = item.estadoaccion || 'Sin Estado';
+        estadoDistribucion[estado] = (estadoDistribucion[estado] || 0) + 1;
+      });
+      const labelsPie = Object.keys(estadoDistribucion);
+      const dataPie = labelsPie.map(estado => estadoDistribucion[estado]);
+
+      const ctxPie = document.getElementById('statusPieChart').getContext('2d');
+      new Chart(ctxPie, {
+        type: 'pie',
+        data: {
+          labels: labelsPie,
+          datasets: [{
+            data: dataPie,
+            backgroundColor: [
+              'rgba(255, 99, 132, 0.6)',
+              'rgba(54, 162, 235, 0.6)',
+              'rgba(255, 206, 86, 0.6)',
+              'rgba(75, 192, 192, 0.6)'
+            ]
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+        }
+      });
     }
-  });
 
-  // 3. Diagrama de torta por Estado
-  const estadoDistribucion = {};
-  datosMantenimiento.forEach(item => {
-    const estado = item.estadoaccion || 'Sin Estado';
-    estadoDistribucion[estado] = (estadoDistribucion[estado] || 0) + 1;
-  });
-  const labelsPie = Object.keys(estadoDistribucion);
-  const dataPie = labelsPie.map(estado => estadoDistribucion[estado]);
-
-  const ctxPie = document.getElementById('statusPieChart').getContext('2d');
-  new Chart(ctxPie, {
-    type: 'pie',
-    data: {
-      labels: labelsPie,
-      datasets: [{
-        data: dataPie,
-        backgroundColor: [
-          'rgba(255, 99, 132, 0.6)',
-          'rgba(54, 162, 235, 0.6)',
-          'rgba(255, 206, 86, 0.6)',
-          'rgba(75, 192, 192, 0.6)'
-        ]
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
+    // Función que se invoca al presionar el botón de imprimir
+    function imprimirInforme() {
+      // Eliminar contenedor previo si existe
+      const oldContainer = document.getElementById("chartContainer");
+      if (oldContainer) oldContainer.remove();
+      // Crear contenedor y esperar 500ms para que se inyecte
+      crearContenedorGrafico();
+      setTimeout(function() {
+        generarGraficos();
+        // Espera 2000ms para que los gráficos se rendericen completamente
+        setTimeout(function() {
+          window.print();
+          const chartContainer = document.getElementById("chartContainer");
+          if (chartContainer) chartContainer.remove();
+        }, 2000);
+      }, 500);
     }
-  });
-}
 
-// Función que se invoca al presionar el botón de imprimir
-function imprimirInforme() {
-  // Crea el contenedor de gráficos de forma dinámica.
-  crearContenedorGrafico();
-  // Genera los gráficos con los datos.
-  generarGraficos();
-  // Espera 1 segundo para que Chart.js termine de renderizar los gráficos.
-  setTimeout(function() {
-    window.print();
-    // Una vez impreso, elimina el contenedor para no dejarlo en el DOM.
-    const chartContainer = document.getElementById("chartContainer");
-    if (chartContainer) {
-      chartContainer.remove();
-    }
-  }, 1000); // 1000 milisegundos = 1 segundo.
-}
-
-
-    
-  </script>
-
-  <!-- Menú móvil -->
-  <script>
+    // Configurar el menú móvil
     const menuToggle = document.getElementById("menuToggle");
     const mobileMenu = document.getElementById("mobileMenu");
     menuToggle.addEventListener("click", () => {
@@ -670,69 +568,8 @@ function imprimirInforme() {
     });
   </script>
 
-  <!-- Event listener único para el formulario (sin compresión) -->
-
   <script>
-  const formMantenimiento = document.getElementById("formMantenimiento");
-  if (rolUsuario === "viewer") {
-    formMantenimiento.addEventListener("submit", function(e) {
-      e.preventDefault();
-      alert("No tienes permisos para registrar o editar mantenimientos.");
-    });
-  } else {
-    formMantenimiento.addEventListener("submit", async function(e) {
-      e.preventDefault();
-      const form = e.target;
-      
-      // Validar que los primeros 6 campos estén completos
-      const maquina = form.maquina.value.trim();
-      const linea = form.linea.value.trim();
-      const fecha = form.fecha.value.trim();
-      const tecnico = form.tecnico.value.trim();
-      const tiempo = form.tiempo.value.trim();
-      const observaciones = form.observaciones.value.trim();
-      
-      if (!maquina || !linea || !fecha || !tecnico || !tiempo || !observaciones) {
-        alert("Por favor, completa los campos obligatorios:\n- Máquina\n- Línea\n- Fecha\n- Técnico\n- Horas mantenimiento\n- Observaciones");
-        return;
-      }
-      
-      const formData = new FormData(form);
-      
-      // Para el campo de síntomas, se ajusta el FormData
-      const sintomasSeleccionados = Array.from(form.querySelectorAll('input[name="sintomas"]:checked'))
-        .map(cb => cb.value);
-      formData.delete("sintomas"); // quitar entradas anteriores
-      sintomasSeleccionados.forEach(val => formData.append("sintomas", val));
-
-      // Añadir la imagen directamente, sin compresión ni validación de tamaño
-      const archivo = form.fotoman.files[0];
-      if (archivo) {
-        formData.set("fotoman", archivo, archivo.name);
-      }
-
-      try {
-        const method = idEditando ? "PUT" : "POST";
-        const url = idEditando
-          ? `https://sim-io.onrender.com/api/mantenimiento/${idEditando}`
-          : `https://sim-io.onrender.com/api/mantenimiento`;
-        const res = await fetch(url, { method, body: formData });
-        if (!res.ok) throw new Error(await res.text());
-        alert(`✅ Mantenimiento ${idEditando ? "actualizado" : "guardado"} correctamente.`);
-        form.reset();
-        idEditando = null;
-        cargarMantenimientos();
-      } catch (err) {
-        console.error("❌ Error al guardar:", err.message);
-        alert("❌ Hubo un error al guardar el mantenimiento:\n" + err.message);
-      }
-    });
-  }
-</script>
-
-
-  <!-- Actualización del rol en el DOM -->
-  <script>
+    // Actualización del rol en el DOM
     document.getElementById("nombreRol").innerText = rolUsuario;
     if (rolUsuario === "viewer") {
       const btnGuardar = document.getElementById("btnGuardar");
