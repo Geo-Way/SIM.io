@@ -34,6 +34,22 @@
       color: #000;
     }
   }
+
+ 
+  .print-only {
+    display: none;
+  }
+  @media print {
+    .print-only {
+      display: block;
+    }
+  }
+  /* Si deseas ajustar el layout a landscape para la impresión */
+  @media print {
+    @page { size: landscape; }
+  }
+ 
+    
 </style>
 
 </head>
