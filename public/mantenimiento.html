@@ -287,17 +287,30 @@
       });
     }
 
-    async function cargarMantenimientos() {
-      try {
-        const res = await fetch("https://sim-io.onrender.com/api/mantenimiento");
-        datosMantenimiento = await res.json();
-        renderTabla(datosMantenimiento);
-        // Genera los gráficos en el bloque de Informe Técnico
-        generarGraficos();
-      } catch (err) {
-        console.error("Error al cargar mantenimientos:", err);
+async function cargarMantenimientos() {
+  try {
+    const res = await fetch("https://sim-io.onrender.com/api/mantenimiento");
+    datosMantenimiento = await res.json();
+    renderTabla(datosMantenimiento);
+    
+    // Verificar si hay parámetro "maquina" en la URL y aplicar el filtrado.
+    const params = new URLSearchParams(window.location.search);
+    const maquinaParam = params.get("maquina");
+    if (maquinaParam) {
+      const filtroInput = document.getElementById("filtroMaquina");
+      if (filtroInput) {
+        filtroInput.value = maquinaParam;
+        aplicarFiltros();
       }
     }
+    
+    // Generar gráficos, etc.
+    generarGraficos();
+  } catch (err) {
+    console.error("Error al cargar mantenimientos:", err);
+  }
+}
+
     window.onload = cargarMantenimientos;
 
     async function eliminarMantenimiento(id) {
