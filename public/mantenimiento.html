@@ -6,7 +6,7 @@
   <title>Mantenimiento</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
-    // Definición global (única) del rol y verificación de sesión
+    // Definición global del rol y verificación de sesión
     const rolUsuario = localStorage.getItem("role") || "viewer";
     if (!localStorage.getItem("loggedIn")) {
       alert("Debes iniciar sesión para acceder.");
@@ -18,27 +18,13 @@
     /* Estilos de impresión */
     @media print {
       @page { size: landscape; }
-      /* Hacer que el contenedor con scroll se expanda para no cortar la tabla */
-      .overflow-x-auto {
-        overflow: visible !important;
-      }
-      /* Ocultar elementos interactivos o de navegación */
-      header, nav, button {
-        display: none !important;
-      }
-      body {
-        font-size: 12px;
-        color: #000;
-      }
+      .overflow-x-auto { overflow: visible !important; }
+      header, nav, button { display: none !important; }
+      body { font-size: 12px; color: #000; }
     }
-    /* El contenedor dinámico se mostrará solo en impresión */
-    .print-only {
-      display: none;
-    }
+    .print-only { display: none; }
     @media print {
-      .print-only {
-        display: block;
-      }
+      .print-only { display: block; }
     }
   </style>
 </head>
@@ -86,7 +72,7 @@
       <input class="p-2 border rounded" name="tiempo" type="number" placeholder="Horas mantenimiento" step="0.1" />
       <input class="p-2 border rounded" name="observaciones" placeholder="Observaciones" />
       <input type="hidden" name="id" id="idMantenimiento" />
-      <!-- Campo de imagen (foto opcional) -->
+      <!-- Campo de imagen (opcional) -->
       <div>
         <label class="block text-sm font-medium text-gray-700 mb-1" for="fotoman">Subir o Tomar Foto</label>
         <input class="p-2 border rounded w-full" type="file" name="fotoman" id="fotoman" accept="image/*" capture="environment" />
@@ -210,7 +196,7 @@
     </div>
 
     <script>
-      // Actualización del rol en el DOM y ocultar botón Guardar para "viewer"
+      // Actualización del rol en el DOM
       document.getElementById("nombreRol").innerText = rolUsuario;
       if (rolUsuario === "viewer") {
         const btnGuardar = document.getElementById("btnGuardar");
@@ -233,11 +219,9 @@
 
   <!-- Scripts generales -->
   <script>
-    // Variables globales
     let datosMantenimiento = [];
     let idEditando = null;
 
-    // Filtrado y renderizado de la tabla
     function aplicarFiltros() {
       const desde = document.getElementById("filtroFechaDesde").value;
       const hasta = document.getElementById("filtroFechaHasta").value;
@@ -309,7 +293,6 @@
         console.error("Error al cargar mantenimientos:", err);
       }
     }
-
     window.onload = cargarMantenimientos;
 
     async function eliminarMantenimiento(id) {
@@ -330,7 +313,6 @@
       let mantenimiento = datosMantenimiento.find(item => item.id === id);
       if (!mantenimiento) return;
 
-      // Convertir "sintomas" a arreglo
       let sintomasArray = mantenimiento.sintomas;
       if (typeof sintomasArray === 'string') {
         sintomasArray = sintomasArray.slice(1, -1).split(',').map(s => s.replace(/"/g, '').trim());
@@ -340,7 +322,6 @@
       idEditando = id;
       form.querySelector("#idMantenimiento").value = id;
 
-      // Rellenar campos del formulario
       form.maquina.value = mantenimiento.maquina || "";
       form.linea.value = mantenimiento.linea || "";
       form.fecha.value = mantenimiento.fecha ? mantenimiento.fecha.split("T")[0] : "";
@@ -354,7 +335,6 @@
       form.electrico.value = mantenimiento.electrico || "";
       form.estadoaccion.value = mantenimiento.estadoaccion || "";
 
-      // Marcar los checkboxes de síntomas
       form.querySelectorAll('input[name="sintomas"]').forEach(cb => {
         cb.checked = sintomasArray.includes(cb.value);
       });
@@ -376,56 +356,7 @@
       window.URL.revokeObjectURL(url);
     }
 
-    // Evento de envío del formulario
-    const formMantenimiento = document.getElementById("formMantenimiento");
-    if (rolUsuario === "viewer") {
-      formMantenimiento.addEventListener("submit", function(e) {
-        e.preventDefault();
-        alert("No tienes permisos para registrar o editar mantenimientos.");
-      });
-    } else {
-      formMantenimiento.addEventListener("submit", async function(e) {
-        e.preventDefault();
-        const form = e.target;
-        // Validar los 6 campos obligatorios
-        const maquina = form.maquina.value.trim();
-        const linea = form.linea.value.trim();
-        const fecha = form.fecha.value.trim();
-        const tecnico = form.tecnico.value.trim();
-        const tiempo = form.tiempo.value.trim();
-        const observaciones = form.observaciones.value.trim();
-        if (!maquina || !linea || !fecha || !tecnico || !tiempo || !observaciones) {
-          alert("Por favor, completa los campos obligatorios:\n- Máquina\n- Línea\n- Fecha\n- Técnico\n- Horas mantenimiento\n- Observaciones");
-          return;
-        }
-        const formData = new FormData(form);
-        const sintomasSeleccionados = Array.from(form.querySelectorAll('input[name="sintomas"]:checked'))
-          .map(cb => cb.value);
-        formData.delete("sintomas");
-        sintomasSeleccionados.forEach(val => formData.append("sintomas", val));
-        const archivo = form.fotoman.files[0];
-        if (archivo) {
-          formData.set("fotoman", archivo, archivo.name);
-        }
-        try {
-          const method = idEditando ? "PUT" : "POST";
-          const url = idEditando
-            ? `https://sim-io.onrender.com/api/mantenimiento/${idEditando}`
-            : `https://sim-io.onrender.com/api/mantenimiento`;
-          const res = await fetch(url, { method, body: formData });
-          if (!res.ok) throw new Error(await res.text());
-          alert(`✅ Mantenimiento ${idEditando ? "actualizado" : "guardado"} correctamente.`);
-          form.reset();
-          idEditando = null;
-          cargarMantenimientos();
-        } catch (err) {
-          console.error("❌ Error al guardar:", err.message);
-          alert("❌ Hubo un error al guardar el mantenimiento:\n" + err.message);
-        }
-      });
-    }
-
-    // Función para crear de forma dinámica el contenedor de gráficos (se mostrará solo en impresión)
+    // Función para crear el contenedor dinámico de gráficos (sólo en impresión)
     function crearContenedorGrafico() {
       const container = document.createElement("div");
       container.id = "chartContainer";
@@ -439,21 +370,27 @@
       const canvasTimeline = document.createElement("canvas");
       canvasTimeline.id = "timelineChart";
       canvasTimeline.style.marginBottom = "30px";
+      canvasTimeline.style.width = "100%";
+      canvasTimeline.style.height = "400px";
       container.appendChild(canvasTimeline);
 
       const canvasBar = document.createElement("canvas");
       canvasBar.id = "lineBarChart";
       canvasBar.style.marginBottom = "30px";
+      canvasBar.style.width = "100%";
+      canvasBar.style.height = "400px";
       container.appendChild(canvasBar);
 
       const canvasPie = document.createElement("canvas");
       canvasPie.id = "statusPieChart";
+      canvasPie.style.width = "100%";
+      canvasPie.style.height = "400px";
       container.appendChild(canvasPie);
 
       document.body.appendChild(container);
     }
 
-    // Función para generar gráficos usando Chart.js
+    // Función para generar gráficos con Chart.js
     function generarGraficos() {
       // Gráfico 1: Línea de tiempo de mantenimientos
       const fechas = {};
@@ -542,25 +479,24 @@
       });
     }
 
-    // Función que se invoca al presionar el botón de imprimir
+    // Función para imprimir el informe (genera el contenedor, dibuja los gráficos y espera para imprimir)
     function imprimirInforme() {
-      // Eliminar contenedor previo si existe
       const oldContainer = document.getElementById("chartContainer");
       if (oldContainer) oldContainer.remove();
-      // Crear contenedor y esperar 500ms para que se inyecte
       crearContenedorGrafico();
       setTimeout(function() {
         generarGraficos();
-        // Espera 2000ms para que los gráficos se rendericen completamente
         setTimeout(function() {
           window.print();
           const chartContainer = document.getElementById("chartContainer");
           if (chartContainer) chartContainer.remove();
-        }, 2000);
+        }, 2500);
       }, 500);
     }
+  </script>
 
-    // Configurar el menú móvil
+  <!-- Menú móvil -->
+  <script>
     const menuToggle = document.getElementById("menuToggle");
     const mobileMenu = document.getElementById("mobileMenu");
     menuToggle.addEventListener("click", () => {
@@ -568,8 +504,58 @@
     });
   </script>
 
+  <!-- Evento del formulario -->
   <script>
-    // Actualización del rol en el DOM
+    const formMantenimiento = document.getElementById("formMantenimiento");
+    if (rolUsuario === "viewer") {
+      formMantenimiento.addEventListener("submit", function(e) {
+        e.preventDefault();
+        alert("No tienes permisos para registrar o editar mantenimientos.");
+      });
+    } else {
+      formMantenimiento.addEventListener("submit", async function(e) {
+        e.preventDefault();
+        const form = e.target;
+        const maquina = form.maquina.value.trim();
+        const linea = form.linea.value.trim();
+        const fecha = form.fecha.value.trim();
+        const tecnico = form.tecnico.value.trim();
+        const tiempo = form.tiempo.value.trim();
+        const observaciones = form.observaciones.value.trim();
+        if (!maquina || !linea || !fecha || !tecnico || !tiempo || !observaciones) {
+          alert("Por favor, completa los campos obligatorios:\n- Máquina\n- Línea\n- Fecha\n- Técnico\n- Horas mantenimiento\n- Observaciones");
+          return;
+        }
+        const formData = new FormData(form);
+        const sintomasSeleccionados = Array.from(form.querySelectorAll('input[name="sintomas"]:checked'))
+          .map(cb => cb.value);
+        formData.delete("sintomas");
+        sintomasSeleccionados.forEach(val => formData.append("sintomas", val));
+        const archivo = form.fotoman.files[0];
+        if (archivo) {
+          formData.set("fotoman", archivo, archivo.name);
+        }
+        try {
+          const method = idEditando ? "PUT" : "POST";
+          const url = idEditando
+            ? `https://sim-io.onrender.com/api/mantenimiento/${idEditando}`
+            : `https://sim-io.onrender.com/api/mantenimiento`;
+          const res = await fetch(url, { method, body: formData });
+          if (!res.ok) throw new Error(await res.text());
+          alert(`✅ Mantenimiento ${idEditando ? "actualizado" : "guardado"} correctamente.`);
+          form.reset();
+          idEditando = null;
+          cargarMantenimientos();
+        } catch (err) {
+          console.error("❌ Error al guardar:", err.message);
+          alert("❌ Hubo un error al guardar el mantenimiento:\n" + err.message);
+        }
+      });
+    }
+  </script>
+
+  <!-- Actualización del rol en el DOM -->
+  <script>
     document.getElementById("nombreRol").innerText = rolUsuario;
     if (rolUsuario === "viewer") {
       const btnGuardar = document.getElementById("btnGuardar");
