@@ -18,10 +18,13 @@
     /* Estilos de impresión */
     @media print {
       @page { size: landscape; }
+      /* Extiende el contenedor con scroll para que no se corte la tabla */
       .overflow-x-auto { overflow: visible !important; }
+      /* Oculta elementos interactivos o de navegación */
       header, nav, button { display: none !important; }
       body { font-size: 12px; color: #000; }
     }
+    /* El contenedor de gráficos se oculta en pantalla y se muestra en impresión */
     .print-only { display: none; }
     @media print {
       .print-only { display: block; }
@@ -47,7 +50,7 @@
       <button id="menuToggle" class="md:hidden text-gray-700 focus:outline-none">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-            d="M4 6h16M4 12h16M4 18h16" />
+                d="M4 6h16M4 12h16M4 18h16" />
         </svg>
       </button>
     </div>
@@ -195,6 +198,14 @@
       <button onclick="exportarCSV()" class="bg-yellow-500 hover:bg-yellow-600 text-white font-semibold px-4 py-2 rounded">Exportar CSV</button>
     </div>
 
+    <!-- Contenedor estático de gráficos para impresión -->
+    <div id="chartContainer" class="print-only">
+      <h2 class="text-xl font-semibold text-gray-700 mb-4">Informe Técnico</h2>
+      <canvas id="timelineChart" style="width:100%; height:400px; margin-bottom:30px;"></canvas>
+      <canvas id="lineBarChart" style="width:100%; height:400px; margin-bottom:30px;"></canvas>
+      <canvas id="statusPieChart" style="width:100%; height:400px;"></canvas>
+    </div>
+
     <script>
       // Actualización del rol en el DOM
       document.getElementById("nombreRol").innerText = rolUsuario;
@@ -239,7 +250,6 @@
                (!tecnico || (row.tecnico || "").toLowerCase().includes(tecnico)) &&
                (!estado || (row.estadoaccion || "").toLowerCase().includes(estado));
       });
-
       renderTabla(filtrados);
     }
 
@@ -356,41 +366,7 @@
       window.URL.revokeObjectURL(url);
     }
 
-    // Función para crear el contenedor dinámico de gráficos (sólo en impresión)
-    function crearContenedorGrafico() {
-      const container = document.createElement("div");
-      container.id = "chartContainer";
-      container.className = "print-only";
-      
-      const h2 = document.createElement("h2");
-      h2.textContent = "Informe Técnico";
-      h2.className = "text-xl font-semibold text-gray-700 mb-4";
-      container.appendChild(h2);
-
-      const canvasTimeline = document.createElement("canvas");
-      canvasTimeline.id = "timelineChart";
-      canvasTimeline.style.marginBottom = "30px";
-      canvasTimeline.style.width = "100%";
-      canvasTimeline.style.height = "400px";
-      container.appendChild(canvasTimeline);
-
-      const canvasBar = document.createElement("canvas");
-      canvasBar.id = "lineBarChart";
-      canvasBar.style.marginBottom = "30px";
-      canvasBar.style.width = "100%";
-      canvasBar.style.height = "400px";
-      container.appendChild(canvasBar);
-
-      const canvasPie = document.createElement("canvas");
-      canvasPie.id = "statusPieChart";
-      canvasPie.style.width = "100%";
-      canvasPie.style.height = "400px";
-      container.appendChild(canvasPie);
-
-      document.body.appendChild(container);
-    }
-
-    // Función para generar gráficos con Chart.js
+    // Función para generar los gráficos en el contenedor estático
     function generarGraficos() {
       // Gráfico 1: Línea de tiempo de mantenimientos
       const fechas = {};
@@ -400,7 +376,6 @@
       });
       const labelsTimeline = Object.keys(fechas).sort();
       const dataTimeline = labelsTimeline.map(fecha => fechas[fecha]);
-
       const ctxTimeline = document.getElementById('timelineChart').getContext('2d');
       new Chart(ctxTimeline, {
         type: 'line',
@@ -414,10 +389,7 @@
             fill: true,
           }]
         },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-        }
+        options: { responsive: true, maintainAspectRatio: false }
       });
 
       // Gráfico 2: Barras de mantenimientos por Línea
@@ -428,7 +400,6 @@
       });
       const labelsLine = Object.keys(mantenimientosPorLinea);
       const dataBar = labelsLine.map(linea => mantenimientosPorLinea[linea]);
-
       const ctxBar = document.getElementById('lineBarChart').getContext('2d');
       new Chart(ctxBar, {
         type: 'bar',
@@ -442,10 +413,7 @@
             borderWidth: 1
           }]
         },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-        }
+        options: { responsive: true, maintainAspectRatio: false }
       });
 
       // Gráfico 3: Diagrama de torta por Estado
@@ -456,7 +424,6 @@
       });
       const labelsPie = Object.keys(estadoDistribucion);
       const dataPie = labelsPie.map(estado => estadoDistribucion[estado]);
-
       const ctxPie = document.getElementById('statusPieChart').getContext('2d');
       new Chart(ctxPie, {
         type: 'pie',
@@ -472,26 +439,16 @@
             ]
           }]
         },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-        }
+        options: { responsive: true, maintainAspectRatio: false }
       });
     }
 
-    // Función para imprimir el informe (genera el contenedor, dibuja los gráficos y espera para imprimir)
+    // Función de impresión: genera los gráficos en el contenedor estático y luego imprime
     function imprimirInforme() {
-      const oldContainer = document.getElementById("chartContainer");
-      if (oldContainer) oldContainer.remove();
-      crearContenedorGrafico();
+      generarGraficos();
       setTimeout(function() {
-        generarGraficos();
-        setTimeout(function() {
-          window.print();
-          const chartContainer = document.getElementById("chartContainer");
-          if (chartContainer) chartContainer.remove();
-        }, 2500);
-      }, 500);
+        window.print();
+      }, 2500);
     }
   </script>
 
@@ -504,7 +461,7 @@
     });
   </script>
 
-  <!-- Evento del formulario -->
+  <!-- Envío del formulario -->
   <script>
     const formMantenimiento = document.getElementById("formMantenimiento");
     if (rolUsuario === "viewer") {
