@@ -6,18 +6,18 @@
   <title>Inventario</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    /* Estilo para impresión: se imprimen solo la tabla con un formato profesional (encabezados rojos) */
+    /* Estilos para impresión */
     @media print {
       body * { visibility: hidden; }
       #tablaInventario, #tablaInventario * { visibility: visible; }
       #tablaInventario { position: absolute; left: 0; top: 0; }
-      th { background-color: #cc0000 !important; color: #fff !important; padding: 8px; }
-      td { padding: 6px; }
+      th { background-color: #cc0000 !important; color: #fff !important; }
+      /* Se puede ajustar el tamaño de fuente para impresión */
       body { font-size: 12px; color: #000; }
     }
   </style>
   <script>
-    // Obtener el rol almacenado; si no existe, se usa "viewer"
+    // Obtener rol y verificar la sesión
     const rolUsuario = localStorage.getItem("role") || "viewer";
     if (!localStorage.getItem("loggedIn")) {
       alert("Debes iniciar sesión para acceder.");
@@ -42,10 +42,8 @@
         <a href="info.html" class="text-gray-500 hover:text-red-600">ℹ️</a>
       </nav>
       <button id="menuToggle" class="md:hidden text-gray-700 focus:outline-none">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none"
-          viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-            d="M4 6h16M4 12h16M4 18h16" />
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
         </svg>
       </button>
     </div>
@@ -75,15 +73,15 @@
       <input class="p-2 border rounded" name="codigobarras" placeholder="Código de barras" type="text"/>
       <button class="col-span-full bg-red-600 text-white p-2 rounded hover:bg-red-700" type="submit">Guardar</button>
     </form>
-
-    <!-- Si el rol es "viewer", se oculta el formulario -->
+    
+    <!-- Si el rol es "viewer", ocultar el formulario -->
     <script>
       if (rolUsuario === "viewer") {
         document.getElementById("formInventario").style.display = "none";
       }
     </script>
 
-    <!-- Filtros para inventario -->
+    <!-- Filtros de inventario -->
     <div class="bg-white p-4 rounded shadow mb-4">
       <h3 class="text-md font-semibold mb-2">Filtrar inventario</h3>
       <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
@@ -102,7 +100,7 @@
     <!-- Inventario actual -->
     <h2 class="text-lg font-semibold my-6">Inventario actual</h2>
     <div class="flex justify-start gap-2 mb-2">
-      <!-- Botones de imprimir y exportar alineados a la izquierda -->
+      <!-- Botones se muestran a la izquierda -->
       <button class="bg-green-600 text-white px-4 py-2 rounded" onclick="imprimirTabla()">Imprimir PDF</button>
       <button class="bg-yellow-500 text-white px-4 py-2 rounded" onclick="exportarCSV()">Exportar CSV</button>
     </div>
@@ -124,7 +122,9 @@
             <th class="p-2">Eliminar</th>
           </tr>
         </thead>
-        <tbody class="text-sm" id="cuerpoTabla"><!-- Se llenará con JS --></tbody>
+        <tbody class="text-sm" id="cuerpoTabla">
+          <!-- Se llenarán mediante JavaScript -->
+        </tbody>
       </table>
     </div>
   </main>
@@ -155,14 +155,8 @@
     </div>
   </div>
 
-  <!-- Footer -->
-  <footer class="bg-white text-center p-4 mt-10 border-t">
-    <div class="max-w-4xl mx-auto px-4 flex flex-col items-center space-y-2">
-      <p class="text-gray-500 text-sm">© 2024 - SIMio | Desarrollado con ❤️</p>
-    </div>
-  </footer>
 
-  <!-- Scripts -->
+  <!-- Scripts generales -->
   <script>
     const role = localStorage.getItem('role') || 'viewer';
 
@@ -197,11 +191,6 @@
     window.onload = cargarInventario;
 
     async function guardarArticulo(datos, form) {
-      // Validación personalizada: Verificar campos obligatorios (Nombre, Cantidad, Precio)
-      if (!datos.nombre || !datos.cantidad || !datos.precio) {
-        alert("Por favor, complete los campos obligatorios: Nombre, Cantidad y Precio.");
-        return;
-      }
       try {
         const res = await fetch("https://sim-io.onrender.com/api/inventario", {
           method: "POST",
@@ -317,6 +306,7 @@
         document.getElementById("formInventario").style.display = "none";
       }
       cargarInventario();
+      // Actualizar el rol en el DOM
       const spanRol = document.getElementById("nombreRol");
       if (spanRol) spanRol.textContent = role;
     });
@@ -330,5 +320,16 @@
       mobileMenu.classList.toggle("hidden");
     });
   </script>
+    <!-- Footer -->
+  <footer class="bg-gray-600 text-gray-200 text-center py-6 mt-10 text-sm">
+    <div class="max-w-4xl mx-auto px-4 flex flex-col items-center space-y-2">
+      <p>
+        © 2025 <strong>GEOWAY</strong>, Technology-Based Initiative – IBT. All rights reserved.
+      </p>
+      <a href="https://geo-way.github.io/GeoWay.io/index.html" target="_blank" class="hover:opacity-80 transition-opacity">
+        <img src="https://geo-way.github.io/GeoWay.io/images/Logo5.png" alt="GEOWAY Logo" class="h-8 invert">
+      </a>
+    </div>
+  </footer>
 </body>
 </html>
