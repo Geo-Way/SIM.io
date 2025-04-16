@@ -6,16 +6,18 @@
   <title>Inventario</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    /* Estilo para impresión: se imprimen solo la tabla con el estilo profesional (fondo rojo en encabezados) */
+    /* Estilos para impresión */
     @media print {
       body * { visibility: hidden; }
       #tablaInventario, #tablaInventario * { visibility: visible; }
       #tablaInventario { position: absolute; left: 0; top: 0; }
-      th { background-color: #cc0000 !important; color: white !important; }
+      th { background-color: #cc0000 !important; color: #fff !important; }
+      /* Se puede ajustar el tamaño de fuente para impresión */
+      body { font-size: 12px; color: #000; }
     }
   </style>
   <script>
-    // Obtener rol almacenado y verificar sesión
+    // Obtener rol y verificar la sesión
     const rolUsuario = localStorage.getItem("role") || "viewer";
     if (!localStorage.getItem("loggedIn")) {
       alert("Debes iniciar sesión para acceder.");
@@ -56,7 +58,7 @@
   </header>
 
   <main class="max-w-7xl mx-auto mt-10 p-4">
-    <!-- Formulario para agregar un artículo -->
+    <!-- Formulario para agregar artículo -->
     <h2 class="text-lg font-semibold mb-4">Agregar nuevo artículo</h2>
     <form id="formInventario" class="grid grid-cols-1 md:grid-cols-3 gap-4 bg-white p-4 rounded shadow mb-6">
       <input class="p-2 border rounded" name="nombre" placeholder="Nombre" required type="text"/>
@@ -71,15 +73,15 @@
       <input class="p-2 border rounded" name="codigobarras" placeholder="Código de barras" type="text"/>
       <button class="col-span-full bg-red-600 text-white p-2 rounded hover:bg-red-700" type="submit">Guardar</button>
     </form>
-
-    <!-- Si el rol es "viewer", el formulario se oculta -->
+    
+    <!-- Si el rol es "viewer", ocultar el formulario -->
     <script>
       if (rolUsuario === "viewer") {
         document.getElementById("formInventario").style.display = "none";
       }
     </script>
 
-    <!-- Filtro de inventario -->
+    <!-- Filtros de inventario -->
     <div class="bg-white p-4 rounded shadow mb-4">
       <h3 class="text-md font-semibold mb-2">Filtrar inventario</h3>
       <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
@@ -97,7 +99,8 @@
 
     <!-- Inventario actual -->
     <h2 class="text-lg font-semibold my-6">Inventario actual</h2>
-    <div class="flex justify-end gap-2 mb-2">
+    <div class="flex justify-start gap-2 mb-2">
+      <!-- Botones se muestran a la izquierda -->
       <button class="bg-green-600 text-white px-4 py-2 rounded" onclick="imprimirTabla()">Imprimir PDF</button>
       <button class="bg-yellow-500 text-white px-4 py-2 rounded" onclick="exportarCSV()">Exportar CSV</button>
     </div>
@@ -120,7 +123,7 @@
           </tr>
         </thead>
         <tbody class="text-sm" id="cuerpoTabla">
-          <!-- Se llenarán mediante JS -->
+          <!-- Se llenarán mediante JavaScript -->
         </tbody>
       </table>
     </div>
@@ -159,7 +162,7 @@
     </div>
   </footer>
 
-  <!-- Scripts -->
+  <!-- Scripts generales -->
   <script>
     const role = localStorage.getItem('role') || 'viewer';
 
@@ -191,7 +194,8 @@
         console.error("Error al cargar inventario:", err);
       }
     }
-    
+    window.onload = cargarInventario;
+
     async function guardarArticulo(datos, form) {
       try {
         const res = await fetch("https://sim-io.onrender.com/api/inventario", {
@@ -207,7 +211,7 @@
         alert("Error al guardar.");
       }
     }
-    
+
     async function eliminarArticulo(id) {
       if (!confirm("¿Eliminar este artículo?")) return;
       try {
@@ -221,7 +225,7 @@
         alert("Error al eliminar.");
       }
     }
-    
+
     function abrirModalEdicion(id, boton) {
       const fila = boton.closest("tr").querySelectorAll("td");
       const form = document.getElementById("formEditar");
@@ -238,11 +242,11 @@
       form.codigobarras.value = fila[9].innerText;
       document.getElementById("modalEditar").classList.remove("hidden");
     }
-    
+
     function cerrarModal() {
       document.getElementById("modalEditar").classList.add("hidden");
     }
-    
+
     function exportarCSV() {
       const filas = document.querySelectorAll("#cuerpoTabla tr");
       let csv = "Nombre,Proveedor,Cantidad,Precio,Fecha,Vida útil,Ubicación,Estado,Familia,Código\n";
@@ -261,21 +265,20 @@
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
     }
-    
+
     function imprimirTabla() {
       const originalTitle = document.title;
       document.title = "Inventario";
       window.print();
       document.title = originalTitle;
     }
-    
+
     function filtrarInventario() {
       const nombre = document.getElementById("filtroNombre").value.toLowerCase();
       const familia = document.getElementById("filtroFamilia").value.toLowerCase();
       const proveedor = document.getElementById("filtroProveedor").value.toLowerCase();
       const ubicacion = document.getElementById("filtroUbicacion").value.toLowerCase();
       const fecha = document.getElementById("filtroFecha").value;
-    
       document.querySelectorAll("#cuerpoTabla tr").forEach(row => {
         const tds = row.querySelectorAll("td");
         const coincide =
@@ -287,7 +290,7 @@
         row.style.display = coincide ? "" : "none";
       });
     }
-    
+
     function limpiarFiltros() {
       document.getElementById("filtroNombre").value = "";
       document.getElementById("filtroFamilia").value = "";
@@ -296,22 +299,25 @@
       document.getElementById("filtroFecha").value = "";
       filtrarInventario();
     }
-    
+
     document.getElementById("formInventario").addEventListener("submit", async function (e) {
       e.preventDefault();
       const form = e.target;
       const datos = Object.fromEntries(new FormData(form).entries());
       await guardarArticulo(datos, form);
     });
-    
+
     document.addEventListener("DOMContentLoaded", () => {
       if (role === "viewer") {
         document.getElementById("formInventario").style.display = "none";
       }
       cargarInventario();
+      // Actualizar el rol en el DOM
+      const spanRol = document.getElementById("nombreRol");
+      if (spanRol) spanRol.textContent = role;
     });
   </script>
-  
+
   <!-- Menú móvil -->
   <script>
     const menuToggle = document.getElementById("menuToggle");
