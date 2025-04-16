@@ -361,49 +361,65 @@ function editarMantenimiento(id) {
   </script>
 
   <!-- Event listener único para el formulario (sin compresión) -->
+
   <script>
-    const formMantenimiento = document.getElementById("formMantenimiento");
-    if (rolUsuario === "viewer") {
-      formMantenimiento.addEventListener("submit", function(e) {
-        e.preventDefault();
-        alert("No tienes permisos para registrar o editar mantenimientos.");
-      });
-    } else {
-      formMantenimiento.addEventListener("submit", async function(e) {
-        e.preventDefault();
-        const form = e.target;
-        const formData = new FormData(form);
+  const formMantenimiento = document.getElementById("formMantenimiento");
+  if (rolUsuario === "viewer") {
+    formMantenimiento.addEventListener("submit", function(e) {
+      e.preventDefault();
+      alert("No tienes permisos para registrar o editar mantenimientos.");
+    });
+  } else {
+    formMantenimiento.addEventListener("submit", async function(e) {
+      e.preventDefault();
+      const form = e.target;
+      
+      // Validar que los primeros 6 campos estén completos
+      const maquina = form.maquina.value.trim();
+      const linea = form.linea.value.trim();
+      const fecha = form.fecha.value.trim();
+      const tecnico = form.tecnico.value.trim();
+      const tiempo = form.tiempo.value.trim();
+      const observaciones = form.observaciones.value.trim();
+      
+      if (!maquina || !linea || !fecha || !tecnico || !tiempo || !observaciones) {
+        alert("Por favor, completa los campos obligatorios:\n- Máquina\n- Línea\n- Fecha\n- Técnico\n- Horas mantenimiento\n- Observaciones");
+        return;
+      }
+      
+      const formData = new FormData(form);
+      
+      // Para el campo de síntomas, se ajusta el FormData
+      const sintomasSeleccionados = Array.from(form.querySelectorAll('input[name="sintomas"]:checked'))
+        .map(cb => cb.value);
+      formData.delete("sintomas"); // quitar entradas anteriores
+      sintomasSeleccionados.forEach(val => formData.append("sintomas", val));
 
-        // Para el campo de síntomas, se ajusta el FormData
-        const sintomasSeleccionados = Array.from(form.querySelectorAll('input[name="sintomas"]:checked'))
-          .map(cb => cb.value);
-        formData.delete("sintomas"); // quitar entradas anteriores
-        sintomasSeleccionados.forEach(val => formData.append("sintomas", val));
+      // Añadir la imagen directamente, sin compresión ni validación de tamaño
+      const archivo = form.fotoman.files[0];
+      if (archivo) {
+        formData.set("fotoman", archivo, archivo.name);
+      }
 
-        // Añadir la imagen directamente, sin compresión ni validación de tamaño
-        const archivo = form.fotoman.files[0];
-        if (archivo) {
-          formData.set("fotoman", archivo, archivo.name);
-        }
+      try {
+        const method = idEditando ? "PUT" : "POST";
+        const url = idEditando
+          ? `https://sim-io.onrender.com/api/mantenimiento/${idEditando}`
+          : `https://sim-io.onrender.com/api/mantenimiento`;
+        const res = await fetch(url, { method, body: formData });
+        if (!res.ok) throw new Error(await res.text());
+        alert(`✅ Mantenimiento ${idEditando ? "actualizado" : "guardado"} correctamente.`);
+        form.reset();
+        idEditando = null;
+        cargarMantenimientos();
+      } catch (err) {
+        console.error("❌ Error al guardar:", err.message);
+        alert("❌ Hubo un error al guardar el mantenimiento:\n" + err.message);
+      }
+    });
+  }
+</script>
 
-        try {
-          const method = idEditando ? "PUT" : "POST";
-          const url = idEditando
-            ? `https://sim-io.onrender.com/api/mantenimiento/${idEditando}`
-            : `https://sim-io.onrender.com/api/mantenimiento`;
-          const res = await fetch(url, { method, body: formData });
-          if (!res.ok) throw new Error(await res.text());
-          alert(`✅ Mantenimiento ${idEditando ? "actualizado" : "guardado"} correctamente.`);
-          form.reset();
-          idEditando = null;
-          cargarMantenimientos();
-        } catch (err) {
-          console.error("❌ Error al guardar:", err.message);
-          alert("❌ Hubo un error al guardar el mantenimiento:\n" + err.message);
-        }
-      });
-    }
-  </script>
 
   <!-- Actualización del rol en el DOM -->
   <script>
