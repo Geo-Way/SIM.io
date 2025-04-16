@@ -16,7 +16,7 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 const upload = multer({
   dest: 'uploads/',
-  limits: { fileSize: 500 * 1024 } // 500 KB
+ // limits: { fileSize: 500 * 1024 } // 500 KB
 });
 
 const pool = new Pool({
