@@ -73,7 +73,9 @@
       <input class="p-2 border rounded" name="estado" placeholder="Estado" type="text"/>
       <input class="p-2 border rounded" name="familia" placeholder="Familia" type="text"/>
       <input class="p-2 border rounded" name="codigobarras" placeholder="Código de barras" type="text"/>
-      <button class="col-span-full bg-red-600 text-white p-2 rounded hover:bg-red-700" type="submit">Guardar</button>
+      <button class="col-span-full bg-red-600 text-white p-2 rounded hover:bg-red-700" type="submit">
+        Guardar
+      </button>
     </form>
     <!-- Si el rol es "viewer", ocultar el formulario -->
     <script>
@@ -82,17 +84,33 @@
       }
     </script>
 
-    <!-- Validación: Aviso de campos obligatorios (en este ejemplo: Nombre, Cantidad y Precio) -->
+    <!-- Validación con alerta visual (se resalta el borde de los campos faltantes) -->
     <script>
-      document.getElementById("formInventario").addEventListener("submit", async function (e) {
+      function validarFormulario(form) {
+        let valid = true;
+        const requiredFields = ['nombre', 'cantidad', 'precio'];
+        requiredFields.forEach(name => {
+          const input = form.elements[name];
+          if (input) {
+            if (!input.value.trim()) {
+              input.classList.add("border-red-500");
+              input.setAttribute("title", "Campo obligatorio");
+              valid = false;
+            } else {
+              input.classList.remove("border-red-500");
+              input.removeAttribute("title");
+            }
+          }
+        });
+        return valid;
+      }
+      // Validación en el formulario de nuevo artículo
+      document.getElementById("formInventario").addEventListener("submit", async function(e) {
         e.preventDefault();
         const form = e.target;
+        if (!validarFormulario(form)) return;
         const formData = new FormData(form);
         const datos = Object.fromEntries(formData.entries());
-        if (!datos.nombre || !datos.cantidad || !datos.precio) {
-          alert("Por favor, complete los campos obligatorios: Nombre, Cantidad y Precio.");
-          return;
-        }
         await guardarArticulo(datos, form);
       });
     </script>
@@ -116,7 +134,7 @@
     <!-- Inventario actual -->
     <h2 class="text-lg font-semibold my-6">Inventario actual</h2>
     <div class="flex justify-start gap-2 mb-2">
-      <!-- Botones de imprimir y exportar a la izquierda -->
+      <!-- Botones de imprimir y exportar alineados a la izquierda -->
       <button class="bg-green-600 text-white px-4 py-2 rounded" onclick="imprimirTabla()">Imprimir PDF</button>
       <button class="bg-yellow-500 text-white px-4 py-2 rounded" onclick="exportarCSV()">Exportar CSV</button>
     </div>
@@ -138,9 +156,7 @@
             <th class="p-2">Eliminar</th>
           </tr>
         </thead>
-        <tbody class="text-sm" id="cuerpoTabla">
-          <!-- Se llenarán mediante JavaScript -->
-        </tbody>
+        <tbody class="text-sm" id="cuerpoTabla"><!-- Se llenará mediante JavaScript --></tbody>
       </table>
     </div>
   </main>
@@ -150,7 +166,7 @@
     <div class="bg-white p-6 rounded w-full max-w-xl">
       <h2 class="text-xl font-semibold mb-4">Editar artículo</h2>
       <form id="formEditar">
-        <!-- Nota: Se le asigna un id diferente al input oculto para evitar conflicto con form.id -->
+        <!-- Se asigna id="idArticulo" al input oculto -->
         <input type="hidden" name="id" id="idArticulo"/>
         <div class="grid grid-cols-2 gap-4">
           <input class="p-2 border rounded" name="nombre" placeholder="Nombre" type="text" required/>
@@ -171,6 +187,16 @@
       </form>
     </div>
   </div>
+
+  <!-- Footer -->
+  <footer class="bg-gray-600 text-gray-200 text-center py-6 mt-10 text-sm">
+    <div class="max-w-4xl mx-auto px-4 flex flex-col items-center space-y-2">
+      <p>© 2025 <strong>GEOWAY</strong>, Technology-Based Initiative – IBT. All rights reserved.</p>
+      <a href="https://geo-way.github.io/GeoWay.io/index.html" target="_blank" class="hover:opacity-80 transition-opacity">
+        <img src="https://geo-way.github.io/GeoWay.io/images/Logo5.png" alt="GEOWAY Logo" class="h-8 invert">
+      </a>
+    </div>
+  </footer>
 
   <!-- Scripts generales -->
   <script>
@@ -207,7 +233,6 @@
     window.onload = cargarInventario;
 
     async function guardarArticulo(datos, form) {
-      // Validación personalizada
       if (!datos.nombre || !datos.cantidad || !datos.precio) {
         alert("Por favor, complete los campos obligatorios: Nombre, Cantidad y Precio.");
         return;
@@ -244,7 +269,7 @@
     function abrirModalEdicion(id, boton) {
       const fila = boton.closest("tr").querySelectorAll("td");
       const form = document.getElementById("formEditar");
-      // Usar el input con id "idArticulo" para asignar el id
+      // Asignar el id en el input oculto con id "idArticulo"
       document.getElementById("idArticulo").value = id;
       form.nombre.value = fila[0].innerText;
       form.proveedor.value = fila[1].innerText;
@@ -262,6 +287,32 @@
     function cerrarModal() {
       document.getElementById("modalEditar").classList.add("hidden");
     }
+
+    // Event listener para el formulario de edición
+    document.getElementById("formEditar").addEventListener("submit", async function(e) {
+      e.preventDefault();
+      const form = e.target;
+      // Validar campos obligatorios en el formulario de edición
+      if (!validarFormulario(form)) return;
+      const formData = new FormData(form);
+      const datos = Object.fromEntries(formData.entries());
+      const id = datos.id;
+      // Eliminamos la propiedad id del objeto para enviarla por URL
+      delete datos.id;
+      try {
+        const res = await fetch("https://sim-io.onrender.com/api/inventario/" + document.getElementById("idArticulo").value, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(datos)
+        });
+        if (!res.ok) throw new Error(await res.text());
+        alert("Artículo actualizado.");
+        cerrarModal();
+        cargarInventario();
+      } catch (err) {
+        alert("Error al actualizar.");
+      }
+    });
 
     function exportarCSV() {
       const filas = document.querySelectorAll("#cuerpoTabla tr");
@@ -324,6 +375,26 @@
       const spanRol = document.getElementById("nombreRol");
       if (spanRol) spanRol.textContent = role;
     });
+
+    // Función para validar campos obligatorios (para creación y edición)
+    function validarFormulario(form) {
+      let valid = true;
+      const requiredFields = ['nombre', 'cantidad', 'precio'];
+      requiredFields.forEach(name => {
+        const input = form.elements[name];
+        if (input) {
+          if (!input.value.trim()) {
+            input.classList.add("border-red-500");
+            input.setAttribute("title", "Campo obligatorio");
+            valid = false;
+          } else {
+            input.classList.remove("border-red-500");
+            input.removeAttribute("title");
+          }
+        }
+      });
+      return valid;
+    }
   </script>
 
   <!-- Menú móvil -->
