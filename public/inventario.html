@@ -6,7 +6,7 @@
   <title>Inventario</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    /* Estilos para impresión: La tabla se imprimirá con encabezados rojos y un estilo profesional */
+    /* Estilos para impresión: La tabla se imprimirá con encabezados rojos y estilo profesional */
     @media print {
       body * { visibility: hidden; }
       #tablaInventario, #tablaInventario * { visibility: visible; }
@@ -32,7 +32,9 @@
       <a href="index.html" class="flex items-center space-x-2">
         <img src="https://images.squarespace-cdn.com/content/v1/58a36221d482e9bca4af6eac/34694fc3-6f92-4054-8a58-3776436c00dc/IMG_9869+2.PNG?format=2500w" alt="Logo" class="h-10 w-auto"/>
         <span class="text-xl font-bold text-red-600">SIMio</span>
-        <span id="rolVisual" class="text-sm text-gray-500 italic ml-4">(Rol: <span id="nombreRol">cargando...</span>)</span>
+        <span id="rolVisual" class="text-sm text-gray-500 italic ml-4">
+          (Rol: <span id="nombreRol">cargando...</span>)
+        </span>
       </a>
       <nav class="hidden md:flex space-x-6 text-sm font-medium">
         <a href="index.html" class="text-gray-700 hover:text-red-600">Home</a>
@@ -63,32 +65,42 @@
     <!-- Formulario para agregar artículo -->
     <h2 class="text-lg font-semibold mb-4">Agregar nuevo artículo</h2>
     <form id="formInventario" class="grid grid-cols-1 md:grid-cols-3 gap-4 bg-white p-4 rounded shadow mb-6">
+      <!-- Los campos obligatorios (nombre, proveedor, cantidad, precio, fecha, vidautil, ubicacion, estado) -->
       <input class="p-2 border rounded" name="nombre" placeholder="Nombre" required type="text"/>
-      <input class="p-2 border rounded" name="proveedor" placeholder="Proveedor" type="text"/>
-      <input class="p-2 border rounded" name="cantidad" placeholder="Cantidad" type="number"/>
-      <input class="p-2 border rounded" name="precio" placeholder="Precio" step="0.01" type="number"/>
-      <input class="p-2 border rounded" name="fecha" type="date"/>
-      <input class="p-2 border rounded" name="vidautil" placeholder="Vida útil (años)" type="text"/>
-      <input class="p-2 border rounded" name="ubicacion" placeholder="Ubicación" type="text"/>
-      <input class="p-2 border rounded" name="estado" placeholder="Estado" type="text"/>
+      <input class="p-2 border rounded" name="proveedor" placeholder="Proveedor" required type="text"/>
+      <input class="p-2 border rounded" name="cantidad" placeholder="Cantidad" required type="number"/>
+      <input class="p-2 border rounded" name="precio" placeholder="Precio" required step="0.01" type="number"/>
+      <input class="p-2 border rounded" name="fecha" required type="date"/>
+      <input class="p-2 border rounded" name="vidautil" placeholder="Vida útil (años)" required type="text"/>
+      <input class="p-2 border rounded" name="ubicacion" placeholder="Ubicación" required type="text"/>
+      <!-- Campo Estado como lista desplegable -->
+      <select name="estado" required class="p-2 border rounded">
+        <option value="">Seleccione Estado</option>
+        <option value="nuevo">Nuevo</option>
+        <option value="usado">Usado</option>
+        <option value="semi-nuevo">Semi-nuevo</option>
+      </select>
+      <!-- Campos opcionales -->
       <input class="p-2 border rounded" name="familia" placeholder="Familia" type="text"/>
       <input class="p-2 border rounded" name="codigobarras" placeholder="Código de barras" type="text"/>
       <button class="col-span-full bg-red-600 text-white p-2 rounded hover:bg-red-700" type="submit">
         Guardar
       </button>
     </form>
-    <!-- Si el rol es "viewer", ocultar el formulario -->
+
+    <!-- Ocultar el formulario si el rol es "viewer" -->
     <script>
       if (rolUsuario === "viewer") {
         document.getElementById("formInventario").style.display = "none";
       }
     </script>
 
-    <!-- Validación con alerta visual (se resalta el borde de los campos faltantes) -->
+    <!-- Validación visual: resalta campos obligatorios vacíos -->
     <script>
       function validarFormulario(form) {
         let valid = true;
-        const requiredFields = ['nombre', 'cantidad', 'precio'];
+        // Lista de campos obligatorios (excluye familia y codigobarras)
+        const requiredFields = ['nombre', 'proveedor', 'cantidad', 'precio', 'fecha', 'vidautil', 'ubicacion', 'estado'];
         requiredFields.forEach(name => {
           const input = form.elements[name];
           if (input) {
@@ -104,7 +116,7 @@
         });
         return valid;
       }
-      // Validación en el formulario de nuevo artículo
+      // Validación en el formulario de creación
       document.getElementById("formInventario").addEventListener("submit", async function(e) {
         e.preventDefault();
         const form = e.target;
@@ -133,8 +145,8 @@
 
     <!-- Inventario actual -->
     <h2 class="text-lg font-semibold my-6">Inventario actual</h2>
+    <!-- Botones de imprimir y exportar alineados a la izquierda -->
     <div class="flex justify-start gap-2 mb-2">
-      <!-- Botones de imprimir y exportar alineados a la izquierda -->
       <button class="bg-green-600 text-white px-4 py-2 rounded" onclick="imprimirTabla()">Imprimir PDF</button>
       <button class="bg-yellow-500 text-white px-4 py-2 rounded" onclick="exportarCSV()">Exportar CSV</button>
     </div>
@@ -156,7 +168,9 @@
             <th class="p-2">Eliminar</th>
           </tr>
         </thead>
-        <tbody class="text-sm" id="cuerpoTabla"><!-- Se llenará mediante JavaScript --></tbody>
+        <tbody class="text-sm" id="cuerpoTabla">
+          <!-- Se llenará mediante JavaScript -->
+        </tbody>
       </table>
     </div>
   </main>
@@ -166,17 +180,23 @@
     <div class="bg-white p-6 rounded w-full max-w-xl">
       <h2 class="text-xl font-semibold mb-4">Editar artículo</h2>
       <form id="formEditar">
-        <!-- Se asigna id="idArticulo" al input oculto -->
+        <!-- Input oculto para el id del artículo -->
         <input type="hidden" name="id" id="idArticulo"/>
         <div class="grid grid-cols-2 gap-4">
           <input class="p-2 border rounded" name="nombre" placeholder="Nombre" type="text" required/>
-          <input class="p-2 border rounded" name="proveedor" placeholder="Proveedor" type="text"/>
-          <input class="p-2 border rounded" name="cantidad" placeholder="Cantidad" type="number"/>
-          <input class="p-2 border rounded" name="precio" placeholder="Precio" step="0.01" type="number"/>
-          <input class="p-2 border rounded" name="fecha" type="date"/>
-          <input class="p-2 border rounded" name="vidautil" placeholder="Vida útil (años)" type="text"/>
-          <input class="p-2 border rounded" name="ubicacion" placeholder="Ubicación" type="text"/>
-          <input class="p-2 border rounded" name="estado" placeholder="Estado" type="text"/>
+          <input class="p-2 border rounded" name="proveedor" placeholder="Proveedor" type="text" required/>
+          <input class="p-2 border rounded" name="cantidad" placeholder="Cantidad" type="number" required/>
+          <input class="p-2 border rounded" name="precio" placeholder="Precio" step="0.01" type="number" required/>
+          <input class="p-2 border rounded" name="fecha" type="date" required/>
+          <input class="p-2 border rounded" name="vidautil" placeholder="Vida útil (años)" type="text" required/>
+          <input class="p-2 border rounded" name="ubicacion" placeholder="Ubicación" type="text" required/>
+          <!-- Estado como lista desplegable -->
+          <select name="estado" required class="p-2 border rounded">
+            <option value="">Seleccione Estado</option>
+            <option value="nuevo">Nuevo</option>
+            <option value="usado">Usado</option>
+            <option value="semi-nuevo">Semi-nuevo</option>
+          </select>
           <input class="p-2 border rounded" name="familia" placeholder="Familia" type="text"/>
           <input class="p-2 border rounded" name="codigobarras" placeholder="Código de barras" type="text"/>
         </div>
@@ -221,8 +241,12 @@
             <td>${item.estado}</td>
             <td>${item.familia}</td>
             <td>${item.codigobarras}</td>
-            <td class="text-center"><button class="btn-editar ${role === 'viewer' ? 'hidden' : ''}" onclick="abrirModalEdicion(${item.id}, this)">✏️</button></td>
-            <td class="text-center"><button class="btn-borrar ${role === 'viewer' ? 'hidden' : ''}" onclick="eliminarArticulo(${item.id})">🗑️</button></td>
+            <td class="text-center">
+              <button class="btn-editar ${role === 'viewer' ? 'hidden' : ''}" onclick="abrirModalEdicion(${item.id}, this)">✏️</button>
+            </td>
+            <td class="text-center">
+              <button class="btn-borrar ${role === 'viewer' ? 'hidden' : ''}" onclick="eliminarArticulo(${item.id})">🗑️</button>
+            </td>
           `;
           cuerpo.appendChild(fila);
         });
@@ -233,8 +257,8 @@
     window.onload = cargarInventario;
 
     async function guardarArticulo(datos, form) {
-      if (!datos.nombre || !datos.cantidad || !datos.precio) {
-        alert("Por favor, complete los campos obligatorios: Nombre, Cantidad y Precio.");
+      if (!datos.nombre || !datos.proveedor || !datos.cantidad || !datos.precio || !datos.fecha || !datos.vidautil || !datos.ubicacion || !datos.estado) {
+        alert("Por favor, complete todos los campos obligatorios (excepto Familia y Código de barras).");
         return;
       }
       try {
@@ -269,7 +293,7 @@
     function abrirModalEdicion(id, boton) {
       const fila = boton.closest("tr").querySelectorAll("td");
       const form = document.getElementById("formEditar");
-      // Asignar el id en el input oculto con id "idArticulo"
+      // Asigna el id al input oculto con id "idArticulo"
       document.getElementById("idArticulo").value = id;
       form.nombre.value = fila[0].innerText;
       form.proveedor.value = fila[1].innerText;
@@ -288,16 +312,15 @@
       document.getElementById("modalEditar").classList.add("hidden");
     }
 
-    // Event listener para el formulario de edición
+    // Listener para el formulario de edición con validación
     document.getElementById("formEditar").addEventListener("submit", async function(e) {
       e.preventDefault();
       const form = e.target;
-      // Validar campos obligatorios en el formulario de edición
       if (!validarFormulario(form)) return;
       const formData = new FormData(form);
       const datos = Object.fromEntries(formData.entries());
+      // Extraer el id y eliminarlo del objeto a enviar
       const id = datos.id;
-      // Eliminamos la propiedad id del objeto para enviarla por URL
       delete datos.id;
       try {
         const res = await fetch("https://sim-io.onrender.com/api/inventario/" + document.getElementById("idArticulo").value, {
@@ -376,10 +399,11 @@
       if (spanRol) spanRol.textContent = role;
     });
 
-    // Función para validar campos obligatorios (para creación y edición)
+    // Función de validación para ambos formularios (creación y edición)
     function validarFormulario(form) {
       let valid = true;
-      const requiredFields = ['nombre', 'cantidad', 'precio'];
+      // Obligatorios: nombre, proveedor, cantidad, precio, fecha, vidautil, ubicacion, estado
+      const requiredFields = ['nombre', 'proveedor', 'cantidad', 'precio', 'fecha', 'vidautil', 'ubicacion', 'estado'];
       requiredFields.forEach(name => {
         const input = form.elements[name];
         if (input) {
