@@ -18,17 +18,11 @@
     /* Estilos de impresión */
     @media print {
       @page { size: landscape; }
-      /* Extiende el contenedor con scroll para que no se corte la tabla */
       .overflow-x-auto { overflow: visible !important; }
-      /* Oculta elementos interactivos o de navegación */
       header, nav, button { display: none !important; }
       body { font-size: 12px; color: #000; }
     }
-    /* El contenedor de gráficos se oculta en pantalla y se muestra en impresión */
-    .print-only { display: none; }
-    @media print {
-      .print-only { display: block; }
-    }
+    /* Puedes agregar aquí estilos adicionales para el bloque de informe si lo deseas */
   </style>
 </head>
 <body class="bg-gray-100 text-gray-900">
@@ -49,8 +43,7 @@
       </nav>
       <button id="menuToggle" class="md:hidden text-gray-700 focus:outline-none">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M4 6h16M4 12h16M4 18h16" />
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
         </svg>
       </button>
     </div>
@@ -194,12 +187,11 @@
     </div>
 
     <div class="mt-4 flex gap-4">
-      <button onclick="imprimirInforme()" class="bg-green-600 hover:bg-green-700 text-white font-semibold px-4 py-2 rounded">Imprimir Informe PDF</button>
       <button onclick="exportarCSV()" class="bg-yellow-500 hover:bg-yellow-600 text-white font-semibold px-4 py-2 rounded">Exportar CSV</button>
     </div>
 
-    <!-- Contenedor estático de gráficos para impresión -->
-    <div id="chartContainer" class="print-only">
+    <!-- Bloque fijo para los gráficos y estadísticas -->
+    <div id="informeTecnico" class="mt-10">
       <h2 class="text-xl font-semibold text-gray-700 mb-4">Informe Técnico</h2>
       <canvas id="timelineChart" style="width:100%; height:400px; margin-bottom:30px;"></canvas>
       <canvas id="lineBarChart" style="width:100%; height:400px; margin-bottom:30px;"></canvas>
@@ -230,6 +222,7 @@
 
   <!-- Scripts generales -->
   <script>
+    // Variables globales
     let datosMantenimiento = [];
     let idEditando = null;
 
@@ -299,6 +292,8 @@
         const res = await fetch("https://sim-io.onrender.com/api/mantenimiento");
         datosMantenimiento = await res.json();
         renderTabla(datosMantenimiento);
+        // Una vez cargados los datos, generar los gráficos para el Informe Técnico
+        generarGraficos();
       } catch (err) {
         console.error("Error al cargar mantenimientos:", err);
       }
@@ -322,12 +317,10 @@
     function editarMantenimiento(id) {
       let mantenimiento = datosMantenimiento.find(item => item.id === id);
       if (!mantenimiento) return;
-
       let sintomasArray = mantenimiento.sintomas;
       if (typeof sintomasArray === 'string') {
         sintomasArray = sintomasArray.slice(1, -1).split(',').map(s => s.replace(/"/g, '').trim());
       }
-
       const form = document.getElementById("formMantenimiento");
       idEditando = id;
       form.querySelector("#idMantenimiento").value = id;
@@ -366,7 +359,7 @@
       window.URL.revokeObjectURL(url);
     }
 
-    // Función para generar los gráficos en el contenedor estático
+    // Función para generar los gráficos con Chart.js en el bloque "informeTecnico"
     function generarGraficos() {
       // Gráfico 1: Línea de tiempo de mantenimientos
       const fechas = {};
@@ -441,14 +434,6 @@
         },
         options: { responsive: true, maintainAspectRatio: false }
       });
-    }
-
-    // Función de impresión: genera los gráficos en el contenedor estático y luego imprime
-    function imprimirInforme() {
-      generarGraficos();
-      setTimeout(function() {
-        window.print();
-      }, 2500);
     }
   </script>
 
