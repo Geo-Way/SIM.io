@@ -15,14 +15,13 @@
   </script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
-    /* Estilos de impresión */
+    /* Estilos de impresión: se imprime en landscape, se ocultan header, nav y botones */
     @media print {
       @page { size: landscape; }
       .overflow-x-auto { overflow: visible !important; }
       header, nav, button { display: none !important; }
       body { font-size: 12px; color: #000; }
     }
-    /* Puedes agregar aquí estilos adicionales para el bloque de informe si lo deseas */
   </style>
 </head>
 <body class="bg-gray-100 text-gray-900">
@@ -43,7 +42,8 @@
       </nav>
       <button id="menuToggle" class="md:hidden text-gray-700 focus:outline-none">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M4 6h16M4 12h16M4 18h16" />
         </svg>
       </button>
     </div>
@@ -59,6 +59,7 @@
 
   <!-- MAIN -->
   <main class="max-w-7xl mx-auto mt-10 p-4">
+    <!-- Formulario -->
     <h2 class="text-lg font-semibold text-gray-700 mb-4">📄 Formulario de Mantenimiento</h2>
     <form id="formMantenimiento" enctype="multipart/form-data" class="grid md:grid-cols-3 gap-4 bg-white p-6 rounded shadow mb-6">
       <input class="p-2 border rounded" name="maquina" placeholder="Máquina" required />
@@ -187,10 +188,12 @@
     </div>
 
     <div class="mt-4 flex gap-4">
+      <!-- El botón de imprimir ahora imprime directamente, ya que el bloque de informe se encuentra en el HTML -->
+      <button onclick="window.print()" class="bg-green-600 hover:bg-green-700 text-white font-semibold px-4 py-2 rounded">Imprimir PDF</button>
       <button onclick="exportarCSV()" class="bg-yellow-500 hover:bg-yellow-600 text-white font-semibold px-4 py-2 rounded">Exportar CSV</button>
     </div>
 
-    <!-- Bloque fijo para los gráficos y estadísticas -->
+    <!-- Bloque fijo para gráficos y estadísticas -->
     <div id="informeTecnico" class="mt-10">
       <h2 class="text-xl font-semibold text-gray-700 mb-4">Informe Técnico</h2>
       <canvas id="timelineChart" style="width:100%; height:400px; margin-bottom:30px;"></canvas>
@@ -222,7 +225,6 @@
 
   <!-- Scripts generales -->
   <script>
-    // Variables globales
     let datosMantenimiento = [];
     let idEditando = null;
 
@@ -292,7 +294,7 @@
         const res = await fetch("https://sim-io.onrender.com/api/mantenimiento");
         datosMantenimiento = await res.json();
         renderTabla(datosMantenimiento);
-        // Una vez cargados los datos, generar los gráficos para el Informe Técnico
+        // Una vez que se han cargado los datos, se generan los gráficos
         generarGraficos();
       } catch (err) {
         console.error("Error al cargar mantenimientos:", err);
@@ -324,7 +326,6 @@
       const form = document.getElementById("formMantenimiento");
       idEditando = id;
       form.querySelector("#idMantenimiento").value = id;
-
       form.maquina.value = mantenimiento.maquina || "";
       form.linea.value = mantenimiento.linea || "";
       form.fecha.value = mantenimiento.fecha ? mantenimiento.fecha.split("T")[0] : "";
@@ -337,11 +338,9 @@
       form.neumatico.value = mantenimiento.neumatico || "";
       form.electrico.value = mantenimiento.electrico || "";
       form.estadoaccion.value = mantenimiento.estadoaccion || "";
-
       form.querySelectorAll('input[name="sintomas"]').forEach(cb => {
         cb.checked = sintomasArray.includes(cb.value);
       });
-
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
@@ -359,9 +358,9 @@
       window.URL.revokeObjectURL(url);
     }
 
-    // Función para generar los gráficos con Chart.js en el bloque "informeTecnico"
+    // Función para generar los gráficos con Chart.js en el bloque estático "informeTecnico"
     function generarGraficos() {
-      // Gráfico 1: Línea de tiempo de mantenimientos
+      // Gráfico 1: Línea de tiempo
       const fechas = {};
       datosMantenimiento.forEach(item => {
         const fecha = item.fecha ? item.fecha.split("T")[0] : 'Sin fecha';
@@ -385,7 +384,7 @@
         options: { responsive: true, maintainAspectRatio: false }
       });
 
-      // Gráfico 2: Barras de mantenimientos por Línea
+      // Gráfico 2: Barras por Línea
       const mantenimientosPorLinea = {};
       datosMantenimiento.forEach(item => {
         const linea = item.linea || 'Sin Línea';
@@ -409,7 +408,7 @@
         options: { responsive: true, maintainAspectRatio: false }
       });
 
-      // Gráfico 3: Diagrama de torta por Estado
+      // Gráfico 3: Torta por Estado
       const estadoDistribucion = {};
       datosMantenimiento.forEach(item => {
         const estado = item.estadoaccion || 'Sin Estado';
