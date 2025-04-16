@@ -6,18 +6,18 @@
   <title>Inventario</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    /* Estilos para impresión */
+    /* Estilos para impresión: La tabla se imprimirá con encabezados rojos y un estilo profesional */
     @media print {
       body * { visibility: hidden; }
       #tablaInventario, #tablaInventario * { visibility: visible; }
       #tablaInventario { position: absolute; left: 0; top: 0; }
-      th { background-color: #cc0000 !important; color: #fff !important; }
-      /* Se puede ajustar el tamaño de fuente para impresión */
+      th { background-color: #cc0000 !important; color: #fff !important; padding: 8px; }
+      td { padding: 6px; }
       body { font-size: 12px; color: #000; }
     }
   </style>
   <script>
-    // Obtener rol y verificar la sesión
+    // Obtener rol almacenado y verificar sesión
     const rolUsuario = localStorage.getItem("role") || "viewer";
     if (!localStorage.getItem("loggedIn")) {
       alert("Debes iniciar sesión para acceder.");
@@ -42,8 +42,10 @@
         <a href="info.html" class="text-gray-500 hover:text-red-600">ℹ️</a>
       </nav>
       <button id="menuToggle" class="md:hidden text-gray-700 focus:outline-none">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none"
+          viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M4 6h16M4 12h16M4 18h16" />
         </svg>
       </button>
     </div>
@@ -73,12 +75,26 @@
       <input class="p-2 border rounded" name="codigobarras" placeholder="Código de barras" type="text"/>
       <button class="col-span-full bg-red-600 text-white p-2 rounded hover:bg-red-700" type="submit">Guardar</button>
     </form>
-    
     <!-- Si el rol es "viewer", ocultar el formulario -->
     <script>
       if (rolUsuario === "viewer") {
         document.getElementById("formInventario").style.display = "none";
       }
+    </script>
+
+    <!-- Validación: Aviso de campos obligatorios (en este ejemplo: Nombre, Cantidad y Precio) -->
+    <script>
+      document.getElementById("formInventario").addEventListener("submit", async function (e) {
+        e.preventDefault();
+        const form = e.target;
+        const formData = new FormData(form);
+        const datos = Object.fromEntries(formData.entries());
+        if (!datos.nombre || !datos.cantidad || !datos.precio) {
+          alert("Por favor, complete los campos obligatorios: Nombre, Cantidad y Precio.");
+          return;
+        }
+        await guardarArticulo(datos, form);
+      });
     </script>
 
     <!-- Filtros de inventario -->
@@ -100,7 +116,7 @@
     <!-- Inventario actual -->
     <h2 class="text-lg font-semibold my-6">Inventario actual</h2>
     <div class="flex justify-start gap-2 mb-2">
-      <!-- Botones se muestran a la izquierda -->
+      <!-- Botones de imprimir y exportar a la izquierda -->
       <button class="bg-green-600 text-white px-4 py-2 rounded" onclick="imprimirTabla()">Imprimir PDF</button>
       <button class="bg-yellow-500 text-white px-4 py-2 rounded" onclick="exportarCSV()">Exportar CSV</button>
     </div>
@@ -134,7 +150,8 @@
     <div class="bg-white p-6 rounded w-full max-w-xl">
       <h2 class="text-xl font-semibold mb-4">Editar artículo</h2>
       <form id="formEditar">
-        <input type="hidden" name="id"/>
+        <!-- Nota: Se le asigna un id diferente al input oculto para evitar conflicto con form.id -->
+        <input type="hidden" name="id" id="idArticulo"/>
         <div class="grid grid-cols-2 gap-4">
           <input class="p-2 border rounded" name="nombre" placeholder="Nombre" type="text" required/>
           <input class="p-2 border rounded" name="proveedor" placeholder="Proveedor" type="text"/>
@@ -155,6 +172,12 @@
     </div>
   </div>
 
+  <!-- Footer -->
+  <footer class="bg-white text-center p-4 mt-10 border-t">
+    <div class="max-w-4xl mx-auto px-4 flex flex-col items-center space-y-2">
+      <p class="text-gray-500 text-sm">© 2024 - SIMio | Desarrollado con ❤️</p>
+    </div>
+  </footer>
 
   <!-- Scripts generales -->
   <script>
@@ -191,6 +214,11 @@
     window.onload = cargarInventario;
 
     async function guardarArticulo(datos, form) {
+      // Validación personalizada
+      if (!datos.nombre || !datos.cantidad || !datos.precio) {
+        alert("Por favor, complete los campos obligatorios: Nombre, Cantidad y Precio.");
+        return;
+      }
       try {
         const res = await fetch("https://sim-io.onrender.com/api/inventario", {
           method: "POST",
@@ -223,7 +251,8 @@
     function abrirModalEdicion(id, boton) {
       const fila = boton.closest("tr").querySelectorAll("td");
       const form = document.getElementById("formEditar");
-      form.id.value = id;
+      // Usar el input con id "idArticulo" para asignar el id
+      document.getElementById("idArticulo").value = id;
       form.nombre.value = fila[0].innerText;
       form.proveedor.value = fila[1].innerText;
       form.cantidad.value = fila[2].innerText;
@@ -294,19 +323,11 @@
       filtrarInventario();
     }
 
-    document.getElementById("formInventario").addEventListener("submit", async function (e) {
-      e.preventDefault();
-      const form = e.target;
-      const datos = Object.fromEntries(new FormData(form).entries());
-      await guardarArticulo(datos, form);
-    });
-
     document.addEventListener("DOMContentLoaded", () => {
       if (role === "viewer") {
         document.getElementById("formInventario").style.display = "none";
       }
       cargarInventario();
-      // Actualizar el rol en el DOM
       const spanRol = document.getElementById("nombreRol");
       if (spanRol) spanRol.textContent = role;
     });
@@ -320,12 +341,11 @@
       mobileMenu.classList.toggle("hidden");
     });
   </script>
-    <!-- Footer -->
+  
+  <!-- Footer -->
   <footer class="bg-gray-600 text-gray-200 text-center py-6 mt-10 text-sm">
     <div class="max-w-4xl mx-auto px-4 flex flex-col items-center space-y-2">
-      <p>
-        © 2025 <strong>GEOWAY</strong>, Technology-Based Initiative – IBT. All rights reserved.
-      </p>
+      <p>© 2025 <strong>GEOWAY</strong>, Technology-Based Initiative – IBT. All rights reserved.</p>
       <a href="https://geo-way.github.io/GeoWay.io/index.html" target="_blank" class="hover:opacity-80 transition-opacity">
         <img src="https://geo-way.github.io/GeoWay.io/images/Logo5.png" alt="GEOWAY Logo" class="h-8 invert">
       </a>
