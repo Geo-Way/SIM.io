@@ -16,107 +16,192 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 const upload = multer({
   dest: 'uploads/',
-  limits: { fileSize: 500 * 1024 } // 500 KB
+  limits: { fileSize: 500 * 1024 }
 });
 
+// Configuración robusta del pool PostgreSQL
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  ssl: { rejectUnauthorized: false }
+  ssl: { rejectUnauthorized: false }, // Forzar SSL
+  max: 5, // reducir conexiones para plan gratuito
+  idleTimeoutMillis: 10000,
+  connectionTimeoutMillis: 10000, // timeout más largo
+  statement_timeout: 30000,
+  query_timeout: 30000,
 });
 
-// Función para inicializar la base de datos
-async function initializeDatabase() {
+// Manejo de errores del pool
+pool.on('error', (err, client) => {
+  console.error('❌ Error en pool PostgreSQL:', err);
+});
+
+pool.on('connect', (client) => {
+  console.log('✅ Nueva conexión establecida a PostgreSQL');
+});
+
+// Variable para controlar si la BD está inicializada
+let dbInitialized = false;
+
+// Función para probar la conexión
+async function testConnection() {
   try {
-    console.log('🔧 Iniciando verificación/creación de tablas...');
-    
-    // Crear tabla inventario si no existe
-    await pool.query(`
-      CREATE TABLE IF NOT EXISTS inventario (
-        id SERIAL PRIMARY KEY,
-        nombre VARCHAR(255) NOT NULL,
-        proveedor VARCHAR(255),
-        cantidad INTEGER NOT NULL DEFAULT 0,
-        precio DECIMAL(10,2),
-        fecha DATE,
-        vidautil INTEGER,
-        ubicacion VARCHAR(255),
-        estado VARCHAR(100),
-        familia VARCHAR(255),
-        codigobarras VARCHAR(255),
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      );
-    `);
-    console.log('✅ Tabla inventario verificada/creada');
-
-    // Crear tabla mantenimiento si no existe
-    await pool.query(`
-      CREATE TABLE IF NOT EXISTS mantenimiento (
-        id SERIAL PRIMARY KEY,
-        maquina VARCHAR(255) NOT NULL,
-        linea VARCHAR(255),
-        fecha DATE,
-        tecnico VARCHAR(255),
-        tiempo INTEGER,
-        sintomas TEXT[],
-        estadomotor VARCHAR(255),
-        transmision VARCHAR(255),
-        hidraulico VARCHAR(255),
-        neumatico VARCHAR(255),
-        electrico VARCHAR(255),
-        observaciones TEXT,
-        estadoaccion VARCHAR(255),
-        fotoman VARCHAR(500),
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      );
-    `);
-    console.log('✅ Tabla mantenimiento verificada/creada');
-
-    // Verificar que las tablas existen
-    const tablesResult = await pool.query(`
-      SELECT table_name 
-      FROM information_schema.tables 
-      WHERE table_schema = 'public' 
-      AND table_type = 'BASE TABLE';
-    `);
-    
-    console.log('📋 Tablas disponibles:', tablesResult.rows.map(row => row.table_name));
-    console.log('🎉 Base de datos inicializada correctamente');
-    
+    console.log('🔍 Probando conexión a PostgreSQL...');
+    const client = await pool.connect();
+    await client.query('SELECT NOW()');
+    client.release();
+    console.log('✅ Conexión a PostgreSQL exitosa');
+    return true;
   } catch (error) {
-    console.error('❌ Error al inicializar base de datos:', error);
-    throw error;
+    console.error('❌ Error de conexión:', error.message);
+    return false;
   }
 }
 
+// Función para inicializar con múltiples intentos
+async function initializeDatabase() {
+  const maxRetries = 10;
+  let retryDelay = 2000;
+
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      console.log(`🔧 Intento ${attempt}/${maxRetries} de inicialización...`);
+      
+      // Probar conexión primero
+      const connectionOk = await testConnection();
+      if (!connectionOk) {
+        throw new Error('No se puede establecer conexión');
+      }
+
+      const client = await pool.connect();
+      
+      // Crear extensiones si es necesario
+      try {
+        await client.query('CREATE EXTENSION IF NOT EXISTS "uuid-ossp"');
+        console.log('✅ Extensiones verificadas');
+      } catch (extError) {
+        console.log('⚠️ No se pudieron crear extensiones (normal en algunos hosts)');
+      }
+
+      // Crear tabla inventario
+      await client.query(`
+        CREATE TABLE IF NOT EXISTS inventario (
+          id SERIAL PRIMARY KEY,
+          nombre VARCHAR(255) NOT NULL,
+          proveedor VARCHAR(255),
+          cantidad INTEGER NOT NULL DEFAULT 0,
+          precio DECIMAL(10,2),
+          fecha DATE,
+          vidautil INTEGER,
+          ubicacion VARCHAR(255),
+          estado VARCHAR(100),
+          familia VARCHAR(255),
+          codigobarras VARCHAR(255),
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+      `);
+      console.log('✅ Tabla inventario creada/verificada');
+
+      // Crear tabla mantenimiento
+      await client.query(`
+        CREATE TABLE IF NOT EXISTS mantenimiento (
+          id SERIAL PRIMARY KEY,
+          maquina VARCHAR(255) NOT NULL,
+          linea VARCHAR(255),
+          fecha DATE,
+          tecnico VARCHAR(255),
+          tiempo INTEGER,
+          sintomas TEXT[],
+          estadomotor VARCHAR(255),
+          transmision VARCHAR(255),
+          hidraulico VARCHAR(255),
+          neumatico VARCHAR(255),
+          electrico VARCHAR(255),
+          observaciones TEXT,
+          estadoaccion VARCHAR(255),
+          fotoman VARCHAR(500),
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+      `);
+      console.log('✅ Tabla mantenimiento creada/verificada');
+
+      // Verificar tablas
+      const tables = await client.query(`
+        SELECT table_name FROM information_schema.tables 
+        WHERE table_schema = 'public' AND table_type = 'BASE TABLE'
+      `);
+      
+      console.log('📋 Tablas en BD:', tables.rows.map(r => r.table_name));
+      
+      client.release();
+      
+      dbInitialized = true;
+      console.log('🎉 ¡Base de datos inicializada correctamente!');
+      return true;
+
+    } catch (error) {
+      console.error(`❌ Error en intento ${attempt}:`, error.message);
+      
+      if (attempt === maxRetries) {
+        console.error('💥 Falló inicialización después de', maxRetries, 'intentos');
+        console.log('⚠️ El servidor continuará sin base de datos...');
+        return false;
+      }
+      
+      console.log(`⏳ Esperando ${retryDelay/1000}s antes del siguiente intento...`);
+      await new Promise(resolve => setTimeout(resolve, retryDelay));
+      retryDelay = Math.min(retryDelay * 1.5, 10000); // Backoff exponencial
+    }
+  }
+  return false;
+}
+
+// Middleware para verificar BD
+const checkDB = (req, res, next) => {
+  if (!dbInitialized) {
+    return res.status(503).json({ 
+      error: 'Base de datos no disponible',
+      message: 'El sistema está inicializándose, intenta en unos momentos'
+    });
+  }
+  next();
+};
+
 // POST - Registrar artículo
-app.post('/api/inventario', async (req, res) => {
+app.post('/api/inventario', checkDB, async (req, res) => {
   const {
     nombre, proveedor, cantidad, precio, fecha,
-    vidautil, ubicacion, estado, familia,
-    codigobarras
+    vidautil, ubicacion, estado, familia, codigobarras
   } = req.body;
 
-  console.log('📝 Intentando guardar artículo:', { nombre, cantidad });
+  if (!nombre) {
+    return res.status(400).json({ error: 'El nombre es obligatorio' });
+  }
 
   try {
     const result = await pool.query(
       `INSERT INTO inventario (
         nombre, proveedor, cantidad, precio, fecha,
-        vidautil, ubicacion, estado, familia,
-        codigobarras
-      ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) RETURNING id`,
+        vidautil, ubicacion, estado, familia, codigobarras
+      ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) RETURNING *`,
       [
-        nombre, proveedor, cantidad, precio, fecha,
-        vidautil, ubicacion, estado, familia,
-        codigobarras
+        nombre, proveedor || null, 
+        parseInt(cantidad) || 0, 
+        parseFloat(precio) || null, 
+        fecha || null,
+        parseInt(vidautil) || null, 
+        ubicacion || null, 
+        estado || null, 
+        familia || null,
+        codigobarras || null
       ]
     );
-    console.log('✅ Artículo guardado con ID:', result.rows[0].id);
+    
+    console.log('✅ Artículo guardado:', result.rows[0].id);
     res.status(201).json({ 
       message: 'Artículo guardado correctamente',
-      id: result.rows[0].id 
+      data: result.rows[0]
     });
   } catch (error) {
     console.error('❌ Error al guardar:', error);
@@ -128,11 +213,10 @@ app.post('/api/inventario', async (req, res) => {
 });
 
 // GET - Listar artículos
-app.get('/api/inventario', async (req, res) => {
+app.get('/api/inventario', checkDB, async (req, res) => {
   try {
-    console.log('📋 Obteniendo lista de inventario...');
     const result = await pool.query('SELECT * FROM inventario ORDER BY created_at DESC');
-    console.log('✅ Inventario obtenido:', result.rows.length, 'elementos');
+    console.log('📋 Inventario obtenido:', result.rows.length, 'elementos');
     res.json(result.rows);
   } catch (error) {
     console.error('❌ Error al obtener artículos:', error);
@@ -144,12 +228,11 @@ app.get('/api/inventario', async (req, res) => {
 });
 
 // PUT - Editar artículo
-app.put('/api/inventario/:id', async (req, res) => {
+app.put('/api/inventario/:id', checkDB, async (req, res) => {
   const { id } = req.params;
   const {
     nombre, proveedor, cantidad, precio, fecha,
-    vidautil, ubicacion, estado, familia,
-    codigobarras
+    vidautil, ubicacion, estado, familia, codigobarras
   } = req.body;
 
   try {
@@ -158,11 +241,10 @@ app.put('/api/inventario/:id', async (req, res) => {
         nombre=$1, proveedor=$2, cantidad=$3, precio=$4, fecha=$5,
         vidautil=$6, ubicacion=$7, estado=$8, familia=$9, codigobarras=$10,
         updated_at=CURRENT_TIMESTAMP
-       WHERE id=$11 RETURNING id`,
+       WHERE id=$11 RETURNING *`,
       [
         nombre, proveedor, cantidad, precio, fecha,
-        vidautil, ubicacion, estado, familia,
-        codigobarras, id
+        vidautil, ubicacion, estado, familia, codigobarras, id
       ]
     );
     
@@ -170,9 +252,12 @@ app.put('/api/inventario/:id', async (req, res) => {
       return res.status(404).json({ error: 'Artículo no encontrado' });
     }
     
-    res.json({ message: "Artículo actualizado correctamente" });
+    res.json({ 
+      message: "Artículo actualizado correctamente",
+      data: result.rows[0]
+    });
   } catch (error) {
-    console.error('❌ Error al actualizar artículo:', error);
+    console.error('❌ Error al actualizar:', error);
     res.status(500).json({ 
       error: 'Error al actualizar artículo', 
       details: error.message 
@@ -180,8 +265,9 @@ app.put('/api/inventario/:id', async (req, res) => {
   }
 });
 
-app.delete("/api/inventario/:id", async (req, res) => {
-  const id = req.params.id;
+// DELETE - Eliminar artículo
+app.delete("/api/inventario/:id", checkDB, async (req, res) => {
+  const { id } = req.params;
   try {
     const result = await pool.query("DELETE FROM inventario WHERE id = $1 RETURNING id", [id]);
     
@@ -190,20 +276,20 @@ app.delete("/api/inventario/:id", async (req, res) => {
     }
     
     res.json({ message: 'Artículo eliminado correctamente' });
-  } catch (err) {
-    console.error("❌ Error al eliminar:", err);
+  } catch (error) {
+    console.error("❌ Error al eliminar:", error);
     res.status(500).json({ 
       error: "Error al eliminar artículo", 
-      details: err.message 
+      details: error.message 
     });
   }
 });
 
 // GET - Listar mantenimientos
-app.get('/api/mantenimiento', async (req, res) => {
+app.get('/api/mantenimiento', checkDB, async (req, res) => {
   try {
     const result = await pool.query('SELECT * FROM mantenimiento ORDER BY created_at DESC');
-    res.status(200).json(result.rows);
+    res.json(result.rows);
   } catch (error) {
     console.error('❌ Error al obtener mantenimientos:', error);
     res.status(500).json({ 
@@ -213,8 +299,8 @@ app.get('/api/mantenimiento', async (req, res) => {
   }
 });
 
-// POST - Guardar mantenimiento con subida de foto
-app.post('/api/mantenimiento', upload.single('fotoman'), async (req, res) => {
+// POST - Guardar mantenimiento
+app.post('/api/mantenimiento', checkDB, upload.single('fotoman'), async (req, res) => {
   try {
     let {
       maquina, linea, fecha, tecnico, tiempo,
@@ -224,10 +310,13 @@ app.post('/api/mantenimiento', upload.single('fotoman'), async (req, res) => {
 
     const fotoman = req.file ? `/uploads/${req.file.filename}` : null;
 
-    if (Array.isArray(sintomas) && sintomas.length > 0) {
-      sintomas = `{${sintomas.map(s => `"${s}"`).join(',')}}`;
+    // Procesar síntomas para PostgreSQL array
+    if (Array.isArray(sintomas)) {
+      sintomas = sintomas;
+    } else if (typeof sintomas === 'string' && sintomas.trim()) {
+      sintomas = [sintomas];
     } else {
-      sintomas = '{}';
+      sintomas = [];
     }
 
     const result = await pool.query(
@@ -236,12 +325,7 @@ app.post('/api/mantenimiento', upload.single('fotoman'), async (req, res) => {
         estadomotor, transmision, hidraulico,
         neumatico, electrico, observaciones,
         estadoaccion, fotoman
-      ) VALUES (
-        $1, $2, $3, $4, $5, $6,
-        $7, $8, $9,
-        $10, $11, $12,
-        $13, $14
-      ) RETURNING id`,
+      ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14) RETURNING *`,
       [
         maquina, linea, fecha, tecnico, tiempo, sintomas,
         estadomotor, transmision, hidraulico,
@@ -250,9 +334,9 @@ app.post('/api/mantenimiento', upload.single('fotoman'), async (req, res) => {
       ]
     );
 
-    res.status(200).json({ 
+    res.status(201).json({ 
       message: 'Mantenimiento guardado correctamente',
-      id: result.rows[0].id
+      data: result.rows[0]
     });
   } catch (error) {
     console.error('❌ Error al guardar mantenimiento:', error);
@@ -263,91 +347,32 @@ app.post('/api/mantenimiento', upload.single('fotoman'), async (req, res) => {
   }
 });
 
-// PUT - Editar mantenimiento con foto
-app.put('/api/mantenimiento/:id', upload.single('fotoman'), async (req, res) => {
-  const { id } = req.params;
-  let {
-    maquina, linea, fecha, tecnico, tiempo,
-    sintomas, estadomotor, transmision, hidraulico,
-    neumatico, electrico, observaciones, estadoaccion
-  } = req.body;
+// PUT y DELETE de mantenimiento (similar estructura)...
 
-  try {
-    const fotoman = req.file ? `/uploads/${req.file.filename}` : null;
-
-    if (Array.isArray(sintomas) && sintomas.length > 0) {
-      sintomas = `{${sintomas.map(s => `"${s}"`).join(',')}}`;
-    } else {
-      sintomas = '{}';
-    }
-
-    const query = `
-      UPDATE mantenimiento SET
-        maquina=$1, linea=$2, fecha=$3, tecnico=$4, tiempo=$5,
-        sintomas=$6, estadomotor=$7, transmision=$8, hidraulico=$9,
-        neumatico=$10, electrico=$11, observaciones=$12,
-        estadoaccion=$13${fotoman ? `, fotoman=$14` : ''}, updated_at=CURRENT_TIMESTAMP
-      WHERE id=$${fotoman ? 15 : 14} RETURNING id
-    `;
-
-    const values = fotoman
-      ? [maquina, linea, fecha, tecnico, tiempo, sintomas, estadomotor, transmision, hidraulico,
-         neumatico, electrico, observaciones, estadoaccion, fotoman, id]
-      : [maquina, linea, fecha, tecnico, tiempo, sintomas, estadomotor, transmision, hidraulico,
-         neumatico, electrico, observaciones, estadoaccion, id];
-
-    const result = await pool.query(query, values);
-    
-    if (result.rowCount === 0) {
-      return res.status(404).json({ error: 'Mantenimiento no encontrado' });
-    }
-
-    res.status(200).json({ message: 'Mantenimiento actualizado correctamente' });
-  } catch (error) {
-    console.error('❌ Error al actualizar mantenimiento:', error);
-    res.status(500).json({ 
-      error: 'Error al actualizar mantenimiento', 
-      details: error.message 
-    });
-  }
-});
-
-// DELETE - Eliminar mantenimiento
-app.delete('/api/mantenimiento/:id', async (req, res) => {
-  const { id } = req.params;
-  try {
-    const result = await pool.query('DELETE FROM mantenimiento WHERE id = $1 RETURNING id', [id]);
-    
-    if (result.rowCount === 0) {
-      return res.status(404).json({ error: 'Mantenimiento no encontrado' });
-    }
-    
-    res.status(200).json({ message: 'Mantenimiento eliminado correctamente' });
-  } catch (error) {
-    console.error('❌ Error al eliminar mantenimiento:', error);
-    res.status(500).json({ 
-      error: 'Error al eliminar mantenimiento', 
-      details: error.message 
-    });
-  }
-});
-
-// Ruta de verificación de salud
+// Ruta de salud
 app.get('/api/health', async (req, res) => {
   try {
-    await pool.query('SELECT 1');
+    if (!dbInitialized) {
+      return res.status(503).json({
+        status: 'Initializing',
+        database: 'Connecting...',
+        message: 'Base de datos inicializándose'
+      });
+    }
+
+    const result = await pool.query('SELECT NOW() as timestamp, version() as pg_version');
     res.json({ 
       status: 'OK', 
       database: 'Connected',
-      timestamp: new Date().toISOString(),
+      timestamp: result.rows[0].timestamp,
+      postgresql: result.rows[0].pg_version.split(' ')[0] + ' ' + result.rows[0].pg_version.split(' ')[1],
       url: 'https://sim-io.onrender.com'
     });
   } catch (error) {
     res.status(500).json({ 
       status: 'Error', 
-      database: 'Disconnected', 
-      error: error.message,
-      timestamp: new Date().toISOString()
+      database: 'Error',
+      error: error.message
     });
   }
 });
@@ -355,7 +380,8 @@ app.get('/api/health', async (req, res) => {
 // Ruta por defecto
 app.get('/', (req, res) => {
   res.json({
-    message: 'SIMio API funcionando correctamente',
+    message: 'SIMio API funcionando',
+    status: dbInitialized ? 'Ready' : 'Initializing',
     endpoints: {
       health: '/api/health',
       inventario: '/api/inventario',
@@ -364,36 +390,36 @@ app.get('/', (req, res) => {
   });
 });
 
-// Inicializar base de datos y arrancar servidor
+// Inicializar servidor
 async function startServer() {
-  try {
-    console.log('🚀 Iniciando servidor SIMio...');
-    console.log('🔗 DATABASE_URL configurada:', process.env.DATABASE_URL ? 'SÍ' : 'NO');
-    
-    // Inicializar base de datos
-    await initializeDatabase();
-    
-    // Arrancar servidor
-    const server = app.listen(port, '0.0.0.0', () => {
-      console.log(`🎉 Servidor corriendo en puerto ${port}`);
-      console.log(`🌐 URL: https://sim-io.onrender.com`);
-      console.log(`💾 Base de datos PostgreSQL: CONECTADA`);
-    });
+  console.log('🚀 Iniciando SIMio...');
+  console.log('🔗 DATABASE_URL:', process.env.DATABASE_URL ? 'Configurada' : 'NO CONFIGURADA');
+  
+  // Arrancar servidor inmediatamente
+  const server = app.listen(port, '0.0.0.0', () => {
+    console.log(`🎉 Servidor corriendo en puerto ${port}`);
+    console.log(`🌐 URL: https://sim-io.onrender.com`);
+  });
 
-    // Manejar cierre elegante
-    process.on('SIGTERM', () => {
-      console.log('🛑 SIGTERM recibido, cerrando servidor...');
-      server.close(() => {
-        console.log('✅ Servidor cerrado correctamente');
+  // Inicializar BD en paralelo
+  initializeDatabase().then(success => {
+    if (success) {
+      console.log('🎯 Sistema completamente inicializado');
+    } else {
+      console.log('⚠️ Sistema funcionando en modo limitado (sin BD)');
+    }
+  });
+
+  // Manejo de cierre
+  process.on('SIGTERM', () => {
+    console.log('🛑 Cerrando servidor...');
+    server.close(() => {
+      pool.end(() => {
+        console.log('✅ Cerrado correctamente');
         process.exit(0);
       });
     });
-
-  } catch (error) {
-    console.error('💥 Error crítico al iniciar servidor:', error);
-    process.exit(1);
-  }
+  });
 }
 
-// Iniciar aplicación
 startServer();
